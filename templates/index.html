@@ -1,0 +1,16 @@
+<!doctype>
+<html>
+  <head>
+    <title>sol-studio - home</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  </head>
+  <body>
+    {% if logined %}
+      <h2>{{ logined }}님 안녕하세요</h2>
+      <a href="/board">게시판 가기</a>
+      <a href="/logout">로그아웃</a>
+    {% else %}
+      <h2><a href="/login">로그인이 필요합니다</a></h2>
+    {% endif %}
+  </body>
+</html>

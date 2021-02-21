@@ -1,0 +1,37 @@
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<link href="/static/img/icon.ico" rel="shortcut icon" type="image/x-icon">
+<title>게시판 - {{ post['title'] }}</title>
+<style>
+    .content{
+        border-style: groove;
+        width: 97%;
+        min-height: 80%;
+        margin: auto;
+    }
+    h1{
+        margin-left: 2%;
+    }
+    h5{
+        margin-left:3%;
+    }
+</style>
+<a href="/board/list/{{ page }}">이전</a>
+<h1>{{ post['title'] }}</h1>
+<br>
+<h5 style="margin-top: -2%;">글쓴이 : {{ post['author'] }}</h5><br>
+<h5 style="margin-top: -2%;">TIME  : {{ post['time'] }}</h5><br>
+<h5 style="margin-top: -2%;">ID    : {{ post['url'] }}</h5>
+<div class="content">
+        {{ post['content'] | safe}}
+</div>
+<a href="/board/post/{{ post['url'] }}/delete">삭제</a>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<script>
+  {% for message in messages %}
+    alert('{{ message }}');
+  {% endfor %}
+</script>
+{% endif %}
+{% endwith %}
+{% block body %}{% endblock %}

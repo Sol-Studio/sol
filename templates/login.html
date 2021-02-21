@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>로그인</title>
+        <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" href="../plugin/bootstrap/css/style.css" media="screen" title="no title" charset="utf-8">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="../plugin/bootstrap/js/bootstrap.min.js"></script>
+        <script src="../config/js/login.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-3">
+                    <div class="login-box well">
+                        <form accept-charset="UTF-8" role="form" method="post" action="/login">
+                            <legend>로그인</legend>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                {{form.id.label("ID")}}
+                                {{form.id(class="form-control", placeholder="ID")}}
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-lock"></i></span>
+                                {{form.pw.label("PASSWORD")}}
+                                {{form.pw(class="form-control", placeholder="PASSWORD")}}
+                            </div>
+                            <button type="submit" id="login-submit" class="btn btn-light">로그인</button>
+                            <div class="form-group">
+                                <a href="/signup" class="btn btn-light"> 회원가입</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,53 @@
+<!doctype>
+<html>
+  <head>
+      <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+      <link rel="stylesheet" href="/static/styl.css">
+      <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css">
+      <link href="/static/img/icon.ico" rel="shortcut icon" type="image/x-icon">
+      <title>게시판 - {{ page }}페이지</title>
+  </head>
+  <body>
+      <div class='container'>
+        <a href="/">홈</a>
+        <table class="table table-hover table-striped">
+          <thead>
+            <tr>
+              <th>제목</th>
+              <th>글쓴이</th>
+              <th>날짜</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for i in length %}
+            <tr>
+              <td><a href="/board/post/{{ posts[i][1] }}">{{ posts[i][0] }}</a></td>
+              <td>{{ posts[i][3] }}</td>
+              <td>{{ posts[i][2] }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        <hr/>
+        <button style="float: right;" type="button" onclick="window.location='/board/new'" class="btn btn-light pull-right">글쓰기</button>
+        <div style="margin-left: 40%;">
+          <ul class="pagination">
+            <li class="page-item"><a class="page-link" href="/board/list/{{ page - 1 }}">{{ page - 1 }}</a></li>
+            <li class="page-item"><a class="page-link" href="/board/list/{{ page }}">{{ page }}</a></li>
+            <li class="page-item"><a class="page-link" href="/board/list/{{ page + 1 }}">{{ page + 1 }}</a></li>
+          </ul>
+        </div>
+      </div>
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <script>
+        {% for message in messages %}
+          alert('{{ message }}');
+        {% endfor %}
+      </script>
+      {% endif %}
+      {% endwith %}
+      {% block body %}{% endblock %}
+
+  </body>
+</html>

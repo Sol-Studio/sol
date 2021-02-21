@@ -1,0 +1,33 @@
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<link href="/static/img/icon.ico" rel="shortcut icon" type="image/x-icon">
+<title>게시판 - 글쓰기</title>
+<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+<form method="post" action="/board/new" id="formByte" name="formByte">
+    제목 : <input type="text" name="title"><br><br>내용<br>
+    <textarea name="content" cols=100 rows=40 id="byteInfo"></textarea><br>
+    <button type="submit">제출</button>
+</form>
+<div class="info">
+</div>
+<script type="text/javascript">
+  $(document).ready(function() {
+    var ec = document.getElementsByClassName('info');
+      $('#byteInfo').on('keyup', function() {
+      	ec[0].innerHTML =$(this).val().length + " / 200 (글자)";
+          if($(this).val().length > 200) {
+              $(this).val($(this).val().substring(0, 200));
+              alert("200글자 이내로 작성해주세요");
+          }
+      });
+  });
+</script>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<script>
+  {% for message in messages %}
+    alert('{{ message }}');
+  {% endfor %}
+</script>
+{% endif %}
+{% endwith %}
+{% block body %}{% endblock %}
