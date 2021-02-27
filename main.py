@@ -7,7 +7,7 @@ ips={}
 NoLoginPages = [
     "/?",
     "/signup?",
-    "/login?"
+    "/login?",
 ]
 
 IgnoreConnect = [
@@ -15,13 +15,14 @@ IgnoreConnect = [
     "/plugin/",
     "/config",
     "/favicon.ico?",
-    "/manage"
+    "/manage",
+    "/ai/wait/"
 ]
 
 
 
 @app.before_request
-def all_connect_(): 
+def all_connect_():
     ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     for connect in IgnoreConnect:
         if connect in request.full_path:return
@@ -278,7 +279,7 @@ def ai_pages():
     def ai_wait(id_):
         if os.path.isfile("ai/result/" + id_ + ".txt"):
             return redirect("/ai/result/" + id_)
-        
+
         else:
             return render_template("ai/wait.html")
 
