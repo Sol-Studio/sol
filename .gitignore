@@ -2,3 +2,6 @@ secretkey.txt
 *.log
 /logs
 /__pycache__
+/upload
+/static/upload
+/ai/result

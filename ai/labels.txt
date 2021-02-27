@@ -1,0 +1,4 @@
+sea
+forest
+building
+sky
