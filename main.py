@@ -1,9 +1,19 @@
 # 커스텀 모듈
 from sol import *
+
+# 일반 모듈
+from flask import Flask
+from flask import render_template
+from flask import redirect
+from flask import request
+from flask import session
+from flask import flash
+from pymongo import MongoClient
+
 # Create Flask App
 app = Flask(__name__)
 
-ips={}
+ips = {}
 NoLoginPages = [
     "/?",
     "/signup?",
@@ -20,25 +30,30 @@ IgnoreConnect = [
 ]
 
 
-
 @app.before_request
 def all_connect_():
     ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     for connect in IgnoreConnect:
-        if connect in request.full_path:return
+        if connect in request.full_path:
+            return
 
     if "userid" not in session.keys():
         session["userid"] = None
 
-
-
-    ips[ip] = {"last": time.time(), "url": request.full_path , "id": session["userid"]}
+    ips[ip] = {
+        "last": time.time(),
+        "url": request.full_path,
+        "id": session["userid"]
+    }
     print(ip, request.full_path)
     for page in NoLoginPages:
-        if page == request.full_path:return
+        if page == request.full_path:
+            return
 
-    if not isLogined(session):
+    if not is_logined(session):
         return redirect("/login")
+
+
 def manager_pages():
     # 관리자 페이지
     @app.route("/manage")
@@ -53,16 +68,28 @@ def manager_pages():
             return_dict = manage_helper(ips)
             return_str = ""
             for key in return_dict.keys():
-                return_str += key + "\n&nbsp;&nbsp;ID    : " + str(return_dict[key]["id"]) + "\n&nbsp;&nbsp;URL  : " + return_dict[key]["url"] + "\n&nbsp;&nbsp;TIME : " + return_dict[key]["last"] + "\n\n"
+                return_str += key \
+                              + "\n&nbsp;&nbsp;ID    : " \
+                              + str(return_dict[key]["id"]) \
+                              + "\n&nbsp;&nbsp;URL  : " \
+                              + return_dict[key]["url"] \
+                              + "\n&nbsp;&nbsp;TIME : " \
+                              + return_dict[key]["last"] \
+                              + "\n\n"
+
             return render_template("manage.html", ips=return_str.replace("\n", "<br>").replace(" ", "&nbsp;"))
         else:
             return redirect("/login")
+
+
 @app.route("/")
 def index_pages():
-    return render_template("index.html", logined=isLogined(session))
+    return render_template("index.html", logined=is_logined(session))
+
+
 def about_login():
     # 로그인
-    @app.route("/login", methods=['POST','GET'])
+    @app.route("/login", methods=['POST', 'GET'])
     def login():
         form = LoginForm()
 
@@ -74,9 +101,9 @@ def about_login():
             client = MongoClient("mongodb://localhost:27017/")
             posts = client.sol.users
             # form
-            id = form.data.get('id')
+            id_ = form.data.get('id')
             pw = form.data.get('pw')
-            data = posts.find({"id": id})
+            data = posts.find({"id": id_})
 
             # db 연결 종료
             client.close()
@@ -86,7 +113,6 @@ def about_login():
             i = 0
             for d in data:
                 login_data[str(i)] = d
-
 
             # 아이디가 존재하지 않음
             if len(login_data) != 1:
@@ -98,15 +124,14 @@ def about_login():
 
             # 통과
             else:
-                session['userid'] = id
+                session['userid'] = id_
                 return redirect("/")
-
 
     # 회원가입
     @app.route("/signup", methods=["GET", "POST"])
     def signup():
         ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-        if isLogined(session):
+        if is_logined(session):
             flash("이미 로그인되어있습니다.")
             return redirect("/")
 
@@ -125,18 +150,16 @@ def about_login():
             for d in data:
                 login_data[str(i)] = d
 
-
             # 아이디가 존재하지 않음
             if len(login_data) != 1:
                 if form.data.get('pw') != form.data.get('re_password'):
                     flash('비밀번호가 일치하지 않습니다')
                     return render_template('signup.html', form=form)
 
-
                 if len(form.data.get('pw')) < 10:
                     flash("비밀번호는 10글자 이상으로 해주세요")
                     return render_template("signup.html", form=form)
-                x = users.insert_one(
+                users.insert_one(
                     {
                         "id": form.data.get('id'),
                         "pw": form.data.get('pw'),
@@ -150,18 +173,18 @@ def about_login():
                 flash("해당 아이디는 이미 사용중입니다.")
                 return render_template("signup.html", form=form)
 
-
     # 로그아웃
     @app.route("/logout")
     def logout():
-        ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-        if not isLogined(session):
+        if not is_logined(session):
             return redirect("/login")
-        if isLogined:
+        if is_logined(session):
             del session['userid']
             return redirect("/")
         else:
             return redirect("/login")
+
+
 def board_pages():
     # /board
     @app.route("/board/")
@@ -169,29 +192,30 @@ def board_pages():
     def index_of_board():
         return redirect("/board/list/1")
 
-
     # board/list/
     @app.route("/board/list/<index_num>")
     def pages_(index_num):
-        if not isLogined(session):
+        if not is_logined(session):
             return redirect("/login")
         client = MongoClient("mongodb://localhost:27017/")
         posts = client.sol.posts
         i = int(index_num) * 20 - 20
         return_posts = {}
 
-
-        for post in posts.find({
+        for post_ in posts.find({
                 'url': {
                     '$gt': posts.estimated_document_count() - (int(index_num) * 20 + 1),
-                    '$lt' : posts.estimated_document_count() - (int(index_num) * 20 - 21)
+                    '$lt': posts.estimated_document_count() - (int(index_num) * 20 - 21)
                     }}).sort("url", -1):
-            return_posts[post['url']] = post['title'], post['url'], post['time'], post['author']
+            return_posts[post_['url']] = post_['title'], post_['url'], post_['time'], post_['author']
             i += 1
 
         client.close()
-        return render_template("board/index.html", posts=return_posts, length=list(return_posts.keys()), page=int(index_num))
-
+        return render_template("board/index.html",
+                               posts=return_posts,
+                               length=list(return_posts.keys()),
+                               page=int(index_num)
+                               )
 
     # 글 쓰기
     @app.route("/board/new", methods=['POST', 'GET'])
@@ -206,7 +230,6 @@ def board_pages():
             flash("제목을 입력해주세요")
             return render_template("board/new.html")
 
-
         ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
         client = MongoClient("mongodb://localhost:27017/")
         posts = client.sol.posts
@@ -214,8 +237,7 @@ def board_pages():
         if "<br>" not in content:
             content = content.replace("\n", "<br>")
 
-
-        x = posts.insert_one(
+        posts.insert_one(
             {
                 "title": request.form.get('title'),
                 "author": session['userid'],
@@ -228,12 +250,10 @@ def board_pages():
         client.close()
         return redirect("/board/list")
 
-
     # 글 보기 (조회)
     @app.route("/board/post/<id_>")
     def post(id_):
-        ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-        if not isLogined(session):
+        if not is_logined(session):
             return redirect("/login")
 
         client = MongoClient("mongodb://localhost:27017/")
@@ -242,9 +262,8 @@ def board_pages():
         client.close()
         try:
             return render_template("board/post.html", post=data[0], page=data[0]["url"] // 20 + 1)
-        except:
+        except KeyError:
             return redirect("/err/404")
-
 
     # 글 삭제
     @app.route("/board/post/<id_>/delete")
@@ -260,6 +279,8 @@ def board_pages():
         else:
             flash("권한이 없습니다")
             return redirect("/board/post/" + id_)
+
+
 def ai_pages():
     @app.route("/ai", methods=['POST', 'GET'])
     def ai_page():
@@ -267,11 +288,11 @@ def ai_pages():
             return render_template("ai/index.html")
         else:
             f = request.files['file']
-            f_name = secure_filename(f.filename)
+            f_name = str(len(os.listdir("static/upload")) + 1) + ".jpg"
             path = os.path.join(app.config['UPLOAD_DIR'], f_name)
             f.save(path)
-            id_ = file_list = len(os.listdir("ai/result")) + 1
-            os.system("start python multi.py %s %d" % (path, id_))
+            id_ = len(os.listdir("ai/result")) + 1
+            os.system("start python multi.py %s %d %s" % (path, id_, session['userid']))
 
             return redirect("/ai/wait/" + str(id_))
 
@@ -283,19 +304,24 @@ def ai_pages():
         else:
             return render_template("ai/wait.html")
 
-
     @app.route("/ai/result/<id_>")
     def ai_result(id_):
-        result = eval(open("ai/result/" + id_ + ".txt", "r").read())
-        return render_template("ai/result.html", max_=result[max(result.keys())], confidence=round(max(result.keys()), 3))
+        if os.path.isfile("ai/result/" + id_ + ".txt"):
+            result = eval(open("ai/result/" + id_ + ".txt", "r").read())
+            if session["userid"] == result[-100]:
+                return render_template("ai/result.html", max_=result[max(result.keys())],
+                                       confidence=round(max(result.keys()), 3), img=result[-101])
+            return "다른 사람의 결과는 볼 수 없습니다."
+
+        return "잘못된 결과 id 입니다."
+
 
 def error_handler():
     # 404
     @app.route("/err/404")
     @app.errorhandler(404)
-    def _page_not_found(err=404):
-        return "존재하지 않는 페이지입니다. <a href='/'>홈으로 가기</a>"
-
+    def _page_not_found():
+        return "존재하지 않는 페이지입니다. "
 
 
 # run server
@@ -304,9 +330,9 @@ if __name__ == "__main__":
     about_login()
     board_pages()
     ai_pages()
-    Log.log("server restarted")
+    Log.log("server started")
 
-    app.config['SECRET_KEY'] =  open("secretkey.txt", "r").read()
+    app.config['SECRET_KEY'] = open("secret_key.txt", "r").read()
     app.config["UPLOAD_DIR"] = "static/upload/"
     app.run(host='0.0.0.0', port=5000, debug=True)
     Log.log("server closed")

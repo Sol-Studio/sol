@@ -22,5 +22,6 @@ return_dict            = {}
 for i in range(len(index)):
     return_dict[float(prediction[i])] = index[i]
 
-
+return_dict[-100] = sys.argv[3]
+return_dict[-101] = sys.argv[1]
 open("ai/result/%s.txt" % file, 'w').write(str(return_dict))

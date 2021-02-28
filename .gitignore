@@ -1,4 +1,4 @@
-secretkey.txt
+secret_key.txt
 *.log
 /logs
 /__pycache__
