@@ -9,7 +9,14 @@ from wtforms.validators import DataRequired
 from wtforms.validators import EqualTo
 from pytz import timezone
 import os
-
+from flask import Flask
+from flask import render_template
+from flask import redirect
+from flask import request
+from flask import session
+from flask import flash   
+from flask import abort   # 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
+from pymongo import MongoClient
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 AI_model_dir = "ai/model_v3"

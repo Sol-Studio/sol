@@ -3,13 +3,16 @@
 <title>게시판 - 글쓰기</title>
 <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
 <form method="post" action="/board/new" id="formByte" name="formByte">
-    제목 : <input type="text" name="title"><br><br>내용<br>
+    제목 : <input type="text" name="title">
+    <br><br>
+    내용<br>
     <textarea name="content" cols=100 rows=40 id="byteInfo"></textarea><br>
     <button type="submit">제출</button>
 </form>
 <div class="info">
 </div>
 <script type="text/javascript">
+  // 이 코드를 수정해서 글자수를 초과한 게시물을 올릴 경우, 예고없이 삭제되고, 아이피밴 될 수 있습니다.
   $(document).ready(function() {
     var ec = document.getElementsByClassName('info');
       $('#byteInfo').on('keyup', function() {

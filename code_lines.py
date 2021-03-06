@@ -7,6 +7,7 @@ ROOT_DIR = 'C:\\Users\\최유찬\\Desktop\\sol-studio\\3.coding\\게시판'
 # 조사할 확장자 목록
 extensions = [
     '*.py',
+    '*.html',
 ]
 
 # 무시할 디렉토리 경로 목록
@@ -56,7 +57,7 @@ def start_count():
             continue
 
         extension_count_dict['*.' + ext] += 1
-        
+
         count_line = sum(1 for _ in open(file_name_with_path, encoding='ISO-8859-1'))
         tmp = open(file_name_with_path, encoding='ISO-8859-1').read()
         line_count_dict[file_name_with_path] = count_line

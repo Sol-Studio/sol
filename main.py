@@ -1,15 +1,6 @@
 # 커스텀 모듈
 from sol import *
 
-# 일반 모듈
-from flask import Flask
-from flask import render_template
-from flask import redirect
-from flask import request
-from flask import session
-from flask import flash
-from pymongo import MongoClient
-
 # Create Flask App
 app = Flask(__name__)
 
@@ -29,10 +20,14 @@ IgnoreConnect = [
     "/ai/wait/"
 ]
 
+black_list = []
 
 @app.before_request
 def all_connect_():
     ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+    if ip in black_list:
+        abort(403)
+    
     for connect in IgnoreConnect:
         if connect in request.full_path:
             return
@@ -56,30 +51,41 @@ def all_connect_():
 
 def manager_pages():
     # 관리자 페이지
-    @app.route("/manage")
+    @app.route("/manage", methods=["POST", "GET"])
     def manage():
         if session['userid'] == "관리자" or session['userid'] == "admin":
             if request.args.get("cmd"):
                 cmd = request.args.get("cmd").split()
                 if cmd[0] == "del":
                     del ips[cmd[1]]
+                elif cmd[0] == "block":
+                    if cmd[1] != "192.168.0.1":
+                        black_list.append(cmd[1])
+                    else:
+                        flash("관리자는 차단할 수 없습니다")
+                elif cmd[0] == "unblock":
+                    black_list.remove(cmd[1])
+
                 return redirect("/manage")
 
             return_dict = manage_helper(ips)
             return_str = ""
             for key in return_dict.keys():
                 return_str += key \
-                              + "\n&nbsp;&nbsp;ID    : " \
-                              + str(return_dict[key]["id"]) \
-                              + "\n&nbsp;&nbsp;URL  : " \
-                              + return_dict[key]["url"] \
-                              + "\n&nbsp;&nbsp;TIME : " \
-                              + return_dict[key]["last"] \
-                              + "\n\n"
+                            + "\n&nbsp;&nbsp;ID    : " \
+                            + str(return_dict[key]["id"]) \
+                            + "\n&nbsp;&nbsp;URL  : " \
+                            + return_dict[key]["url"] \
+                            + "\n&nbsp;&nbsp;TIME : " \
+                            + return_dict[key]["last"] \
+                            + "\n\n"
+            return_str += "\n블랙리스트 : " + str(black_list)
 
             return render_template("manage.html", ips=return_str.replace("\n", "<br>").replace(" ", "&nbsp;"))
         else:
             return redirect("/login")
+
+
 
 
 @app.route("/")
@@ -100,7 +106,7 @@ def about_login():
             # db 연결
             client = MongoClient("mongodb://localhost:27017/")
             posts = client.sol.users
-            # form
+            # 입력값 불러오기
             id_ = form.data.get('id')
             pw = form.data.get('pw')
             data = posts.find({"id": id_})
@@ -164,7 +170,8 @@ def about_login():
                         "id": form.data.get('id'),
                         "pw": form.data.get('pw'),
                         "ip": ip,
-                        "name": form.data.get('name')
+                        "name": form.data.get('name'),
+                        "status_messages": "상태메시지가 없습니다."
                     }
                 )
                 client.close()
@@ -259,9 +266,10 @@ def board_pages():
         client = MongoClient("mongodb://localhost:27017/")
         posts = client.sol.posts
         data = posts.find({"url": int(id_)})
+        posts_count = posts.estimated_document_count()
         client.close()
         try:
-            return render_template("board/post.html", post=data[0], page=data[0]["url"] // 20 + 1)
+            return render_template("board/post.html", post=data[0], page=(posts_count - data[0]["url"]) // 20 + 1)
         except KeyError:
             return redirect("/err/404")
 
@@ -287,6 +295,15 @@ def ai_pages():
         if request.method == "GET":
             return render_template("ai/index.html")
         else:
+            upload_file = request.files.get('file', None)
+            if upload_file.mimetype == "image/jpeg"\
+                and upload_file.content_type == "image/jpeg":
+                pass
+            else:
+                ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+                black_list.append(ip)
+                return "허허.. 밴 풀고싶다면 나에게 연락해라"
+                
             f = request.files['file']
             f_name = str(len(os.listdir("static/upload")) + 1) + ".jpg"
             path = os.path.join(app.config['UPLOAD_DIR'], f_name)
@@ -316,11 +333,57 @@ def ai_pages():
         return "잘못된 결과 id 입니다."
 
 
+def profile_pages():
+    @app.route("/profile/my-profile")
+    def my_profile():
+        ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+        client = MongoClient("mongodb://localhost:27017/")
+        users = client.sol.users
+        data = users.find({"id": session['userid']})
+        # db 연결 종료
+        client.close()
+
+        # 정보 검색
+        profile_data = {}
+        i = 0
+        for d in data:
+            profile_data[str(i)] = d
+
+        return render_template("profile/my_profile.html", 
+            profile=profile_data["0"],
+            ip=ip
+        )
+    @app.route("/profile/my-profile-edit", methods=["POST", "GET"])
+    def edit_profile():
+        if request.method == "GET":
+            client = MongoClient("mongodb://localhost:27017/")
+            users = client.sol.users
+            data = users.find({"id": session['userid']})
+            # db 연결 종료
+            client.close()
+
+            # 정보 검색
+            profile_data = {}
+            i = 0
+            for d in data:
+                profile_data[str(i)] = d
+
+            return render_template("profile/edit.html", profile=profile_data["0"])
+        elif request.method == "POST":
+            status_message = request.form.get('status_message')
+            print(status_message)
+            client = MongoClient("mongodb://localhost:27017/")
+            users = client.sol.users
+            data = users.update({"id": session["userid"]}, { "$set": { "status_message": status_message } })
+            # db 연결 종료
+            client.close()
+            return redirect("/profile/my-profile")
+
 def error_handler():
     # 404
     @app.route("/err/404")
     @app.errorhandler(404)
-    def _page_not_found():
+    def _page_not_found(e=404):
         return "존재하지 않는 페이지입니다. "
 
 
@@ -330,6 +393,8 @@ if __name__ == "__main__":
     about_login()
     board_pages()
     ai_pages()
+    profile_pages()
+    error_handler()
     Log.log("server started")
 
     app.config['SECRET_KEY'] = open("secret_key.txt", "r").read()

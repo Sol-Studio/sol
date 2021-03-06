@@ -5,3 +5,4 @@ secret_key.txt
 /upload
 /static/upload
 /ai/result
+/.idea

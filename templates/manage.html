@@ -1,1 +1,15 @@
+<form method="get" action="/manage" id="formByte" name="formByte">
+    CMD : 
+    <input type="text" name="cmd"><br>
+</form>
 {{ ips | safe }}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<script>
+  {% for message in messages %}
+    alert('{{ message }}');
+  {% endfor %}
+</script>
+{% endif %}
+{% endwith %}
+{% block body %}{% endblock %}

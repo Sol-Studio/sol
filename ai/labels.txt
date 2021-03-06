@@ -1,4 +1,5 @@
-sea
-forest
-building
-sky
+0 sea
+1 forest
+2 building
+3 sky
+4 car
