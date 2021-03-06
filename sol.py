@@ -15,11 +15,8 @@ from flask import redirect
 from flask import request
 from flask import session
 from flask import flash   
-from flask import abort   # 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
+from flask import abort                         # 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
 from pymongo import MongoClient
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-AI_model_dir = "ai/model_v3"
 
 
 # LOGIN FORMS
@@ -35,6 +32,7 @@ class LoginForm(FlaskForm):
     pw = PasswordField('pw', validators=[DataRequired()])
 
 
+# LOG
 class Log:
     def __init__(self):
         # LOG SETTING
@@ -60,6 +58,9 @@ class Log:
         log_message = "{0}/{1}/{2}/{3}".format(log_date, str(r), error_code, error_message)
         print(color(log_message, Colors.MAGENTA))
         logging.info(log_message)
+
+
+Log = Log()
 
 
 # COLOR
@@ -89,6 +90,7 @@ def color(string, start_color=Colors.RESET):
     return start_color + string + Colors.RESET
 
 
+# MANAGE 페이지에서 쓰임
 def time_passed(last_time):
     sec_, min_, hour_, day = time.time() - last_time, 0, 0, 0
 
@@ -116,11 +118,9 @@ def manage_helper(data):
     return return_dict
 
 
+# 로그인되어있다면 아이디, 아니면 False
 def is_logined(s):
     if "userid" in s.keys():
         return s['userid']
     else:
         return False
-
-
-Log = Log()
