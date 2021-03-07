@@ -15,13 +15,13 @@
         Kakao.Link.sendDefault({
           objectType: 'feed',
           content: {
-            title: '선물이 도착했어요',
-            description: '힛',
+            title: '{{ title }}',
+            description: '{{ description }}',
             imageUrl:
-              'https://file.mk.co.kr/meet/neds/2019/03/image_readtop_2019_153364_15525272393668974.jpg',
+              'http://sol-studio.kro.kr:5000/{{ img_url }}',
             link: {
-              mobileWebUrl: 'http://sol-studio.kro.kr/board/post/102',
-              webUrl: 'http://sol-studio.kro.kr/board/post/102',
+              mobileWebUrl: '{{ url }}',
+              webUrl: '{{ url }}',
             },
           },
           social: {
@@ -33,8 +33,8 @@
             {
               title: '자세히 보기',
               link: {
-                mobileWebUrl: 'http://sol-studio.kro.kr/board/post/102',
-                webUrl: 'http://sol-studio.kro.kr/board/post/102',
+                mobileWebUrl: '{{ url }}',
+                webUrl: '{{ url }}',
               },
             }
           ],

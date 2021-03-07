@@ -646,23 +646,35 @@ def other_profile(id_="관리자"):
                            profile=profile_data["0"], )
 
 
+
+# 카카오톡 공유
+@app.route("/kakaotalk", methods=["GET", "POST"])
+def kakaotalk():
+    if request.method == "GET":
+        return render_template("kakaotalk/make.html")
+    else:
+        upload_file = request.files.get('file', None)
+        if True:
+            id_ = len(os.listdir("static/upload")) + 1
+            filename = str(id_) + ".jpg"
+            save_file_path = os.path.join(app.config['UPLOAD_DIR'], filename)
+            upload_file.save(save_file_path)
+
+
+            return render_template("kakaotalk/send.html",
+                        title=str(request.form.get('title')),
+                        description=str(request.form.get('description')),
+                        url=str(request.form.get('url')),
+                        img_url=save_file_path
+                    )
+        else:
+            return ""
+
 # 404 처리
 @app.route("/err/404")
 @app.errorhandler(404)
 def _page_not_found(e=404):
     return "존재하지 않는 페이지입니다. <br>오류 코드 : " + str(e)
-
-# 카카오톡 공유
-@app.route("/kakaotalk")
-def kakaotalk():
-    return render_template("kakaotalk.html")
-
-# 403 처리(블랙리스트, manage 페이지 접근)
-@app.errorhandler(403)
-def _connection_not_allowed(e=403):
-    return "자동/수동적으로 이 서버의 블랙리스트에 추가되셨습니다.<br>" \
-           "특정 페이지에서만 그럴수도 있으니, <a href='/'>여기</a>를 클릭해주세요<br>"\
-           "오류 코드 : " + str(e)
 
 #
 #
