@@ -5,6 +5,7 @@
       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
       <link href="/static/img/icon.ico" rel="shortcut icon" type="image/x-icon">
       <title>sol - {{ page }}페이지</title>
+
   </head>
   <body>
       <div class='container'>
@@ -19,13 +20,11 @@
           </thead>
           <tbody>
           {% for i in length %}
-            <a href='/board/post/{{ posts[i][1] }}'>
-              <tr>
-                <td>{{ posts[i][0] }}</td>
-                <td>{{ posts[i][3] }}</td>
-                <td>{{ posts[i][2] }}</td>
-              </tr>
-            </a>
+           <tr style = "cursor:pointer;" onClick = " location.href='/board/post/{{ posts[i][1] }}' " onMouseOver = " indow.status = 'http://ihouse.so.vc' " onMouseOut = " window.status = '' " >
+              <td border="10">{{ posts[i][0] }}</td>
+              <td>{{ posts[i][3] }}</td>
+              <td>{{ posts[i][2] }}</td>
+            </tr>
           {% endfor %}
           </tbody>
         </table>
@@ -49,6 +48,5 @@
       {% endif %}
       {% endwith %}
       {% block body %}{% endblock %}
-
   </body>
 </html>
