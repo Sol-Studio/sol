@@ -100,7 +100,6 @@ class Log:
         print(color(log_message, Colors.MAGENTA))
         logging.info(log_message)
 
-Log = Log()
 
 # COLOR
 class Colors:
@@ -697,5 +696,5 @@ IgnoreConnect = [
 Log = Log()
 # RUN SERVER
 Log.log("server started")
-app.run(host='127.0.0.1', port=5000, debug=True)
+app.run(host='0.0.0.0', port=5000, debug=True)
 Log.log("server closed")
