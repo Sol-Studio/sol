@@ -661,11 +661,18 @@ def kakaotalk():
             upload_file.save(save_file_path)
 
 
+            title=str(request.form.get('title')),
+            description=str(request.form.get('description')),
+            url=str(request.form.get('url')),
+            img_url=save_file_path
+
+            Log.log("%s / %s / %s / %s" % (title, description, url, img_url))
+
             return render_template("kakaotalk/send.html",
-                        title=str(request.form.get('title')),
-                        description=str(request.form.get('description')),
-                        url=str(request.form.get('url')),
-                        img_url=save_file_path
+                        title=title,
+                        description=description,
+                        url=url,
+                        img_url=img_url
                     )
         else:
             return ""
