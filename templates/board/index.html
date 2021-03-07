@@ -19,13 +19,13 @@
           </thead>
           <tbody>
           {% for i in length %}
-            <button onclick="window.location = '/board/post/{{ posts[i][1] }}'">
+            <a href='/board/post/{{ posts[i][1] }}'>
               <tr>
                 <td>{{ posts[i][0] }}</td>
                 <td>{{ posts[i][3] }}</td>
                 <td>{{ posts[i][2] }}</td>
               </tr>
-            </button>
+            </a>
           {% endfor %}
           </tbody>
         </table>
