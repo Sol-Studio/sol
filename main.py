@@ -654,28 +654,19 @@ def kakaotalk():
         return render_template("kakaotalk/make.html")
     else:
         upload_file = request.files.get('file', None)
-        if True:
-            id_ = len(os.listdir("static/upload")) + 1
-            filename = str(id_) + ".jpg"
-            save_file_path = os.path.join(app.config['UPLOAD_DIR'], filename)
-            upload_file.save(save_file_path)
 
+        id_ = len(os.listdir("static/upload")) + 1
+        filename = str(id_) + ".jpg"
+        save_file_path = os.path.join(app.config['UPLOAD_DIR'], filename)
+        upload_file.save(save_file_path)
 
-            title=str(request.form.get('title')),
-            description=str(request.form.get('description')),
-            url=str(request.form.get('url')),
-            img_url=save_file_path
+        return render_template("kakaotalk/send.html",
+                    title=str(request.form.get('title')),
+                    description=str(request.form.get('description')),
+                    url=str(request.form.get('url')),
+                    img_url=save_file_path
+                )
 
-            Log.log("%s / %s / %s / %s" % (title, description, url, img_url))
-
-            return render_template("kakaotalk/send.html",
-                        title=title,
-                        description=description,
-                        url=url,
-                        img_url=img_url
-                    )
-        else:
-            return ""
 
 # 404 처리
 @app.route("/err/404")
