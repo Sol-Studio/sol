@@ -1,0 +1,48 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>선물 보내기</title>
+    <script type="text/JavaScript" src="https://developers.kakao.com/sdk/js/kakao.min.js"></script>
+    </head>
+  <body>
+    <center>
+      <input type="button" onClick="sendLinkDefault();" value="보내기" style="width:90%;height:90%;margin-top:2%;font-size:700%"/>
+    </center>
+    <script>
+    try {
+      function sendLinkDefault() {
+        Kakao.init('24ee4dc09da0ef5004ae6641e32f3288')
+        Kakao.Link.sendDefault({
+          objectType: 'feed',
+          content: {
+            title: '선물이 도착했어요',
+            description: '힛',
+            imageUrl:
+              'https://file.mk.co.kr/meet/neds/2019/03/image_readtop_2019_153364_15525272393668974.jpg',
+            link: {
+              mobileWebUrl: 'http://sol-studio.kro.kr/board/post/102',
+              webUrl: 'http://sol-studio.kro.kr/board/post/102',
+            },
+          },
+          social: {
+            likeCount: 2862,
+            commentCount: 435,
+            sharedCount: 1045,
+          },
+          buttons: [
+            {
+              title: '자세히 보기',
+              link: {
+                mobileWebUrl: 'http://sol-studio.kro.kr/board/post/102',
+                webUrl: 'http://sol-studio.kro.kr/board/post/102',
+              },
+            }
+          ],
+        })
+      }
+    ; window.kakaoDemoCallback && window.kakaoDemoCallback() }
+    catch(e) { window.kakaoDemoException && window.kakaoDemoException(e) }
+    </script>
+
+  </body>
+</html>

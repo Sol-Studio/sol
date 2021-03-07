@@ -6,3 +6,4 @@ secret_key.txt
 /static/upload
 /ai/result
 /.idea
+/.vscode
