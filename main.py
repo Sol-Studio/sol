@@ -256,7 +256,12 @@ def before_all_connect_():
 @app.route("/")
 @app.route("/home")
 def index_page():
+    if "kakaotalk-callback." in str(request):
+        return "ok"
     return render_template("index.html", logined=is_logined(session))
+
+
+
 
 
 # 관리자 페이지

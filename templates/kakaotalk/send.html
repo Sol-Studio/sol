@@ -3,29 +3,24 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>카톡 공유</title>
     <script type="text/JavaScript" src="https://developers.kakao.com/sdk/js/kakao.min.js"></script>
+    <script>
+      Kakao.init('9110cc5f2159504e8844c4a23cea3929')
+      function sendLinkDefault() {
+        Kakao.Link.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: '{{ title }}',
+          description: '{{ description }}',
+          imageUrl: '{{ img_url }}',
+          link: {
+            webUrl: "{{ url }}"
+          },
+        },
+      });
+    }
+    </script>
   </head>
   <body>
       <input type="button" onClick="sendLinkDefault();" value="Default"/>
-    <script>
-      Kakao.init('24ee4dc09da0ef5004ae6641e32f3288')
-      try {
-        function sendLinkDefault() {
-          Kakao.Link.sendDefault({
-          objectType: 'feed',
-          content: {
-            title: '디저트 사진',
-            description: '아메리카노, 빵, 케익',
-            imageUrl:
-              '',
-            link: {
-              mobileWebUrl: 'https://developers.kakao.com',
-              androidExecParams: 'test',
-            },
-          },
-        });
-        }
-      ; window.kakaoDemoCallback && window.kakaoDemoCallback() }
-      catch(e) { window.kakaoDemoException && window.kakaoDemoException(e) }
-    </script>
   </body>
 </html>
