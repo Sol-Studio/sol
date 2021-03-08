@@ -673,9 +673,9 @@ def kakaotalk():
                 )
 
 
-@app.route("/kakaotalk-callback")
-def kakaotalk_callback():
-    return "속았네"
+@app.route("/redirect/<url>")
+def redirect_page(url):
+    return redirect(url)
 
 
 # 404 처리
