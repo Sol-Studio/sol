@@ -668,6 +668,11 @@ def kakaotalk():
                 )
 
 
+@app.route("/kakaotalk-callback")
+def kakaotalk_callback():
+    return "속았네"
+
+
 # 404 처리
 @app.route("/err/404")
 @app.errorhandler(404)

@@ -1,48 +1,31 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>선물 보내기</title>
+    <title>카톡 공유</title>
     <script type="text/JavaScript" src="https://developers.kakao.com/sdk/js/kakao.min.js"></script>
-    </head>
+  </head>
   <body>
-    <center>
-      <input type="button" onClick="sendLinkDefault();" value="보내기" style="width:90%;height:90%;margin-top:2%;font-size:700%"/>
-    </center>
+      <input type="button" onClick="sendLinkDefault();" value="Default"/>
     <script>
-    try {
-      function sendLinkDefault() {
-        Kakao.init('24ee4dc09da0ef5004ae6641e32f3288')
-        Kakao.Link.sendDefault({
+      Kakao.init('24ee4dc09da0ef5004ae6641e32f3288')
+      try {
+        function sendLinkDefault() {
+          Kakao.Link.sendDefault({
           objectType: 'feed',
           content: {
-            title: '{{ title }}',
-            description: '{{ description }}',
+            title: '디저트 사진',
+            description: '아메리카노, 빵, 케익',
             imageUrl:
-              'http://sol-studio.kro.kr:5000/{{ img_url }}',
+              '',
             link: {
-              mobileWebUrl: '{{ url }}',
-              webUrl: '{{ url }}',
+              mobileWebUrl: 'https://developers.kakao.com',
+              androidExecParams: 'test',
             },
           },
-          social: {
-            likeCount: 2862,
-            commentCount: 435,
-            sharedCount: 1045,
-          },
-          buttons: [
-            {
-              title: '자세히 보기',
-              link: {
-                mobileWebUrl: '{{ url }}',
-                webUrl: '{{ url }}',
-              },
-            }
-          ],
-        })
-      }
-    ; window.kakaoDemoCallback && window.kakaoDemoCallback() }
-    catch(e) { window.kakaoDemoException && window.kakaoDemoException(e) }
+        });
+        }
+      ; window.kakaoDemoCallback && window.kakaoDemoCallback() }
+      catch(e) { window.kakaoDemoException && window.kakaoDemoException(e) }
     </script>
-
   </body>
 </html>
