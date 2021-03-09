@@ -12,8 +12,16 @@
           title: '{{ title }}',
           description: '{{ description }}',
           imageUrl: 'http://sol-studio.kro.kr:5000/{{ img_url }}',
+          button:[
+            {
+            title:"어쩌구"
+            link:{
+              webUrl: "http://sol-studio.kro.kr:5000/redirect?url={{ url }}"
+            },
+          }
+          ]
           link: {
-            webUrl: "http://sol-studio.kro.kr:5000/redirect?url={{ url }}"
+            webUrl: "http://sol-studio.kro.kr:5000/redirect?url={{ url }}",
           },
         },
       });
