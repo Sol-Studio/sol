@@ -162,10 +162,10 @@ def manage_helper(data):
 
 # 로그인되어있다면 아이디, 아니면 False
 def is_logined(s):
-    if "userid" in s.keys():
-        return s['userid']
-    else:
+    if s["userid"] == None:
         return False
+    else:
+        return s["userid"]
 
 
 # post 여러개 올리기
@@ -683,6 +683,12 @@ def kakaotalk():
 @app.route("/redirect")
 def redirect_page():
     return redirect(request.args.get('url'))
+
+
+@app.route("/temp/file/html/guide")
+def tmp():
+    if request.args.get("key") == "kim-wun-chan":
+        return render_template("tmp.html")
 
 
 # 404 처리
