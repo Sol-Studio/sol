@@ -232,6 +232,10 @@ def before_all_connect_():
     # 로그인이 아직 안됐을때 None을 아이디로
     if "userid" not in session.keys():
         session["userid"] = None
+        session["hide"] = False
+
+    if session['hide']:
+        return
 
     # 마지막 접속 기록을 남김
     ips[ip] = {
@@ -355,6 +359,8 @@ def login():
         # 통과
         else:
             session['userid'] = id_
+            if id_ == "admin":
+                session["hide"] = True
             return redirect("/")
 
 
