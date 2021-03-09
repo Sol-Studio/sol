@@ -676,9 +676,9 @@ def kakaotalk():
     else:
         upload_file = request.files.get('file', None)
 
-        id_ = len(os.listdir("static/file-hosting/kakaotalk")) + 1
+        id_ = len(os.listdir("static/kakaotalk")) + 1
         filename = str(id_) + ".jpg"
-        save_file_path = "static/file-hosting/kakaotalk/" + secure_filename(filename)
+        save_file_path = "static/kakaotalk/" + secure_filename(filename)
         upload_file.save(save_file_path)
 
         Log.log("카카오 링크 전송\ntitle: "
