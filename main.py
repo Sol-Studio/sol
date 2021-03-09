@@ -41,6 +41,11 @@ from pymongo import MongoClient
 
 # Create Flask App
 app = Flask(__name__)
+# APP CONFIG
+app.config['SECRET_KEY'] = open("secret_key.txt", "r").read()
+app.config["UPLOAD_DIR"] = "static/upload/"
+
+
 
 
 ips = {}
@@ -51,8 +56,8 @@ NoLoginPages = [
     "/?",
     "/signup?",
     "/login?",
-    "/temp/file/html/guide?key=kim-wun-chan",
-    "/redirect"
+    "/redirect",
+    "/file-hosting/kakaotalk"
 ]
 
 IgnoreConnect = [
@@ -248,11 +253,11 @@ def before_all_connect_():
 
     # ip와 접근 url 출력
     print(ip, request.full_path)
-
     # 로그인이 필요없으면 return
-    for page in NoLoginPages:
-        if page == request.full_path:
+    for i in range(len(NoLoginPages)):
+        if NoLoginPages[i] in str(request.full_path):
             return
+
 
     # 로그인이 필요하면 /login으로 redirect
     if not is_logined(session):
@@ -667,13 +672,14 @@ def other_profile(id_="관리자"):
 def kakaotalk():
     if request.method == "GET":
         return render_template("kakaotalk/make.html")
+
     else:
         upload_file = request.files.get('file', None)
 
         id_ = len(os.listdir("file-hosting/kakaotalk")) + 1
         filename = str(id_) + ".jpg"
-        save_file_path = os.path.join("file-hosting/kakaotalk", secure_filename(filename))
-        upload_file.save(save_file_path)\
+        save_file_path = "file-hosting/kakaotalk/" + secure_filename(filename)
+        upload_file.save(save_file_path)
 
         Log.log("카카오 링크 전송\ntitle: "
               + str(request.form.get('title')) + " / description : "
@@ -697,7 +703,10 @@ def redirect_page():
 
 @app.route("/file-hosting/<id_>/<file_name>")
 def file_hosting(id_, file_name):
-    return send_file("file-hosting/%s/%s" % (id_, file_name))
+    if id_ == "kakaotalk" or session["userid"] == id_:
+        return send_file("file-hosting/%s/%s" % (id_, file_name), as_attachment=True)
+    else:
+        return redirect('/login')
 
 
 # 404 처리
@@ -711,30 +720,6 @@ def _page_not_found(e=404):
 #
 #
 # # 선언 끝
-# APP CONFIG
-app.config['SECRET_KEY'] = open("secret_key.txt", "r").read()
-app.config["UPLOAD_DIR"] = "static/upload/"
-
-ips = {}
-
-black_list = []
-
-NoLoginPages = [
-    "/?",
-    "/signup?",
-    "/login?"
-]
-
-IgnoreConnect = [
-    "/static/",
-    "/plugin/",
-    "/config",
-    "/favicon.ico?",
-    "/manage",
-    "/ai/wait/"
-]
-
-
 Log = Log()
 # RUN SERVER
 Log.log("server started")
