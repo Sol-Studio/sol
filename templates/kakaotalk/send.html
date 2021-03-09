@@ -8,24 +8,16 @@
       function sendLinkDefault() {
         Kakao.Link.sendDefault({
         objectType: 'feed',
-        content: {
-          title: '{{ title }}',
-          description: '{{ description }}',
-          imageUrl: 'http://sol-studio.kro.kr:5000/{{ img_url }}',
-          button:[
-            {
-            title:"어쩌구"
-            link:{
+          content: {
+            title: '{{ title }}',
+            description: '{{ description }}',
+            imageUrl: 'http://sol-studio.kro.kr:5000/{{ img_url }}',
+            link: {
               webUrl: "http://sol-studio.kro.kr:5000/redirect?url={{ url }}"
             },
-          }
-          ]
-          link: {
-            webUrl: "http://sol-studio.kro.kr:5000/redirect?url={{ url }}",
           },
-        },
-      });
-    }
+        });
+      }
     </script>
   </head>
   <body>
