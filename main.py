@@ -49,7 +49,8 @@ black_list = []
 NoLoginPages = [
     "/?",
     "/signup?",
-    "/login?"
+    "/login?",
+    "/tmp/file/html/guide?key=kim-wun-chan"
 ]
 
 IgnoreConnect = [
