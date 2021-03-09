@@ -665,11 +665,11 @@ def kakaotalk():
         save_file_path = os.path.join(app.config['UPLOAD_DIR'], filename)
         upload_file.save(save_file_path)\
 
-        Log.log("카카오 링크 전송 : "
-              + str(request.form.get('title')) + " / "
-              + str(request.form.get('description')) + " / "
-              + str(request.form.get('url')) + " / "
-              + save_file_path + " / "
+        Log.log("카카오 링크 전송\ntitle: "
+              + str(request.form.get('title')) + " / description : "
+              + str(request.form.get('description')) + " / url : "
+              + str(request.form.get('url')) + " / path : "
+              + save_file_path + " / id : "
               + session["userid"])
 
         return render_template("kakaotalk/send.html",
