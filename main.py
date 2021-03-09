@@ -226,16 +226,13 @@ def before_all_connect_():
 
     # 로그 출력이 필요없는 url로 접근할때 그냥 return
     for connect in IgnoreConnect:
-        if connect in request.full_path:
+        if connect in request.full_path or session['hide']:
             return
 
     # 로그인이 아직 안됐을때 None을 아이디로
     if "userid" not in session.keys():
         session["userid"] = None
         session["hide"] = False
-
-    if session['hide']:
-        return
 
     # 마지막 접속 기록을 남김
     ips[ip] = {
