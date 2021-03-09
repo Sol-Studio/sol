@@ -50,7 +50,7 @@ NoLoginPages = [
     "/?",
     "/signup?",
     "/login?",
-    "/tmp/file/html/guide?key=kim-wun-chan"
+    "/temp/file/html/guide?key=kim-wun-chan"
 ]
 
 IgnoreConnect = [
@@ -249,8 +249,8 @@ def before_all_connect_():
             return
 
     # 로그인이 필요하면 /login으로 redirect
-    #if not is_logined(session):
-        #return redirect("/login")
+    if not is_logined(session):
+        return redirect("/login")
 
 
 # 홈
