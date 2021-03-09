@@ -676,9 +676,9 @@ def kakaotalk():
     else:
         upload_file = request.files.get('file', None)
 
-        id_ = len(os.listdir("file-hosting/kakaotalk")) + 1
+        id_ = len(os.listdir("static/file-hosting/kakaotalk")) + 1
         filename = str(id_) + ".jpg"
-        save_file_path = "file-hosting/kakaotalk/" + secure_filename(filename)
+        save_file_path = "static/file-hosting/kakaotalk/" + secure_filename(filename)
         upload_file.save(save_file_path)
 
         Log.log("카카오 링크 전송\ntitle: "
@@ -699,14 +699,6 @@ def kakaotalk():
 @app.route("/redirect")
 def redirect_page():
     return redirect(request.args.get('url'))
-
-
-@app.route("/file-hosting/<id_>/<file_name>")
-def file_hosting(id_, file_name):
-    if id_ == "kakaotalk" or session["userid"] == id_:
-        return send_file("file-hosting/%s/%s" % (id_, file_name), as_attachment=True)
-    else:
-        return redirect('/login')
 
 
 # 404 처리
