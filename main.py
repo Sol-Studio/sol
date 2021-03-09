@@ -36,6 +36,7 @@ from flask import request
 from flask import session
 from flask import flash
 from flask import abort  # 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
+from flask import send_file
 from pymongo import MongoClient
 
 # Create Flask App
@@ -50,7 +51,8 @@ NoLoginPages = [
     "/?",
     "/signup?",
     "/login?",
-    "/temp/file/html/guide?key=kim-wun-chan"
+    "/temp/file/html/guide?key=kim-wun-chan",
+    "/redirect"
 ]
 
 IgnoreConnect = [
@@ -361,6 +363,7 @@ def login():
             session['userid'] = id_
             if id_ == "admin":
                 session["hide"] = True
+                del ips[request.environ.get('HTTP_X_REAL_IP', request.remote_addr)]
             return redirect("/")
 
 
@@ -667,9 +670,9 @@ def kakaotalk():
     else:
         upload_file = request.files.get('file', None)
 
-        id_ = len(os.listdir("static/upload")) + 1
+        id_ = len(os.listdir("file-hosting/kakaotalk")) + 1
         filename = str(id_) + ".jpg"
-        save_file_path = os.path.join(app.config['UPLOAD_DIR'], filename)
+        save_file_path = os.path.join("file-hosting/kakaotalk", secure_filename(filename))
         upload_file.save(save_file_path)\
 
         Log.log("카카오 링크 전송\ntitle: "
@@ -692,10 +695,9 @@ def redirect_page():
     return redirect(request.args.get('url'))
 
 
-@app.route("/temp/file/html/guide")
-def tmp():
-    if request.args.get("key") == "kim-wun-chan":
-        return render_template("tmp.html")
+@app.route("/file-hosting/<id_>/<file_name>")
+def file_hosting(id_, file_name):
+    return send_file("file-hosting/%s/%s" % (id_, file_name))
 
 
 # 404 처리
