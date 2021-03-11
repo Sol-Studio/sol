@@ -20,8 +20,8 @@
           </thead>
           <tbody>
           {% for i in length %}
-           <tr style = "cursor:pointer;" onClick = " location.href='/board/post/{{ posts[i][1] }}' " onMouseOver = " indow.status = 'http://ihouse.so.vc' " onMouseOut = " window.status = '' " >
-              <td border="10">{{ posts[i][0] }}</td>
+           <tr style = "cursor:pointer;" onClick = "location.href='/board/post/{{ posts[i][1] }}'">
+              <td>{{ posts[i][0] }}</td>
               <td>{{ posts[i][3] }}</td>
               <td>{{ posts[i][2] }}</td>
             </tr>

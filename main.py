@@ -1,7 +1,6 @@
 # IMPORT
 import logging                                    # 로깅
 import time                                       # 시간
-import datetime                                   # 시간
 from flask_wtf import FlaskForm                   # 로그인 검증
 from wtforms import StringField                   # 로그인 검증
 from wtforms import PasswordField                 # 로그인 검증
@@ -18,56 +17,70 @@ from flask import flash                           # alert 띄우기
 from flask import abort                           # 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
 from pymongo import MongoClient                   # MongoDB
 import mimetypes                                  # 파일 검증
-from werkzeug.utils import secure_filename
-import logging
-import time
-import datetime
-from flask_wtf import FlaskForm
-from wtforms import StringField
-from wtforms import PasswordField
-from wtforms.validators import DataRequired
-from wtforms.validators import EqualTo
-from pytz import timezone
-import os
-from flask import Flask
+from werkzeug.utils import secure_filename        # 파일 이름 검증
+import logging                                    # 로깅
+import time                                       # 시간
+from datetime import datetime                     # 시간
+from datetime import timedelta
+from flask_wtf import FlaskForm                   # form
+from wtforms import StringField                   # form
+from wtforms import PasswordField                 # form
+from wtforms.validators import DataRequired       # form
+from wtforms.validators import EqualTo            # form
+from pytz import timezone                         # 로깅
+import os                                         # multi 실행
+from flask import Flask                           # Flask...
 from flask import render_template
 from flask import redirect
 from flask import request
 from flask import session
 from flask import flash
-from flask import abort  # 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
-from flask import send_file
-from pymongo import MongoClient
+from flask import abort                           # -- 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
+from flask import send_file                       # ...Flask
+from pymongo import MongoClient                   # MongoDB
+import pickle                                     # 서버 변수 저장
+from werkzeug.debug import DebuggedApplication
 
 # Create Flask App
 app = Flask(__name__)
+
+isdebug = True
+# debug app
+if isdebug:
+    app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
 # APP CONFIG
 app.config['SECRET_KEY'] = open("secret_key.txt", "r").read()
 app.config["UPLOAD_DIR"] = "static/upload/"
 
+connect_count = 0
+try:
+    ips = pickle.load(open("ips.bin", "rb"))
+except FileNotFoundError:
+    ips = {}
 
+try:
+    hist = pickle.load(open("hist.bin", "rb"))
+except FileNotFoundError:
+    hist = {}
 
-
-ips = {}
 
 black_list = []
-
 NoLoginPages = [
     "/?",
     "/signup?",
     "/login?",
-    "/redirect",
-    "/file-hosting/kakaotalk"
+    "/redirect"
 ]
-
 IgnoreConnect = [
     "/static/",
     "/plugin/",
     "/config",
     "/favicon.ico?",
-    "/manage",
-    "/ai/wait/"
+    "/ai/wait/",
+    "/manage"
 ]
+
+config = {"save_point":1}
 
 
 # LOGIN FORMS
@@ -86,13 +99,13 @@ class LoginForm(FlaskForm):
 class Log:
     def __init__(self):
         # LOG SETTING
-        dt = datetime.datetime.now(timezone("Asia/Seoul"))
+        dt = datetime.now(timezone("Asia/Seoul"))
         log_date = dt.strftime("%Y%m%d")
         logging.basicConfig(filename="logs/" + log_date + "log.log", level=logging.DEBUG)
 
     @staticmethod
     def get_log_date():
-        dt = datetime.datetime.now(timezone("Asia/Seoul"))
+        dt = datetime.now(timezone("Asia/Seoul"))
         log_date = dt.strftime("%Y%m%d_%H:%M:%S")
         return log_date
 
@@ -163,7 +176,8 @@ def manage_helper(data):
         return_dict[key] = {
             "last": time_passed(data[key]["last"]),
             "url": data[key]["url"],
-            "id": data[key]["id"]
+            "id": data[key]["id"],
+            "action": data[key]["active"]
         }
     return return_dict
 
@@ -226,6 +240,7 @@ def mongodb_test():
 # 모든 연결에 대해 실행
 @app.before_request
 def before_all_connect_():
+    global connect_count
     ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     # 블랙리스트면 403 띄우기
     if ip in black_list:
@@ -239,18 +254,28 @@ def before_all_connect_():
     # 로그인이 아직 안됐을때 None을 아이디로
     if "userid" not in session.keys():
         session["userid"] = None
-        session["hide"] = False
-
-    if session['hide']:
-        return
+        session["active"] = 0
 
     # 마지막 접속 기록을 남김
     ips[ip] = {
         "last": time.time(),
         "url": request.full_path,
-        "id": session["userid"]
+        "id": session["userid"],
+        "active": session["active"] + 1
     }
+    if ip not in hist.keys():
+        hist[ip] = {
+            time.time(): request.full_path
+        }
+    else:
+        hist[ip][time.time()] = request.full_path
+    connect_count += 1
+    if connect_count == config["save_point"]:
+        pickle.dump(ips, open("ips.bin", "wb"))
+        pickle.dump(hist, open("hist.bin", "wb"))
+        connect_count = 0
 
+    
     # ip와 접근 url 출력
     print(ip, request.full_path)
     # 로그인이 필요없으면 return
@@ -273,9 +298,6 @@ def index_page():
     return render_template("index.html", logined=is_logined(session))
 
 
-
-
-
 # 관리자 페이지
 @app.route("/manage", methods=["POST", "GET"])
 def manage():
@@ -287,46 +309,51 @@ def manage():
             # 로그 삭제
             if cmd[0] == "del":
                 del ips[cmd[1]]
+                del hist[cmd[1]]
+                flash("완료")
 
             # 블랙리스트
             elif cmd[0] == "block":
-                if cmd[1] != "192.168.0.1":
-                    black_list.append(cmd[1])
-                else:
-                    flash("관리자는 차단할 수 없습니다")
+                black_list.append(cmd[1])
+                flash("완료")
+
 
             # 블랙리스트 해제
             elif cmd[0] == "unblock":
-                black_list.remove(cmd[1])
+                if cmd[1] in black_list:
+                    black_list.remove(cmd[1])
+                    flash("완료")
+                else:
+                    flash("블랙리스트에 없습니다")
 
+            # db test
             elif cmd[0] == "do":
                 if cmd[1] == "db_test":
                     mongodb_test()
-
-            elif cmd[0] == "do":
-                if cmd[1] == "db_test":
-                    mongodb_test()
+                    flash("완료")
 
             return redirect("/manage")
 
         return_dict = manage_helper(ips)
 
-        # CREATE HTML
-        return_str = ""
-        for key in return_dict.keys():
-            return_str += key \
-                          + "\n&nbsp;&nbsp;ID    : " \
-                          + str(return_dict[key]["id"]) \
-                          + "\n&nbsp;&nbsp;URL  : " \
-                          + return_dict[key]["url"] \
-                          + "\n&nbsp;&nbsp;TIME : " \
-                          + return_dict[key]["last"] \
-                          + "\n\n"
-        return_str += "\n블랙리스트 : " + str(black_list)
-
-        return render_template("manage.html", ips=return_str.replace("\n", "<br>").replace(" ", "&nbsp;"))
+        return render_template("manage.html", ips=return_dict, keys=return_dict.keys(), blacklist=black_list)
     else:
         abort(403)
+        black_list.append(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+
+
+@app.route("/manage/<ip>")
+def manage_ip(ip):
+    if ip not in hist.keys():
+        flash("방문 기록이 없습니다.")
+        return redirect("/manage")
+    return_dict = {}
+    for key in hist[ip].keys():
+        return_dict[time_passed(key)] = hist[ip][key]
+    
+    return render_template("hist_manage.html", hist=return_dict, keys=reversed(list(return_dict.keys())))
+
+
 
 
 # 로그인
@@ -449,11 +476,15 @@ def pages_(index_num):
     i = int(index_num) * 20 - 20
     return_posts = {}
 
-    for post_ in posts.find({
+
+
+    """    for post_ in posts.find({
         'url': {
             '$gt': posts.estimated_document_count() - (int(index_num) * 20 + 1),
             '$lt': posts.estimated_document_count() - (int(index_num) * 20 - 21)
             }}).sort("url", -1):
+    """
+    for post in posts.find({}).sort({'id_':-1}).skip(index_num * 20).limit(20):
         return_posts[post_['url']] = post_['title'], post_['url'], post_['time'], post_['author']
         i += 1
 
@@ -678,15 +709,16 @@ def kakaotalk():
 
         id_ = len(os.listdir("static/kakaotalk")) + 1
         filename = str(id_) + ".jpg"
-        save_file_path = "static/kakaotalk/" + secure_filename(filename)
+        save_file_path = os.path.join("static/kakaotalk/", secure_filename(filename))
         upload_file.save(save_file_path)
 
         Log.log("카카오 링크 전송\ntitle: "
-              + str(request.form.get('title')) + " / description : "
-              + str(request.form.get('description')) + " / url : "
-              + str(request.form.get('url')) + " / path : "
-              + save_file_path + " / id : "
-              + session["userid"])
+                  + str(request.form.get('title')) + " / description : "
+                  + str(request.form.get('description')) + " / url : "
+                  + str(request.form.get('url')) + " / path : "
+                  + save_file_path + " / id : "
+                  + session["userid"]
+              )
 
         return render_template("kakaotalk/send.html",
                     title=str(request.form.get('title')),
@@ -696,6 +728,7 @@ def kakaotalk():
                 )
 
 
+# 리다이렉트
 @app.route("/redirect")
 def redirect_page():
     return redirect(request.args.get('url'))
@@ -707,13 +740,56 @@ def redirect_page():
 def _page_not_found(e=404):
     return "존재하지 않는 페이지입니다. <br>오류 코드 : " + str(e)
 
-#
-#
-#
-#
-# # 선언 끝
+
 Log = Log()
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
 # RUN SERVER
 Log.log("server started")
-app.run(host='0.0.0.0', port=5000, debug=True)
-Log.log("server closed")
+app.run(host='0.0.0.0', port=5000, debug=isdebug)

@@ -1,8 +1,35 @@
+<div class="container">
 <form method="get" action="/manage" id="formByte" name="formByte">
     CMD : 
     <input type="text" name="cmd"><br>
 </form>
-{{ ips | safe }}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+<table class="table-hover table">
+  <thead>
+    <tr>
+      <td>IP</td>
+      <td>ID</td>
+      <td>URL</td>
+      <td>ACTION</td>
+      <td>TIME</td>
+      <td>MANAGE</td>
+    </tr>
+  </thead>
+  <tbody>
+    {% for key in keys %}
+    <tr style = "cursor:pointer;" onClick = "location.href='/manage/{{ key }}'" name='{{ key }}'>
+      <td>{{ key }}</td>
+      <td>{{ ips[key]["id"] }}</td>
+      <td>{{ ips[key]["url"] }}</td>
+      <td>{{ ips[key]["action"] }}</td>
+      <td>{{ ips[key]["last"] }}</td>
+      <td><a href="?cmd=del {{key}}">삭제</a> / {% if key in blacklist %}<a href="?cmd=unblock {{key}}">차단 해제</a>{% else %}<a href="?cmd=block {{key}}">차단</a>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 <script>

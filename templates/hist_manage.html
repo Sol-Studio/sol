@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<div class="container">
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <td>시간</td>
+            <td>URL</td>
+            <td>MANAGE</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for key in keys %}
+        <tr>
+            <td>{{ key }} 전</td>
+            <td>{{ hist[key] }}</td>
+            <td></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
