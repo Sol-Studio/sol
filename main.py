@@ -275,7 +275,7 @@ def before_all_connect_():
         pickle.dump(hist, open("hist.bin", "wb"))
         connect_count = 0
 
-    
+
     # ip와 접근 url 출력
     print(ip, request.full_path)
     # 로그인이 필요없으면 return
@@ -350,7 +350,7 @@ def manage_ip(ip):
     return_dict = {}
     for key in hist[ip].keys():
         return_dict[time_passed(key)] = hist[ip][key]
-    
+
     return render_template("hist_manage.html", hist=return_dict, keys=reversed(list(return_dict.keys())))
 
 
@@ -791,5 +791,5 @@ Log = Log()
 #
 #
 # RUN SERVER
-Log.log("server started")
+Log.log("server started!!")
 app.run(host='0.0.0.0', port=5000, debug=isdebug)
