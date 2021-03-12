@@ -67,7 +67,8 @@ NoLoginPages = [
     "/?",
     "/signup?",
     "/login?",
-    "/redirect"
+    "/redirect",
+    "/quiz"
 ]
 IgnoreConnect = [
     "/static/",
@@ -240,7 +241,7 @@ def before_all_connect_():
         }
     else:
         hist[ip][time.time()] = request.full_path
-    
+
     connect_count += 1
     if connect_count == config["save_point"]:
         pickle.dump(ips, open("ips.bin", "wb"))
