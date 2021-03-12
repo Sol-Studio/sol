@@ -1,11 +1,17 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 <div class="container">
+    <td><a href="?cmd=del">삭제</a> /
+        {% if ip in blacklist %}
+            <a href="?cmd=unblock">차단 해제</a>
+        {% else %}
+            <a href="?cmd=block">차단</a>
+        {% endif %}
+    </td>
 <table class="table table-hover">
     <thead>
         <tr>
-            <td>시간</td>
-            <td>URL</td>
-            <td>MANAGE</td>
+            <th style="width: 25%">시간</th>
+            <th>URL</th>
         </tr>
     </thead>
     <tbody>
@@ -13,9 +19,18 @@
         <tr>
             <td>{{ key }} 전</td>
             <td>{{ hist[key] }}</td>
-            <td></td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 </div>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<script>
+  {% for message in messages %}
+    alert('{{ message }}');
+  {% endfor %}
+</script>
+{% endif %}
+{% endwith %}
+{% block body %}{% endblock %}

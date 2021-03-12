@@ -1,0 +1,140 @@
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body class="">
+
+
+		<title>EBS온라인클래스(Quiz) - clone</title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+		<link rel="stylesheet" href="/static/quiz/main.css">
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+
+
+			<div id="wrapper" class="divided">
+
+				<!-- Additional Elements -->
+					<section class="wrapper style1 align-center">
+						<div class="inner" style="margin-top: -10%;">
+							<div class="index align-left">
+								<h2><img src="/static/quiz/logo_ebs.png" width="228"></h2>
+
+								<!-- Table -->
+									<section>
+										<div class="content">
+
+											<form method="post" action="/quiz">
+												<div class="fields">
+													<div class="field">
+														<label>선생님 문제유형을 선택해주세요.</label>
+													</div>
+													<div class="field third">
+														<input type="radio" id="priority-low" name="priority"  {{ type[0] }} onclick="window.location = '/quiz?type=0'">
+														<label for="priority-low">O/X퀴즈형</label>
+													</div>
+													<div class="field third">
+														<input type="radio" id="priority-normal" name="priority" {{ type[1] }} onclick="window.location = '/quiz?type=1'">
+														<label for="priority-normal">5지선다형</label>
+													</div>
+													<div class="field third">
+														<input type="radio" id="priority-high" name="priority" {{ type[2] }} onclick="window.location = '/quiz?type=2'">
+														<label for="priority-high">단답형</label>
+													</div>
+
+													<div class="field">
+														<label for="name">문제</label>
+														<input type="text" name="name" id="question" value="" placeholder="이곳에 퀴즈의 문제를 넣어주세요.">
+													</div>
+                                                    {% if type[0] %}
+                                                        <input type="hidden" name="qtype" value="0">
+                                                        <div class="field half" id="answer-o_field">
+                                                            <input type="radio" id="answer-o" name="answer_ox" value="O">
+                                                            <label for="answer-o">O(예)</label>
+                                                        </div>
+                                                        <div class="field half" id="answer-x_field">
+                                                            <input type="radio" id="answer-x" name="answer_ox" value="X">
+                                                            <label for="answer-x">X(아니요)</label>
+                                                        </div>
+                                                    {% elif type[1] %}
+                                                        <input type="hidden" name="qtype" value="1">
+													<div class="field" id="answer_1_field">
+														<label for="answer_1">지문1</label>
+														<input type="text" name="answer_1" id="answer_1" value="" placeholder="1번 지문을 넣어주세요.">
+													</div>
+													<div class="field" id="answer_2_field">
+														<label for="answer_2">지문2</label>
+														<input type="text" name="answer_2" id="answer_2" value="" placeholder="2번 지문을 넣어주세요.">
+													</div>
+													<div class="field" id="answer_3_field">
+														<label for="answer_3">지문3</label>
+														<input type="text" name="answer_3" id="answer_3" value="" placeholder="3번 지문을 넣어주세요.">
+													</div>
+													<div class="field" id="answer_4_field">
+														<label for="answer_4">지문4</label>
+														<input type="text" name="answer_4" id="answer_4" value="" placeholder="4번 지문을 넣어주세요.">
+													</div>
+													<div class="field" id="answer_5_field">
+														<label for="answer_5">지문5</label>
+														<input type="text" name="answer_5" id="answer_5" value="" placeholder="5번 지문을 넣어주세요.">
+													</div>
+
+													<div class="field" id="answer_is_field">
+														<label>지문중 정답을 선택해주세요.</label>
+													</div>
+
+													<div class="field penta" id="answer_1_is_field">
+														<input type="radio" id="answer_1_is" name="answer_is" value="0" checked="">
+														<label for="answer_1_is">지문1</label>
+													</div>
+													<div class="field penta" id="answer_2_is_field">
+														<input type="radio" id="answer_2_is" name="answer_is" value="1">
+														<label for="answer_2_is">지문2</label>
+													</div>
+													<div class="field penta" id="answer_3_is_field">
+														<input type="radio" id="answer_3_is" name="answer_is" value="2">
+														<label for="answer_3_is">지문3</label>
+													</div>
+													<div class="field penta" id="answer_4_is_field">
+														<input type="radio" id="answer_4_is" name="answer_is" value="3">
+														<label for="answer_4_is">지문4</label>
+													</div>
+													<div class="field penta" id="answer_5_is_field">
+														<input type="radio" id="answer_5_is" name="answer_is" value="4">
+														<label for="answer_5_is">지문5</label>
+													</div>
+                                                    {% elif type[2] %}
+                                                        <input type="hidden" name="qtype" value="2">
+													<div class="field" id="answer_field">
+														<label for="answer">답(단답형)</label>
+														<input type="text" name="answer" id="answer" value="">
+													</div>
+                                                    {% endif %}
+                                                    <br><br><br><br><br><br>
+													<div class="field">
+														<input type="text" name="pw" value="" placeholder="비밀번호를 넣어주세요(다른 사람이 이 페이지에 접근하지 못하게)">
+													</div>
+												</div>
+												<ul class="actions">
+													<li><input type="submit" class="button primary icon solid fa-pen"></li>
+													<li><a href="/quiz/list" name="list" id="list" class="button icon solid fa-book">목록으로</a></li>
+												</ul>
+											</form>
+
+										</div>
+									</section>
+									<p></p>
+								</div>
+							</div>
+						</section></div>
+
+                    <footer>
+                        <center>
+                            by 최유찬
+                        </center>
+                    </footer>
+
+		<!-- Scripts -->
+			<script src="/static/quiz/jquery.min.js"></script>
+			<script src="/static/quiz/jquery.scrollex.min.js"></script>
+			<script src="/static/quiz/jquery.scrolly.min.js"></script>
+			<script src="/static/quiz/browser.min.js"></script>
+			<script src="/static/quiz/breakpoints.min.js"></script>
+			<script src="/static/quiz/util.js"></script>
+			<script src="/static/quiz/main.js"></script>

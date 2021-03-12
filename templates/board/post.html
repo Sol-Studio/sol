@@ -24,7 +24,7 @@
 <div class="content">
         {{ post['content'] | safe}}
 </div>
-<a href="/board/post/{{ post['url'] }}/delete">삭제</a>
+<a href="/board/list/{{ page }}/{{ post['url'] }}/delete">삭제</a>
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 <script>

@@ -16,14 +16,16 @@
               <th>제목</th>
               <th>글쓴이</th>
               <th>날짜</th>
+              <th>ID</th>
             </tr>
           </thead>
           <tbody>
           {% for i in length %}
-           <tr style = "cursor:pointer;" onClick = "location.href='/board/post/{{ posts[i][1] }}'">
+           <tr style = "cursor:pointer;" onClick = "location.href='/board/list/{{ page }}/{{ posts[i][1] }}'">
               <td>{{ posts[i][0] }}</td>
               <td>{{ posts[i][3] }}</td>
               <td>{{ posts[i][2] }}</td>
+              <td>{{ posts[i][1] }}</td>
             </tr>
           {% endfor %}
           </tbody>

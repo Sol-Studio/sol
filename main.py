@@ -1,52 +1,51 @@
-# IMPORT
-import logging                                    # 로깅
-import time                                       # 시간
-from flask_wtf import FlaskForm                   # 로그인 검증
-from wtforms import StringField                   # 로그인 검증
-from wtforms import PasswordField                 # 로그인 검증
-from wtforms.validators import DataRequired       # 로그인 검증
-from wtforms.validators import EqualTo            # 로그인 검증
-from pytz import timezone                         # 시간 정보
-import os                                         # os
-from flask import Flask                           # app
-from flask import render_template                 # 템플릿
-from flask import redirect                        # 리다이렉트
-from flask import request                         # 클라이언트 정보
-from flask import session                         # 로그인 정보
-from flask import flash                           # alert 띄우기
-from flask import abort                           # 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
-from pymongo import MongoClient                   # MongoDB
-import mimetypes                                  # 파일 검증
-from werkzeug.utils import secure_filename        # 파일 이름 검증
-import logging                                    # 로깅
-import time                                       # 시간
-from datetime import datetime                     # 시간
+import logging
+import time
+from flask_wtf import FlaskForm
+from wtforms import StringField
+from wtforms import PasswordField  # 로그인 검증
+from wtforms.validators import DataRequired  # 로그인 검증
+from wtforms.validators import EqualTo  # 로그인 검증
+from pytz import timezone  # 시간 정보
+import os  # os
+from flask import Flask  # app
+from flask import render_template  # 템플릿
+from flask import redirect  # 리다이렉트
+from flask import request  # 클라이언트 정보
+from flask import session  # 로그인 정보
+from flask import flash  # alert 띄우기
+from flask import abort  # 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
+from pymongo import MongoClient  # MongoDB
+import mimetypes  # 파일 검증
+from werkzeug.utils import secure_filename  # 파일 이름 검증
+import logging  # 로깅
+import time  # 시간
+from datetime import datetime  # 시간
 from datetime import timedelta
-from flask_wtf import FlaskForm                   # form
-from wtforms import StringField                   # form
-from wtforms import PasswordField                 # form
-from wtforms.validators import DataRequired       # form
-from wtforms.validators import EqualTo            # form
-from pytz import timezone                         # 로깅
-import os                                         # multi 실행
-from flask import Flask                           # Flask...
+from flask_wtf import FlaskForm  # form
+from wtforms import StringField  # form
+from wtforms import PasswordField  # form
+from wtforms.validators import DataRequired  # form
+from wtforms.validators import EqualTo  # form
+from pytz import timezone  # 로깅
+import os  # multi 실행
+from flask import Flask  # Flask...
 from flask import render_template
 from flask import redirect
 from flask import request
 from flask import session
 from flask import flash
-from flask import abort                           # -- 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
-from flask import send_file                       # ...Flask
-from pymongo import MongoClient                   # MongoDB
-import pickle                                     # 서버 변수 저장
+from flask import abort  # -- 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
+from flask import send_file  # ...Flask
+from pymongo import MongoClient  # MongoDB
+import pickle  # 서버 변수 저장
 from werkzeug.debug import DebuggedApplication
 
 # Create Flask App
 app = Flask(__name__)
 
-isdebug = True
+is_debug = True
 # debug app
-if isdebug:
+if is_debug:
     app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
 # APP CONFIG
 app.config['SECRET_KEY'] = open("secret_key.txt", "r").read()
@@ -62,7 +61,6 @@ try:
     hist = pickle.load(open("hist.bin", "rb"))
 except FileNotFoundError:
     hist = {}
-
 
 black_list = []
 NoLoginPages = [
@@ -80,7 +78,7 @@ IgnoreConnect = [
     "/manage"
 ]
 
-config = {"save_point":1}
+config = {"save_point": 1}
 
 
 # LOGIN FORMS
@@ -94,6 +92,7 @@ class RegisterForm(FlaskForm):
 class LoginForm(FlaskForm):
     id = StringField('id', validators=[DataRequired()])
     pw = PasswordField('pw', validators=[DataRequired()])
+
 
 # LOG
 class Log:
@@ -169,7 +168,6 @@ def time_passed(last_time):
     return "%d일 %d시간 %d분 %f초" % (day, hour_, min_, sec_)
 
 
-# collection => dict 변환
 def manage_helper(data):
     return_dict = {}
     for key in data.keys():
@@ -184,7 +182,7 @@ def manage_helper(data):
 
 # 로그인되어있다면 아이디, 아니면 False
 def is_logined(s):
-    if s["userid"] == None:
+    if not s["userid"]:
         return False
     else:
         return s["userid"]
@@ -193,32 +191,7 @@ def is_logined(s):
 # post 여러개 올리기
 def mongodb_test():
     client = MongoClient("mongodb://localhost:27017/")
-    database = client["sol"]
-    posts = database["posts"]
-
-
-    num = 100
-
-    for i in range(num):
-        print(posts.count())
-        posts.insert_one(
-            {
-                "title": "program wrote" + str(posts.estimated_document_count() + 1),
-                "author": "program",
-                "content": "test",
-                "url": posts.estimated_document_count() + 1,
-                "time": time.strftime('%c', time.localtime(time.time())),
-                "ip": "console"
-            }
-        )
-    client.close()
-
-# post 여러개 올리기
-def mongodb_test():
-    client = MongoClient("mongodb://localhost:27017/")
-    database = client["sol"]
-    posts = database["posts"]
-
+    posts = client.sol.posts
 
     num = 100
 
@@ -242,19 +215,17 @@ def mongodb_test():
 def before_all_connect_():
     global connect_count
     ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-    # 블랙리스트면 403 띄우기
-    if ip in black_list:
-        abort(403)
 
-    # 로그 출력이 필요없는 url로 접근할때 그냥 return
+    # 로그 출력이 필요없는 url 로 접근할때 그냥 return
     for connect in IgnoreConnect:
         if connect in request.full_path:
             return
 
-    # 로그인이 아직 안됐을때 None을 아이디로
+    # 로그인이 아직 안됐을때 None 을 아이디로
     if "userid" not in session.keys():
         session["userid"] = None
         session["active"] = 0
+    session["active"] += 1
 
     # 마지막 접속 기록을 남김
     ips[ip] = {
@@ -269,20 +240,23 @@ def before_all_connect_():
         }
     else:
         hist[ip][time.time()] = request.full_path
+    
     connect_count += 1
     if connect_count == config["save_point"]:
         pickle.dump(ips, open("ips.bin", "wb"))
         pickle.dump(hist, open("hist.bin", "wb"))
         connect_count = 0
 
-
     # ip와 접근 url 출력
     print(ip, request.full_path)
+    # 블랙리스트면 403 띄우기
+    if ip in black_list:
+        abort(403)
+
     # 로그인이 필요없으면 return
     for i in range(len(NoLoginPages)):
         if NoLoginPages[i] in str(request.full_path):
             return
-
 
     # 로그인이 필요하면 /login으로 redirect
     if not is_logined(session):
@@ -299,7 +273,8 @@ def index_page():
 
 
 # 관리자 페이지
-@app.route("/manage", methods=["POST", "GET"])
+@app.route("/manage")
+@app.route("/manage/")
 def manage():
     if session['userid'] == "관리자" or session['userid'] == "admin":
         # /manage?cmd=어쩌구 처리
@@ -317,7 +292,6 @@ def manage():
                 black_list.append(cmd[1])
                 flash("완료")
 
-
             # 블랙리스트 해제
             elif cmd[0] == "unblock":
                 if cmd[1] in black_list:
@@ -331,6 +305,8 @@ def manage():
                 if cmd[1] == "db_test":
                     mongodb_test()
                     flash("완료")
+            pickle.dump(ips, open("ips.bin", "wb"))
+            pickle.dump(hist, open("hist.bin", "wb"))
 
             return redirect("/manage")
 
@@ -344,6 +320,33 @@ def manage():
 
 @app.route("/manage/<ip>")
 def manage_ip(ip):
+    if session['userid'] != "admin":
+        return ""
+    if request.args.get("cmd"):
+        cmd = request.args.get("cmd")
+        # 로그 삭제
+        if cmd == "del":
+            del ips[ip]
+            del hist[ip]
+            flash("완료")
+            return redirect("/manage")
+
+        # 블랙리스트
+        elif cmd == "block":
+            black_list.append(ip)
+            flash("완료")
+
+        # 블랙리스트 해제
+        elif cmd == "unblock":
+            if ip in black_list:
+                black_list.remove(ip)
+                flash("완료")
+            else:
+                flash("블랙리스트에 없습니다")
+
+        pickle.dump(ips, open("ips.bin", "wb"))
+        pickle.dump(hist, open("hist.bin", "wb"))
+
     if ip not in hist.keys():
         flash("방문 기록이 없습니다.")
         return redirect("/manage")
@@ -351,14 +354,16 @@ def manage_ip(ip):
     for key in hist[ip].keys():
         return_dict[time_passed(key)] = hist[ip][key]
 
-    return render_template("hist_manage.html", hist=return_dict, keys=reversed(list(return_dict.keys())))
-
-
+    return render_template("hist_manage.html", hist=return_dict, keys=reversed(list(return_dict.keys())),
+                           blacklist=black_list, ip=ip)
 
 
 # 로그인
 @app.route("/login", methods=['POST', 'GET'])
 def login():
+    if session['userid']:
+        flash("이미 로그인돼있습니다.")
+        return redirect("/")
     form = LoginForm()
 
     if request.method == "GET":
@@ -469,14 +474,12 @@ def index_of_board():
 # 게시판 - 목록
 @app.route("/board/list/<index_num>")
 def pages_(index_num):
-    if not is_logined(session):
-        return redirect("/login")
+    if int(index_num) < 1:
+        return redirect("/board/list/1")
     client = MongoClient("mongodb://localhost:27017/")
     posts = client.sol.posts
     i = int(index_num) * 20 - 20
     return_posts = {}
-
-
 
     """    for post_ in posts.find({
         'url': {
@@ -484,7 +487,7 @@ def pages_(index_num):
             '$lt': posts.estimated_document_count() - (int(index_num) * 20 - 21)
             }}).sort("url", -1):
     """
-    for post in posts.find({}).sort({'id_':-1}).skip(index_num * 20).limit(20):
+    for post_ in posts.find().sort('_id', -1).skip((int(index_num) - 1) * 20).limit(20):
         return_posts[post_['url']] = post_['title'], post_['url'], post_['time'], post_['author']
         i += 1
 
@@ -517,13 +520,16 @@ def new():
     if "<br>" not in content:
         content = content.replace("\n", "<br>")
 
+    post = posts.find().sort('_id', -1)[0]
+
+    x = datetime.now()
     posts.insert_one(
         {
             "title": request.form.get('title'),
             "author": session['userid'],
             "content": content,
-            "url": posts.estimated_document_count() + 1,
-            "time": time.strftime('%c', time.localtime(time.time())),
+            "url": post["url"] + 1,
+            "time": x.strftime("%Y년 %m월 %d일 %H시 %M분 %S초"),
             "ip": ip
         }
     )
@@ -532,39 +538,35 @@ def new():
 
 
 # 글 보기 (조회)
-@app.route("/board/post/<id_>")
-def post(id_):
+@app.route("/board/list/<idx>/<id_>")
+def post(idx, id_):
     if not is_logined(session):
         return redirect("/login")
 
     client = MongoClient("mongodb://localhost:27017/")
     posts = client.sol.posts
     data = posts.find({"url": int(id_)})
-    posts_count = posts.estimated_document_count()
     client.close()
     try:
-        return render_template("board/post.html", post=data[0], page=(posts_count - data[0]["url"]) // 20 + 1)
+        return render_template("board/post.html", post=data[0], page=int(idx))
     except KeyError:
         return redirect("/err/404")
 
 
 # 글 삭제
-@app.route("/board/post/<id_>/delete")
-def delete_post(id_):
+@app.route("/board/list/<idx>/<id_>/delete")
+def delete_post(idx, id_):
     client = MongoClient("mongodb://localhost:27017/")
     posts = client.sol.posts
     data = posts.find({"url": int(id_)})
     client.close()
-    if session['userid'] == data[0]['author']:
+    if session['userid'] == data[0]['author'] or session["userid"] == "admin":
         posts.delete_one({"url": int(id_)})
         flash("삭제됐습니다")
         return redirect("/board/list")
     else:
         flash("권한이 없습니다")
-        return redirect("/board/post/" + id_)
-
-
-
+        return redirect("/board/list/" + idx + "/" + id_)
 
 
 # TODO : 보안 취약
@@ -587,6 +589,7 @@ def ai_page():
         else:
             black_list.append(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
             return "해킹 시도 감지됨."
+
 
 # 인공지능 결과 나올때까지 대기
 @app.route("/ai/wait/<id_>")
@@ -660,6 +663,7 @@ def edit_profile():
         client.close()
         return redirect("/my-profile")
 
+
 # 남의 프로필 보기
 @app.route("/profile")
 @app.route("/profile/")
@@ -679,10 +683,10 @@ def other_profile(id_="관리자"):
         i += 1
 
     if len(profile_data.keys()) == 0:
-        profile_data["0"] = profile={
-                                "id": "존재하지 않는 사용자",
-                                "status_message": "없음"
-                            }
+        profile_data["0"] = {
+            "id": "존재하지 않는 사용자",
+            "status_message": "없음"
+        }
         return render_template("profile/other_profile.html",
                                profile={
                                    "id": "존재하지 않는 사용자",
@@ -692,10 +696,6 @@ def other_profile(id_="관리자"):
 
     return render_template("profile/other_profile.html",
                            profile=profile_data["0"], )
-
-    return render_template("profile/other_profile.html",
-                           profile=profile_data["0"], )
-
 
 
 # 카카오톡 공유
@@ -713,25 +713,153 @@ def kakaotalk():
         upload_file.save(save_file_path)
 
         Log.log("카카오 링크 전송\ntitle: "
-                  + str(request.form.get('title')) + " / description : "
-                  + str(request.form.get('description')) + " / url : "
-                  + str(request.form.get('url')) + " / path : "
-                  + save_file_path + " / id : "
-                  + session["userid"]
-              )
+                + str(request.form.get('title')) + " / description : "
+                + str(request.form.get('description')) + " / url : "
+                + str(request.form.get('url')) + " / path : "
+                + save_file_path + " / id : "
+                + session["userid"]
+                )
 
         return render_template("kakaotalk/send.html",
-                    title=str(request.form.get('title')),
-                    description=str(request.form.get('description')),
-                    url=str(request.form.get('url')),
-                    img_url=save_file_path
-                )
+                               title=str(request.form.get('title')),
+                               description=str(request.form.get('description')),
+                               url=str(request.form.get('url')),
+                               img_url=save_file_path
+                               )
 
 
 # 리다이렉트
 @app.route("/redirect")
 def redirect_page():
     return redirect(request.args.get('url'))
+
+
+@app.route("/quiz", methods=["GET", "POST"])
+def quiz_index():
+    if request.method == "POST":
+        client = MongoClient("mongodb://localhost:27017/")
+        quizdb = client.sol.quiz
+
+        if request.form.get("qtype") == "0":
+            quizdb.insert_one({
+                "id": quizdb.find().sort('_id', -1)[0]["id"] + 1,
+                "type": request.form.get("qtype"),
+                "q": request.form.get("name"),
+                "answer": request.form.get("answer_ox"),
+                "pw": request.form.get("pw")
+            })
+        elif request.form.get("qtype") == "1":
+            quizdb.insert_one({
+                "id": quizdb.find().sort('_id', -1)[0]["id"] + 1,
+                "type": request.form.get("qtype"),
+                "q": request.form.get("name"),
+                "answer": str(int(request.form.get("answer_is")) + 1),
+                "look": [request.form.get("answer_1"), request.form.get("answer_2"), request.form.get("answer_3"),
+                         request.form.get("answer_4"), request.form.get("answer_5")],
+                "pw": request.form.get("pw")
+            })
+        elif request.form.get("qtype") == "2":
+            quizdb.insert_one({
+                "id": quizdb.find().sort('_id', -1)[0]["id"] + 1,
+                "type": request.form.get("qtype"),
+                "q": request.form.get("name"),
+                "answer": request.form.get("answer"),
+                "pw": request.form.get("pw")
+            })
+        id_ = str(quizdb.find().sort('_id', -1)[0]["id"])
+        client.close()
+        return redirect("/quiz/answer?qno=" + id_)
+
+    else:
+        quiz_type = request.args.get("type")
+        if quiz_type == "0":
+            return render_template("quiz/make.html", type=["checked=''", "", ""])
+        if quiz_type == "1":
+            return render_template("quiz/make.html", type=["", "checked=''", ""])
+        elif quiz_type == "2":
+            return render_template("quiz/make.html", type=["", "", "checked=''"])
+        else:
+            return redirect("/quiz?type=0")
+
+
+@app.route("/quiz/answer")
+def quiz_answer():
+    client = MongoClient("mongodb://localhost:27017/")
+    quizdb = client.sol.quiz
+    answerdb = client.sol.quiz_answer
+
+    try:
+        int(request.args.get("qno"))
+    except:
+        return "문제 URL이 잘못되었습니다."
+
+    answers = answerdb.find({"id": int(request.args.get("qno"))})
+    quiz = quizdb.find({"id": int(request.args.get("qno"))})[0]
+    client.close()
+    try:
+        if request.args.get("pw") == quiz['pw']:
+            return render_template("quiz/answer.html", q=quiz, answers=answers)
+        else:
+            return "비밀번호를 입력하세요 : " \
+                   "<form action='#' method='get'>" \
+                   "<input type='text' name='pw'>" \
+                   "<input type='hidden' name='qno' value='%s'>" \
+                   "<input type='submit'>" \
+                   "</form>" % request.args.get("qno")
+    except:
+        return "비밀번호를 입력하세요 : " \
+               "<form action='#' method='get'>" \
+               "<input type='text' name='pw'>" \
+               "<input type='hidden' name='qno' value='%s'>" \
+               "<input type='submit'>" \
+               "</form>" % request.args.get("qno")
+
+@app.route("/quiz/question", methods=['GET', "POST"])
+def quiz_question():
+    if request.method == "GET":
+        try:
+            int(request.args.get("qno"))
+        except:
+            return "문제 URL이 잘못되었습니다."
+        client = MongoClient("mongodb://localhost:27017/")
+        quizdb = client.sol.quiz
+        client.close()
+        quiz = quizdb.find({"id": int(request.args.get("qno"))})[0]
+        return render_template("quiz/question.html", q=quiz)
+    else:
+        try:
+            int(request.args.get("qno"))
+        except:
+            return "문제 URL이 잘못되었습니다."
+        client = MongoClient("mongodb://localhost:27017/")
+        quizdb = client.sol.quiz
+        quiz_answerdb = client.sol.quiz_answer
+        quiz = quizdb.find({"id": int(request.args.get("qno"))})[0]
+
+        answer_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+
+        quiz_answerdb.insert_one({
+            "id": int(request.args.get("qno")),
+            "name": request.form.get("name"),
+            "time": answer_time,
+            "answer": request.form.get("answer_is")
+        })
+        if request.form.get("answer_is") == quiz["answer"]:
+            flash("정답입니다!")
+            return render_template("quiz/question.html", q=quiz, name=session['name'], close=True)
+        else:
+            flash("안타깝게도 오답입니다!")
+        if not 'name' in session.keys():
+            session['name'] = "이름을 입력해주세요"
+        else:
+            session['name'] = request.form.get("name")
+        client.close()
+        return render_template("quiz/question.html", q=quiz, name=session['name'], close=True)
+
+
+@app.route("/quiz/list")
+def quiz_list():
+    return ""
 
 
 # 404 처리
@@ -789,7 +917,8 @@ Log = Log()
 #
 #
 #
-#
 # RUN SERVER
 Log.log("server started!!")
-app.run(host='0.0.0.0', port=5000, debug=isdebug)
+app.run(host='0.0.0.0', port=5000, debug=is_debug)
+pickle.dump(ips, open("ips.bin", "wb"))
+pickle.dump(hist, open("hist.bin", "wb"))

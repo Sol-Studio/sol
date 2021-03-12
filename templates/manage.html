@@ -1,19 +1,14 @@
-<div class="container">
-<form method="get" action="/manage" id="formByte" name="formByte">
-    CMD : 
-    <input type="text" name="cmd"><br>
-</form>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-
+<div class="container">
 <table class="table-hover table">
   <thead>
     <tr>
-      <td>IP</td>
-      <td>ID</td>
-      <td>URL</td>
-      <td>ACTION</td>
-      <td>TIME</td>
-      <td>MANAGE</td>
+      <th>IP</th>
+      <th>ID</th>
+      <th>URL</th>
+      <th>ACTION</th>
+      <th>TIME</th>
+      <th>MANAGE</th>
     </tr>
   </thead>
   <tbody>
@@ -29,14 +24,34 @@
     {% endfor %}
   </tbody>
 </table>
+<br><br><br><br><br><br><h1>블랙리스트</h1>
+<table class="table table-hover">
+    <thead>
+        <th>IP</th>
+        <th>MANAGE</th>
+    </thead>
+    <tbody>
+        {% for black in blacklist %}
+            <tr>
+                <td>
+                    {{ black }}
+                </td>
+                <td>
+                    <a href="/manage?cmd=unblock {{ black }}">차단 해제</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+
+</table>
 </div>
 {% with messages = get_flashed_messages() %}
 {% if messages %}
-<script>
-  {% for message in messages %}
-    alert('{{ message }}');
-  {% endfor %}
-</script>
+    <script>
+      {% for message in messages %}
+        alert('{{ message }}');
+      {% endfor %}
+    </script>
 {% endif %}
 {% endwith %}
 {% block body %}{% endblock %}
