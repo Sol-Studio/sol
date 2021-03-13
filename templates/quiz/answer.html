@@ -33,8 +33,9 @@
 													<li><a href="#" name="copy" id="copy" class="button primary large icon solid fa-clone">주소복사하기</a></li>
 											</ul>
 
-											<h3>Quiz</h3>
+                                            <h3>Quiz</h3><h4> {{ q["q"] }}</h4>
 											<div class="table-wrapper">
+
                                                 {% if q["type"] == "0" %}
                                                     <table>
                                                         <thead>
@@ -87,11 +88,11 @@
                                                 {% endif %}
 																																															<p></p>
 											<ul class="actions">
-													<li><a href="/quiz/answer?qno={{ q["id"] }}" name="refresh" id="refresh" class="button primary icon solid fa-sync">새로고침</a></li>
+													<li><a href="/quiz/answer?qno={{ q["id"] }}#reload" name="refresh" id="refresh" class="button primary icon solid fa-sync">새로고침</a></li>
 													<li><a href="/quiz/list " name="list" id="list" class="button icon solid fa-book">목록으로</a></li>
 											</ul>
-											<h4>학생퀴즈풀이현황</h4>
-											<p>새로고침버튼을 누르시면 실시간으로 학생들의 문제풀이 현황을 보실 수 있습니다.</p>
+											<h4>학생퀴즈풀이현황 : {{ length }}명 제출함</h4>
+                                                <p>새로고침버튼을 누르시면 실시간으로 학생들의 문제풀이 현황을 보실 수 있습니다.</p><a name="reload"></a>
 											<div class="table-wrapper" id="result">
 												<table>
 													<thead>
@@ -103,15 +104,15 @@
 														</tr>
 													</thead>
 													<tbody>
-														<tr><td colspan=4>아직 답안을 제출한 학생이 없습니다.</td></tr>
-                                                        {% for answer in answers %}
+                                                        {% for idx in range(length) %}
                                                             <tr>
-                                                                <td>{{ answer["name"] }}</td>
-                                                                <td>{{ answer["answer"] }}</td>
-                                                                <td>{% if answer["answer"] == q["answer"] %}O{% else %}X{% endif %}</td>
-                                                                <td>{{ answer["time"] }}</td>
+                                                                <td>{{ answers[idx]["name"] }}</td>
+                                                                <td>{{ answers[idx]["answer"] }}</td>
+                                                                <td>{% if answers[idx]["answer"] == q["answer"] %}O{% else %}X{% endif %}</td>
+                                                                <td>{{ answers[idx]["time"] }}</td>
                                                             </tr>
                                                         {% endfor %}
+
 													</tbody>
 												</table>
 											</div>
@@ -165,15 +166,12 @@
 							  alert("주소가 성공적으로 복사되었습니다.\n화상수업채팅창에 붙여넣기로 학생들에게 전달하실 수 있습니다.\n(" + copyText.value + ")");
 
 		        });
-
 	        });
 	    </script>
-			<!-- Note: Only needed for demo purposes. Delete for production sites. -->
-			<!--script src="assets/js/demo.js"></script-->
-                    <footer>
-                        <center>
-                            by 최유찬
-                        </center>
-                    </footer>
+        <footer>
+            <center>
+                by 최유찬
+            </center>
+        </footer>
 	</body>
 </html>

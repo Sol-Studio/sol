@@ -68,7 +68,8 @@ NoLoginPages = [
     "/signup?",
     "/login?",
     "/redirect",
-    "/quiz"
+    "/quiz/question",
+    "/terms"
 ]
 IgnoreConnect = [
     "/static/",
@@ -78,7 +79,7 @@ IgnoreConnect = [
     "/ai/wait/",
     "/manage"
 ]
-
+mobile_meta = '<meta name=\'viewport\' content=\'width=device-width, initial-scale=1, user-scalable=no\' />'
 config = {"save_point": 1}
 
 
@@ -453,6 +454,14 @@ def signup():
             return render_template("signup.html", form=form)
 
 
+@app.route("/terms")
+def terms():
+    return mobile_meta + "id와 비밀번호는 다른 사이트에서 사용하지 않는 것으로 해주세요(유출 위험)<br>이 사이트는 해킹에 취약합니다.<br><br>" \
+                         "1. 개인정보 처리에 관한 동의.<br>이 사이트는 개발을 목적으로 만들어졌고, 아주 가끔은 오류가 발생하기도 합니다.<br>" \
+                         "이 오류를 수정하기 위해 모든 사용자의 연결을 기록하는데에 동의합니다. 이 기록은 오류가 발생하지 않는 한 열어보지 않고," \
+                         " 1주일마다 삭제합니다(보통은 더 자주 삭제합니다)<br>수집하는 정보 : ip, url, id<br><br><a href='/signup'>돌아가기</a>"
+
+
 # 로그아웃
 @app.route("/logout")
 def logout():
@@ -735,19 +744,21 @@ def redirect_page():
     return redirect(request.args.get('url'))
 
 
+# 퀴즈 출제
 @app.route("/quiz", methods=["GET", "POST"])
 def quiz_index():
     if request.method == "POST":
         client = MongoClient("mongodb://localhost:27017/")
         quizdb = client.sol.quiz
-
+        register_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         if request.form.get("qtype") == "0":
             quizdb.insert_one({
                 "id": quizdb.find().sort('_id', -1)[0]["id"] + 1,
                 "type": request.form.get("qtype"),
                 "q": request.form.get("name"),
                 "answer": request.form.get("answer_ox"),
-                "pw": request.form.get("pw")
+                "name": session['userid'],
+                "time": register_time
             })
         elif request.form.get("qtype") == "1":
             quizdb.insert_one({
@@ -757,7 +768,8 @@ def quiz_index():
                 "answer": str(int(request.form.get("answer_is")) + 1),
                 "look": [request.form.get("answer_1"), request.form.get("answer_2"), request.form.get("answer_3"),
                          request.form.get("answer_4"), request.form.get("answer_5")],
-                "pw": request.form.get("pw")
+                "name": session['userid'],
+                "time": register_time
             })
         elif request.form.get("qtype") == "2":
             quizdb.insert_one({
@@ -765,7 +777,8 @@ def quiz_index():
                 "type": request.form.get("qtype"),
                 "q": request.form.get("name"),
                 "answer": request.form.get("answer"),
-                "pw": request.form.get("pw")
+                "name": session['userid'],
+                "time": register_time
             })
         id_ = str(quizdb.find().sort('_id', -1)[0]["id"])
         client.close()
@@ -782,62 +795,62 @@ def quiz_index():
         else:
             return redirect("/quiz?type=0")
 
-
+# 퀴즈 관리자페이지
 @app.route("/quiz/answer")
 def quiz_answer():
-    client = MongoClient("mongodb://localhost:27017/")
-    quizdb = client.sol.quiz
-    answerdb = client.sol.quiz_answer
-
     try:
         int(request.args.get("qno"))
     except:
         return "문제 URL이 잘못되었습니다."
 
-    answers = answerdb.find({"id": int(request.args.get("qno"))})
-    quiz = quizdb.find({"id": int(request.args.get("qno"))})[0]
-    client.close()
+    client = MongoClient("mongodb://localhost:27017/")
+    answers = list(client.sol.quiz_answer.find({"id": int(request.args.get("qno"))}))
     try:
-        if request.args.get("pw") == quiz['pw']:
-            return render_template("quiz/answer.html", q=quiz, answers=answers)
-        else:
-            return "비밀번호를 입력하세요 : " \
-                   "<form action='#' method='get'>" \
-                   "<input type='text' name='pw'>" \
-                   "<input type='hidden' name='qno' value='%s'>" \
-                   "<input type='submit'>" \
-                   "</form>" % request.args.get("qno")
-    except:
-        return "비밀번호를 입력하세요 : " \
-               "<form action='#' method='get'>" \
-               "<input type='text' name='pw'>" \
-               "<input type='hidden' name='qno' value='%s'>" \
-               "<input type='submit'>" \
-               "</form>" % request.args.get("qno")
+        quiz = client.sol.quiz.find({"id": int(request.args.get("qno"))})[0]
+        client.close()
+    except IndexError:
+        client.close()
+        return mobile_meta + "문제 URL이 잘못되었습니다."
 
+    if session['userid'] == quiz["name"]:
+        return render_template("quiz/answer.html", q=quiz, answers=answers, length=len(answers))
+    else:
+        flash("로그인이 필요합니다")
+        return redirect("/login")
+
+
+# 퀴즈 푸는 페이지
 @app.route("/quiz/question", methods=['GET', "POST"])
 def quiz_question():
     if request.method == "GET":
         try:
             int(request.args.get("qno"))
         except:
-            return "문제 URL이 잘못되었습니다."
+            return mobile_meta + "문제 URL이 잘못되었습니다."
         client = MongoClient("mongodb://localhost:27017/")
         quizdb = client.sol.quiz
-        client.close()
-        quiz = quizdb.find({"id": int(request.args.get("qno"))})[0]
-        return render_template("quiz/question.html", q=quiz)
+
+        try:
+            quiz = quizdb.find({"id": int(request.args.get("qno"))})[0]
+            client.close()
+        except IndexError:
+            client.close()
+            return mobile_meta + "문제 URL이 잘못되었습니다."
+
+        if not "name" in session.keys():
+            session['name'] = "이름을 입력해주세요"
+        return render_template("quiz/question.html", q=quiz, name=session['name'], close=False)
     else:
         try:
             int(request.args.get("qno"))
-        except:
-            return "문제 URL이 잘못되었습니다."
+        except TypeError:
+            return mobile_meta + "문제 URL이 잘못되었습니다."
         client = MongoClient("mongodb://localhost:27017/")
         quizdb = client.sol.quiz
         quiz_answerdb = client.sol.quiz_answer
         quiz = quizdb.find({"id": int(request.args.get("qno"))})[0]
-
         answer_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        session['name'] = request.form.get("name")
 
         quiz_answerdb.insert_one({
             "id": int(request.args.get("qno")),
@@ -845,22 +858,23 @@ def quiz_question():
             "time": answer_time,
             "answer": request.form.get("answer_is")
         })
+
+        client.close()
         if request.form.get("answer_is") == quiz["answer"]:
             flash("정답입니다!")
-            return render_template("quiz/question.html", q=quiz, name=session['name'], close=True)
         else:
             flash("안타깝게도 오답입니다!")
-        if not 'name' in session.keys():
-            session['name'] = "이름을 입력해주세요"
-        else:
-            session['name'] = request.form.get("name")
-        client.close()
+
         return render_template("quiz/question.html", q=quiz, name=session['name'], close=True)
 
 
+# 출제한 퀴즈 목록
 @app.route("/quiz/list")
 def quiz_list():
-    return ""
+    client = MongoClient("mongodb://localhost:27017/")
+    quiz_list = list(client.sol.quiz.find({"name": session["userid"]}))
+    client.close()
+    return render_template("quiz/list.html", l=quiz_list, length=len(quiz_list), name=session['userid'])
 
 
 # 404 처리
@@ -871,46 +885,6 @@ def _page_not_found(e=404):
 
 
 Log = Log()
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
 #
 #
 #
