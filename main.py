@@ -491,12 +491,6 @@ def pages_(index_num):
     i = int(index_num) * 20 - 20
     return_posts = {}
 
-    """    for post_ in posts.find({
-        'url': {
-            '$gt': posts.estimated_document_count() - (int(index_num) * 20 + 1),
-            '$lt': posts.estimated_document_count() - (int(index_num) * 20 - 21)
-            }}).sort("url", -1):
-    """
     for post_ in posts.find().sort('_id', -1).skip((int(index_num) - 1) * 20).limit(20):
         return_posts[post_['url']] = post_['title'], post_['url'], post_['time'], post_['author']
         i += 1

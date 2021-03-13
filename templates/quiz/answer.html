@@ -88,7 +88,7 @@
                                                 {% endif %}
 																																															<p></p>
 											<ul class="actions">
-													<li><a href="/quiz/answer?qno={{ q["id"] }}#reload" name="refresh" id="refresh" class="button primary icon solid fa-sync">새로고침</a></li>
+													<li><a onclick="window.location = '/quiz/answer?qno={{ q["id"] }}'" name="refresh" id="refresh" class="button primary icon solid fa-sync">새로고침</a></li>
 													<li><a href="/quiz/list " name="list" id="list" class="button icon solid fa-book">목록으로</a></li>
 											</ul>
 											<h4>학생퀴즈풀이현황 : {{ length }}명 제출함</h4>
