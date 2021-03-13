@@ -1,26 +1,8 @@
-import logging
-import time
-from flask_wtf import FlaskForm
-from wtforms import StringField
-from wtforms import PasswordField  # 로그인 검증
-from wtforms.validators import DataRequired  # 로그인 검증
-from wtforms.validators import EqualTo  # 로그인 검증
-from pytz import timezone  # 시간 정보
-import os  # os
-from flask import Flask  # app
-from flask import render_template  # 템플릿
-from flask import redirect  # 리다이렉트
-from flask import request  # 클라이언트 정보
-from flask import session  # 로그인 정보
-from flask import flash  # alert 띄우기
-from flask import abort  # 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
-from pymongo import MongoClient  # MongoDB
 import mimetypes  # 파일 검증
 from werkzeug.utils import secure_filename  # 파일 이름 검증
 import logging  # 로깅
 import time  # 시간
 from datetime import datetime  # 시간
-from datetime import timedelta
 from flask_wtf import FlaskForm  # form
 from wtforms import StringField  # form
 from wtforms import PasswordField  # form
@@ -35,11 +17,10 @@ from flask import request
 from flask import session
 from flask import flash
 from flask import abort  # -- 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
-from flask import send_file  # ...Flask
 from pymongo import MongoClient  # MongoDB
 import pickle  # 서버 변수 저장
 from werkzeug.debug import DebuggedApplication
-
+from flask import send_file
 # Create Flask App
 app = Flask(__name__)
 
@@ -260,7 +241,7 @@ def before_all_connect_():
         if NoLoginPages[i] in str(request.full_path):
             return
 
-    # 로그인이 필요하면 /login으로 redirect
+    # 로그인이 필요하면 /login 으로 redirect
     if not is_logined(session):
         return redirect("/login")
 
@@ -524,19 +505,18 @@ def new():
     if "<br>" not in content:
         content = content.replace("\n", "<br>")
 
-    post = posts.find().sort('_id', -1)[0]
+    next_id = posts.find().sort('_id', -1)[0]["url"] + 1
 
     x = datetime.now()
-    posts.insert_one(
-        {
-            "title": request.form.get('title'),
-            "author": session['userid'],
-            "content": content,
-            "url": post["url"] + 1,
-            "time": x.strftime("%Y년 %m월 %d일 %H시 %M분 %S초"),
-            "ip": ip
-        }
-    )
+    posts.insert_one({
+        "title": request.form.get('title'),
+        "author": session['userid'],
+        "content": content,
+        "url": next_id,
+        "time": x.strftime("%Y년 %m월 %d일 %H시 %M분 %S초"),
+        "ip": ip
+    })
+
     client.close()
     return redirect("/board/list")
 
@@ -716,7 +696,8 @@ def kakaotalk():
         save_file_path = os.path.join("static/kakaotalk/", secure_filename(filename))
         upload_file.save(save_file_path)
 
-        Log.log("카카오 링크 전송\ntitle: "
+        Log.log(""
+                + "카카오 링크 전송\ntitle: "
                 + str(request.form.get('title')) + " / description : "
                 + str(request.form.get('description')) + " / url : "
                 + str(request.form.get('url')) + " / path : "
@@ -745,6 +726,7 @@ def quiz_index():
         client = MongoClient("mongodb://localhost:27017/")
         quizdb = client.sol.quiz
         register_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+
         if request.form.get("qtype") == "0":
             quizdb.insert_one({
                 "id": quizdb.find().sort('_id', -1)[0]["id"] + 1,
@@ -754,6 +736,7 @@ def quiz_index():
                 "name": session['userid'],
                 "time": register_time
             })
+
         elif request.form.get("qtype") == "1":
             quizdb.insert_one({
                 "id": quizdb.find().sort('_id', -1)[0]["id"] + 1,
@@ -765,6 +748,7 @@ def quiz_index():
                 "name": session['userid'],
                 "time": register_time
             })
+
         elif request.form.get("qtype") == "2":
             quizdb.insert_one({
                 "id": quizdb.find().sort('_id', -1)[0]["id"] + 1,
@@ -774,11 +758,12 @@ def quiz_index():
                 "name": session['userid'],
                 "time": register_time
             })
+
         id_ = str(quizdb.find().sort('_id', -1)[0]["id"])
         client.close()
         return redirect("/quiz/answer?qno=" + id_)
 
-    else:
+    elif request.method == "GET":
         quiz_type = request.args.get("type")
         if quiz_type == "0":
             return render_template("quiz/make.html", type=["checked=''", "", ""])
@@ -789,12 +774,14 @@ def quiz_index():
         else:
             return redirect("/quiz?type=0")
 
-# 퀴즈 관리자페이지
+
+# 퀴즈 출제자 페이지
 @app.route("/quiz/answer")
 def quiz_answer():
     try:
         int(request.args.get("qno"))
-    except:
+
+    except TypeError:
         return "문제 URL이 잘못되었습니다."
 
     client = MongoClient("mongodb://localhost:27017/")
@@ -802,6 +789,7 @@ def quiz_answer():
     try:
         quiz = client.sol.quiz.find({"id": int(request.args.get("qno"))})[0]
         client.close()
+
     except IndexError:
         client.close()
         return mobile_meta + "문제 URL이 잘못되었습니다."
@@ -819,26 +807,32 @@ def quiz_question():
     if request.method == "GET":
         try:
             int(request.args.get("qno"))
-        except:
+
+        except TypeError:
             return mobile_meta + "문제 URL이 잘못되었습니다."
+
         client = MongoClient("mongodb://localhost:27017/")
         quizdb = client.sol.quiz
 
         try:
             quiz = quizdb.find({"id": int(request.args.get("qno"))})[0]
             client.close()
+
         except IndexError:
             client.close()
             return mobile_meta + "문제 URL이 잘못되었습니다."
 
-        if not "name" in session.keys():
+        if "name" not in session.keys():
             session['name'] = "이름을 입력해주세요"
         return render_template("quiz/question.html", q=quiz, name=session['name'], close=False)
+
     else:
         try:
             int(request.args.get("qno"))
+
         except TypeError:
             return mobile_meta + "문제 URL이 잘못되었습니다."
+
         client = MongoClient("mongodb://localhost:27017/")
         quizdb = client.sol.quiz
         quiz_answerdb = client.sol.quiz_answer
@@ -856,6 +850,7 @@ def quiz_question():
         client.close()
         if request.form.get("answer_is") == quiz["answer"]:
             flash("정답입니다!")
+
         else:
             flash("안타깝게도 오답입니다!")
 
@@ -866,10 +861,14 @@ def quiz_question():
 @app.route("/quiz/list")
 def quiz_list():
     client = MongoClient("mongodb://localhost:27017/")
-    quiz_list = list(client.sol.quiz.find({"name": session["userid"]}))
+    given_quiz_list = list(client.sol.quiz.find({"name": session["userid"]}))
     client.close()
-    return render_template("quiz/list.html", l=quiz_list, length=len(quiz_list), name=session['userid'])
+    return render_template("quiz/list.html", l=given_quiz_list, length=len(quiz_list), name=session['userid'])
 
+
+@app.route("/.well-known/pki-validation/93A7C349AA1DACEFF36A20D7F3EB6AC4.txt")
+def https_request():
+    return send_file("https.txt")
 
 # 404 처리
 @app.route("/err/404")
@@ -879,13 +878,6 @@ def _page_not_found(e=404):
 
 
 Log = Log()
-#
-#
-#
-#
-#
-#
-#
 # RUN SERVER
 Log.log("server started!!")
 app.run(host='0.0.0.0', port=5000, debug=is_debug)
