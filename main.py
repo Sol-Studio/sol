@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename  # 파일 이름 검증
 import logging  # 로깅
 import time  # 시간
 from datetime import datetime  # 시간
+from datetime import timedelta
 from flask_wtf import FlaskForm  # form
 from wtforms import StringField  # form
 from wtforms import PasswordField  # form
@@ -209,6 +210,8 @@ def mongodb_test(num):
 # 모든 연결에 대해 실행
 @app.before_request
 def before_all_connect_():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(hours=10)
     global connect_count
     ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
 
