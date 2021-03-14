@@ -20,14 +20,25 @@ from flask import abort  # -- 정상적이지 않은 상황에서 abort(403)하�
 from pymongo import MongoClient  # MongoDB
 import pickle  # 서버 변수 저장
 from werkzeug.debug import DebuggedApplication
-from flask import send_file
+import sys
+
+
 # Create Flask App
 app = Flask(__name__)
 
-is_debug = True
+
+# debug set
+if len(sys.argv) > 1:
+    is_debug = True
+else:
+    is_debug = False
+
+
 # debug app
 if is_debug:
     app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
+
+
 # APP CONFIG
 app.config['SECRET_KEY'] = open("secret_key.txt", "r").read()
 app.config["UPLOAD_DIR"] = "static/upload/"
@@ -44,6 +55,7 @@ except FileNotFoundError:
     hist = {}
 
 black_list = []
+
 NoLoginPages = [
     "/?",
     "/signup?",
@@ -52,6 +64,7 @@ NoLoginPages = [
     "/quiz/question",
     "/terms"
 ]
+
 IgnoreConnect = [
     "/static/",
     "/plugin/",
@@ -60,7 +73,9 @@ IgnoreConnect = [
     "/ai/wait/",
     "/manage"
 ]
+
 mobile_meta = '<meta name=\'viewport\' content=\'width=device-width, initial-scale=1, user-scalable=no\' />'
+
 config = {"save_point": 1}
 
 
@@ -158,7 +173,7 @@ def manage_helper(data):
             "last": time_passed(data[key]["last"]),
             "url": data[key]["url"],
             "id": data[key]["id"],
-            "action": data[key]["active"]
+            "action": data[key]["action"]
         }
     return return_dict
 
@@ -172,11 +187,9 @@ def is_logined(s):
 
 
 # post 여러개 올리기
-def mongodb_test():
+def mongodb_test(num):
     client = MongoClient("mongodb://localhost:27017/")
     posts = client.sol.posts
-
-    num = 100
 
     for i in range(num):
         print(posts.count())
@@ -207,16 +220,22 @@ def before_all_connect_():
     # 로그인이 아직 안됐을때 None 을 아이디로
     if "userid" not in session.keys():
         session["userid"] = None
-        session["active"] = 0
-    session["active"] += 1
 
     # 마지막 접속 기록을 남김
-    ips[ip] = {
-        "last": time.time(),
-        "url": request.full_path,
-        "id": session["userid"],
-        "active": session["active"] + 1
-    }
+    if ip not in ips.keys():
+        ips[ip] = {
+            "last": time.time(),
+            "url": request.full_path,
+            "id": session["userid"],
+            "action": 1
+        }
+    else:
+        ips[ip] = {
+            "last": time.time(),
+            "url": request.full_path,
+            "id": session["userid"],
+            "action": ips[ip]["action"] + 1
+        }
     if ip not in hist.keys():
         hist[ip] = {
             time.time(): request.full_path
@@ -286,7 +305,7 @@ def manage():
             # db test
             elif cmd[0] == "do":
                 if cmd[1] == "db_test":
-                    mongodb_test()
+                    mongodb_test(cmd[2])
                     flash("완료")
             pickle.dump(ips, open("ips.bin", "wb"))
             pickle.dump(hist, open("hist.bin", "wb"))
@@ -381,9 +400,6 @@ def login():
         # 통과
         else:
             session['userid'] = id_
-            if id_ == "admin":
-                session["hide"] = True
-                del ips[request.environ.get('HTTP_X_REAL_IP', request.remote_addr)]
             return redirect("/")
 
 
@@ -439,8 +455,9 @@ def signup():
 def terms():
     return mobile_meta + "id와 비밀번호는 다른 사이트에서 사용하지 않는 것으로 해주세요(유출 위험)<br>이 사이트는 해킹에 취약합니다.<br><br>" \
                          "1. 개인정보 처리에 관한 동의.<br>이 사이트는 개발을 목적으로 만들어졌고, 아주 가끔은 오류가 발생하기도 합니다.<br>" \
-                         "이 오류를 수정하기 위해 모든 사용자의 연결을 기록하는데에 동의합니다. 이 기록은 오류가 발생하지 않는 한 열어보지 않고," \
-                         " 1주일마다 삭제합니다(보통은 더 자주 삭제합니다)<br>수집하는 정보 : ip, url, id<br><br><a href='/signup'>돌아가기</a>"
+                         "이 오류를 수정하고, 개인을 식별하기 위해 모든 사용자의 연결을 기록하는데에 동의합니다." \
+                         " 이 기록은 오류가 발생하지 않는 한 열어보지 않고, 1주일마다 삭제합니다(보통은 더 자주 삭제합니다)<br>" \
+                         "수집하는 정보 : ip, url, id<br><br><a href='/signup'>돌아가기</a>"
 
 
 # 로그아웃
@@ -484,7 +501,6 @@ def pages_(index_num):
                            )
 
 
-# TODO : 보안 취약
 # 글 쓰기
 @app.route("/board/new", methods=['POST', 'GET'])
 def new():
@@ -501,9 +517,7 @@ def new():
     ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     client = MongoClient("mongodb://localhost:27017/")
     posts = client.sol.posts
-    content = str(request.form.get('content'))
-    if "<br>" not in content:
-        content = content.replace("\n", "<br>")
+    content = str(request.form.get('content')).replace("\n", "<br>")
 
     next_id = posts.find().sort('_id', -1)[0]["url"] + 1
 
@@ -649,10 +663,8 @@ def edit_profile():
 
 
 # 남의 프로필 보기
-@app.route("/profile")
-@app.route("/profile/")
 @app.route("/profile/<id_>")
-def other_profile(id_="관리자"):
+def other_profile(id_):
     client = MongoClient("mongodb://localhost:27017/")
     users = client.sol.users
     data = users.find({"id": id_})
@@ -779,7 +791,8 @@ def quiz_index():
 @app.route("/quiz/answer")
 def quiz_answer():
     try:
-        int(request.args.get("qno"))
+        if int(request.args.get("qno")) == 0:
+            return mobile_meta + "문제 URL이 잘못되었습니다."
 
     except TypeError:
         return "문제 URL이 잘못되었습니다."
@@ -794,7 +807,7 @@ def quiz_answer():
         client.close()
         return mobile_meta + "문제 URL이 잘못되었습니다."
 
-    if session['userid'] == quiz["name"]:
+    if session['userid'] == quiz["name"] or session['userid'] == "admin":
         return render_template("quiz/answer.html", q=quiz, answers=answers, length=len(answers))
     else:
         flash("로그인이 필요합니다")
@@ -806,7 +819,8 @@ def quiz_answer():
 def quiz_question():
     if request.method == "GET":
         try:
-            int(request.args.get("qno"))
+            if int(request.args.get("qno")) == 0:
+                return mobile_meta + "문제 URL이 잘못되었습니다."
 
         except TypeError:
             return mobile_meta + "문제 URL이 잘못되었습니다."
@@ -852,7 +866,10 @@ def quiz_question():
             flash("정답입니다!")
 
         else:
-            flash("안타깝게도 오답입니다!")
+            if quiz["type"] == "1":
+                flash("안타깝게도 오답입니다! 정답은 %s번 입니다!" % quiz["answer"])
+            else:
+                flash("안타깝게도 오답입니다! 정답은 %s 입니다!" % quiz["answer"])
 
         return render_template("quiz/question.html", q=quiz, name=session['name'], close=True)
 
@@ -861,25 +878,55 @@ def quiz_question():
 @app.route("/quiz/list")
 def quiz_list():
     client = MongoClient("mongodb://localhost:27017/")
-    given_quiz_list = list(client.sol.quiz.find({"name": session["userid"]}))
+    if session["userid"] == "admin":
+        given_quiz_list = list(client.sol.quiz.find())
+    else:
+        given_quiz_list = list(client.sol.quiz.find({"name": session["userid"]}))
     client.close()
-    return render_template("quiz/list.html", l=given_quiz_list, length=len(quiz_list), name=session['userid'])
+    return render_template("quiz/list.html", l=given_quiz_list, length=len(given_quiz_list), name=session['userid'])
 
 
-@app.route("/.well-known/pki-validation/93A7C349AA1DACEFF36A20D7F3EB6AC4.txt")
-def https_request():
-    return send_file("https.txt")
+# 퀴즈 삭제(admin 만 가능)
+@app.route("/quiz/del")
+def quiz_del():
+    if session["userid"] == "admin":
+        try:
+            if int(request.args.get("qno")) == 0:
+                return mobile_meta + "문제 URL이 잘못되었습니다."
 
-# 404 처리
-@app.route("/err/404")
-@app.errorhandler(404)
-def _page_not_found(e=404):
-    return "존재하지 않는 페이지입니다. <br>오류 코드 : " + str(e)
+        except TypeError:
+            return mobile_meta + "문제 URL이 잘못되었습니다."
 
+        client = MongoClient("mongodb://localhost:27017/")
+        quizdb = client.sol.quiz
+        quiz_answerdb = client.sol.quiz_answer
+        target = {"id": int(request.args.get("qno"))}
+        length = len(list(quiz_answerdb.find(target)))
+
+        if len(list(quizdb.find(target))) == 0:
+            flash("대상이 없습니다.")
+            return redirect("/")
+
+        quizdb.remove(target)
+        quiz_answerdb.remove(target)
+        flash("성공했습니다 : 1개의 퀴즈, %d개의 응답을 삭제함." % length)
+        return redirect("/")
+
+    else:
+        flash("삭제는 관리자에게 문의하세요(db 꼬임 방지)")
+        return redirect("/")
 
 Log = Log()
-# RUN SERVER
-Log.log("server started!!")
-app.run(host='0.0.0.0', port=5000, debug=is_debug)
+
+if is_debug:
+    Log.log("server restarted")
+    app.run(host='127.0.0.1', port=5000, debug=True)
+
+else:
+    app.run(host="0.0.0.0", port=5000, debug=False)
+
+
+# SERVER CLOSED
 pickle.dump(ips, open("ips.bin", "wb"))
 pickle.dump(hist, open("hist.bin", "wb"))
+print("saved")

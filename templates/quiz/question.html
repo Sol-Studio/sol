@@ -8,137 +8,100 @@
 		<noscript><link rel="stylesheet" href="/static/quiz/noscript.css" /></noscript>
 	</head>
 	<body class="is-preload">
-
-		<!-- Wrapper -->
-			<div id="wrapper" class="divided">
-
-				<!-- Additional Elements -->
-					<section class="wrapper style1 align-center">
-						<div class="inner">
-							<div class="index align-left">
-								<h2><img src="/static/quiz/logo_ebs.png" width="228" /></h2>
-
-								<!-- Table -->
-									<section>
-										<div class="content">
-											<h2>Quiz</h2>
-											<p>{{ name }} 님 아래 퀴즈를 풀어주세요. </p>
-                                        {% if q["type"] == '0' %}
-											<h4>[O/X퀴즈] {{ q["q"] }}</h4>
-											<form method="post" action="#">
-												<div class="fields">
-                                                    <div class="field half" id="answer-o_field">
-                                                        <input type="radio" id="answer-o" name="answer_is" value="O">
-                                                        <label for="answer-o">O(예)</label>
-                                                    </div>
-                                                    <div class="field half" id="answer-x_field">
-                                                        <input type="radio" id="answer-x" name="answer_is" value="X">
-                                                        <label for="answer-x">X(아니요)</label>
-                                                    </div>
-												</div>
-                                        {% elif q["type"] == '1' %}
-                                            <h4>[5지선다형]</h4>
-                                            <form method="post" action="#">
-                                                <table>
-                                                    <thead>
-                                                        <tr>
-                                                            <th>보기</th>
-                                                            <th>선택</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {% for idx in range(5) %}
-                                                            <tr>
-                                                                <td>{{ q["look"][idx] }}</td>
-                                                                <td>
-                                                                    <div class="field penta" id="answer_{{ idx + 1 }}_is_field">
-														                <input type="radio" id="answer_{{ idx + 1 }}_is" name="answer_is" value="{{ idx + 1 }}">
-														                <label for="answer_{{ idx + 1 }}_is">지문{{ idx + 1 }}</label>
-													                </div>
-                                                                </td>
-                                                            </tr>
-                                                        {% endfor %}
-                                                    </tbody>
-                                                </table>
-                                        {% elif q["type"] == '2' %}
-                                            <h4>[단답형]</h4>
-                                            <form method="post" action="#">
-												<div class="fields">
-													<div class="field" id="answer_field">
-														<label for="answer">답을 입력하세요</label>
-														<input type="text" name="answer_is" id="answer" value="">
-													</div>
-												</div>
-
-                                        {% endif %}
-											<br>
-                                            <h4>이름을 입력해주세요</h4>
-                                            <textarea name="name">{{ name }}</textarea>
-											<ul class="actions">
-													<li><input type="submit" class="button primary icon solid fa-pen"></li>
-													<li><a href="#" name="close" id="close" class="button icon solid fa-times">창닫기</a></li>
-											</ul>
-                                        </form>
+        <div id="wrapper" class="divided">
+            <section class="wrapper style1 align-center">
+                <div class="inner">
+                    <div class="index align-left">
+                        <h2><a href="/quiz/question?qno={{ q['id'] }}"><img src="/static/quiz/logo_ebs.png" width="228" /></a></h2>
+                        <section>
+                            <div class="content">
+                                <h2>Quiz</h2>
+                                <p>{{ name }} 님 아래 퀴즈를 풀어주세요. </p>
+                                <form method="post" action="#">
+                                {% if q["type"] == '0' %}
 
 
-										</div>
-									</section>
-							</div>
-						</div>
-					</section>
-			</div>
+                                    <!-- OX 퀴즈 -->
+                                    <h4>[O/X퀴즈] {{ q["q"] }}</h4>
+                                    <div class="fields">
+                                        <div class="field half" id="answer-o_field">
+                                            <input type="radio" id="answer-o" name="answer_is" value="O">
+                                            <label for="answer-o">O(예)</label>
+                                        </div>
+                                        <div class="field half" id="answer-x_field">
+                                            <input type="radio" id="answer-x" name="answer_is" value="X">
+                                            <label for="answer-x">X(아니요)</label>
+                                        </div>
+                                    </div>
 
-		  <!-- Scripts -->
-			<script src="/static/quiz/jquery.min.js"></script>
-			<script src="/static/quiz/jquery.scrollex.min.js"></script>
-			<script src="/static/quiz/jquery.scrolly.min.js"></script>
-			<script src="/static/quiz/browser.min.js"></script>
-			<script src="/static/quiz/breakpoints.min.js"></script>
-			<script src="/static/quizs/util.js"></script>
-			<script src="/static/quiz/main.js"></script>
-			<script>
 
-	        $(document).ready(function() {
+                                {% elif q["type"] == '1' %}
 
-		    		$('#submit').on('click', function() {
-	            	if(confirm('정답을 제출 하시겠습니까?')){
 
-									$.post("answer_write.php", {
-													student_id:'',
-													qno:,
-											    											    											    											    room_id:''
-									},function(jqXHR) {
+                                    <!-- 5지선다형 퀴즈 -->
+                                    <h4>[5지선다형] {{ q['q'] }}</h4>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>보기</th>
+                                                <th>선택</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for idx in range(5) %}
+                                                <tr>
+                                                    <td>{{ q["look"][idx] }}</td>
+                                                    <td>
+                                                        <div class="field penta" id="answer_{{ idx + 1 }}_is_field">
+                                                            <input type="radio" id="answer_{{ idx + 1 }}_is" name="answer_is" value="{{ idx + 1 }}">
+                                                            <label for="answer_{{ idx + 1 }}_is">지문{{ idx + 1 }}</label>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
 
-									},'text' /* xml, text, script, html */)
-									.done(function(jqXHR) {
 
-									    if(jqXHR=='1') alert('정답!입니다. 참잘했어요.');
-									    else alert('안타깝게 틀렸어요.');
+                                {% elif q["type"] == '2' %}
 
-									    if(confirm('창을 닫겠습니까?')){
-												window.close(); // 일반적인 현재 창 닫기
-												window.open('about:blank','_self').self.close();  // IE에서 묻지 않고 창 닫기
-				            	}
 
-									})
-									.fail(function(jqXHR) {
-									    alert("답안제출 이상이 생겼습니다. 새로고침 후 다시 해 주세요." );
-									})
-									.always(function(jqXHR) {
+                                    <!-- 단답형 퀴즈 -->
+                                    <h4>[단답형] {{ q['q'] }}</h4>
+                                    <div class="fields">
+                                        <div class="field" id="answer_field">
+                                            <label for="answer">답을 입력하세요</label>
+                                            <input type="text" name="answer_is" id="answer" value="">
+                                        </div>
+                                    </div>
 
-									})
-	            	}
-		        });
 
-		        $('#close').on('click', function() {
-	            	if(confirm('창을 닫겠습니까?')){
-										window.close(); // 일반적인 현재 창 닫기
-										window.open('about:blank','_self').self.close();  // IE에서 묻지 않고 창 닫기
-	            	}
-	          });
+                                {% endif %}
 
-	        });
-	    </script>
+
+                                    <br>
+                                    <h4>이름을 입력해주세요</h4>
+                                    <textarea name="name">{{ name }}</textarea>
+                                    <ul class="actions">
+                                        <li><input type="submit" class="button primary icon solid fa-pen"></li>
+                                        <li><a href="#" name="close" id="close" class="button icon solid fa-times">창닫기</a></li>
+                                    </ul>
+                                </form>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <script src="/static/quiz/jquery.min.js"></script>
+        <script src="/static/quiz/jquery.scrollex.min.js"></script>
+        <script src="/static/quiz/jquery.scrolly.min.js"></script>
+        <script src="/static/quiz/browser.min.js"></script>
+        <script src="/static/quiz/breakpoints.min.js"></script>
+        <script src="/static/quizs/util.js"></script>
+        <script src="/static/quiz/main.js"></script>
+
 
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -150,15 +113,15 @@
         {% endif %}
         {% endwith %}
         {% block body %}{% endblock %}
-    {% if close %}
-        <script>
-            self.close();
-        </script>
-    {% endif %}
+        {% if close %}
+            <script>
+                self.close();
+            </script>
+        {% endif %}
         <footer>
-        <center>
-            by 최유찬
-        </center>
-    </footer>
+            <center>
+                by 최유찬
+            </center>
+        </footer>
 	</body>
 </html>

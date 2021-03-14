@@ -1,69 +1,65 @@
 <!DOCTYPE HTML>
 <html lang="ko">
-	<head>
-		<title>EBS온라인클래스(Quiz)</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="/static/quiz/main.css" />
-		<noscript><link rel="stylesheet" href="/static/quiz/noscript.css" /></noscript>
-	</head>
-	<body class="is-preload">
-
-		<!-- Wrapper -->
-			<div id="wrapper" class="divided">
-
-				<!-- Additional Elements -->
-					<section class="wrapper style1 align-center">
-						<div class="inner">
-							<div class="index align-left">
-								<h2><img src="/static/quiz/logo_ebs.png" width="228" /></h2>
-
-								<!-- Table -->
-									<section>
-										<div class="content">
-
-											<h4>{{ name }}님께서 최근출제한 퀴즈({{ length }}개)</h4>
-											<div class="table-wrapper">
-												<table>
-													<thead>
-														<tr>
-															<th>#</th>
-															<th>퀴즈타입</th>
-															<th>퀴즈문제</th>
-															<th>등록일시</th>
-														</tr>
-													</thead>
-													<tbody>
-                                                    {% for idx in range(length) %}
-                                                        <tr style = "cursor:pointer;" onclick="window.location = '/quiz/answer?qno={{ l[idx]['id'] }}'">
-                                                          <td>{{ idx + 1 }}</td>
-                                                          <td>{{ l[idx]['type'] }}</td>
-                                                          <td>{{ l[idx]['q'] }}</td>
-                                                          <td>{{ l[idx]['time'] }}</td>
-                                                        </tr>
-                                                    {% endfor %}
-													</tbody>
-												</table>
-											</div>
-
-										</div>
-									</section>
+    <head>
+        <title>EBS온라인클래스(Quiz)</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="/static/quiz/main.css" />
+        <noscript><link rel="stylesheet" href="/static/quiz/noscript.css" /></noscript>
+    </head>
+    <body class="is-preload">
+		<div id="wrapper" class="divided">
+			<section class="wrapper style1 align-center">
+				<div class="inner">
+					<div class="index align-left">
+						<h2><a href="/quiz/list"><img src="/static/quiz/logo_ebs.png" width="228" /></a></h2>
+						<section>
+							<div class="content">
+								{% if name == "admin" %}
+								<h4>{{ length }}개의 모든 퀴즈(관리자)</h4>
+								{% else %}
+								<h4>{{ name }}님께서 최근출제한 퀴즈({{ length }}개)</h4>
+								{% endif %}
+								<div class="table-wrapper">
+									<table>
+										<thead>
+											<tr>
+												<th>#</th>
+												<th>퀴즈타입</th>
+												<th>퀴즈문제</th>
+												<th>등록일시</th>
+												{% if name == "admin" %}
+													<th>(관리자) 삭제</th>
+												{% endif %}
+											</tr>
+										</thead>
+										<tbody>
+										{% for idx in range(length) %}
+											<tr style = "cursor:pointer;" onclick="window.location = '/quiz/answer?qno={{ l[idx]['id'] }}'">
+												<td>{{ idx + 1 }}</td>
+												<td>{{ l[idx]['type'] }}</td>
+												<td>{{ l[idx]['q'] }}</td>
+												<td>{{ l[idx]['time'] }}</td>
+												{% if name == "admin" %}
+													<th><a href="/quiz/del?qno={{ l[idx]['id'] }}">삭제</a></th>
+												{% endif %}
+											</tr>
+										{% endfor %}
+										</tbody>
+									</table>
+								</div>
 							</div>
-						</div>
-					</section>
-			</div>
-
-		<!-- Scripts -->
-			<script src="/static/quiz/jquery.min.js"></script>
-			<script src="/static/quiz/jquery.scrollex.min.js"></script>
-			<script src="/static/quiz/jquery.scrolly.min.js"></script>
-			<script src="/static/quiz/browser.min.js"></script>
-			<script src="/static/quiz/breakpoints.min.js"></script>
-			<script src="/static/quiz/util.js"></script>
-			<script src="/static/quiz/main.js"></script>
-
-		<!-- Note: Only needed for demo purposes. Delete for production sites. -->
-			<!--script src="assets/js/demo.js"></script-->
-
-	</body>
+						</section>
+					</div>
+				</div>
+			</section>
+		</div>
+		<script src="/static/quiz/jquery.min.js"></script>
+		<script src="/static/quiz/jquery.scrollex.min.js"></script>
+		<script src="/static/quiz/jquery.scrolly.min.js"></script>
+		<script src="/static/quiz/browser.min.js"></script>
+		<script src="/static/quiz/breakpoints.min.js"></script>
+		<script src="/static/quiz/util.js"></script>
+		<script src="/static/quiz/main.js"></script>
+    </body>
 </html>

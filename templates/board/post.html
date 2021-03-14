@@ -22,7 +22,7 @@
 <h5 style="margin-top: -2%;">TIME  : {{ post['time'] }}</h5><br>
 <h5 style="margin-top: -2%;">ID    : {{ post['url'] }}</h5>
 <div class="content">
-        {{ post['content'] | safe}}
+        {{ post['content'] }}
 </div>
 <a href="/board/list/{{ page }}/{{ post['url'] }}/delete">삭제</a>
 {% with messages = get_flashed_messages() %}

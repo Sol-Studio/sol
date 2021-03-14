@@ -7,8 +7,8 @@
   <body>
     {% if logined %}
       <h2>{{ logined }}님 안녕하세요</h2>
-      <ul style="list-style: none;margin-left:-30px">
-          <li><a href="/quiz" style="font-size: xx-large">EBS 퀴즈</a></li>
+      <ul style="list-style: none;margin-left:-1%">
+        <li><a href="/quiz" style="font-size: xx-large">EBS 퀴즈 출제하기</a></li>
         <li><a href="/board">게시판 가기</a></li>
         <li><a href="/ai">ai(테스트서버에서만 실행 가능)</a></li>
         <li><a href="/my-profile">내 프로필</a></li>
@@ -18,15 +18,15 @@
     {% else %}
       <h2><a href="/login">로그인이 필요합니다</a></h2>
     {% endif %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <script>
+      {% for message in messages %}
+        alert('{{ message }}');
+      {% endfor %}
+    </script>
+    {% endif %}
+    {% endwith %}
+    {% block body %}{% endblock %}
   </body>
 </html>
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<script>
-  {% for message in messages %}
-    alert('{{ message }}');
-  {% endfor %}
-</script>
-{% endif %}
-{% endwith %}
-{% block body %}{% endblock %}

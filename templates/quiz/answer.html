@@ -8,163 +8,130 @@
 		<noscript><link rel="stylesheet" href="/static/quiz/noscript.css" /></noscript>
 	</head>
 	<body class="is-preload">
+		<div id="wrapper" class="divided">
+			<section class="wrapper style1 align-center">
+				<div class="inner">
+					<div class="index align-left">
+						<h2><a href="/quiz/answer?qno={{ q['id'] }}"><img src="/static/quiz/logo_ebs.png" width="228" /></a></h2>
+							<section>
+								<div class="content">
+									<p>
+										퀴즈가 성공적으로 생성되었습니다. 아래 주소를 화상수업 채팅창에 넣어주시고.<br/>
+										아래 '학생퀴즈풀이현황'에서 학생들의 퀴즈 답안제출 현황을 확인하실 수 있습니다.<br/>
+										<input type="text" id="urlcopy" value="http://sol-studio.tk:5000/quiz/question?qno={{ q["id"] }}" readonly />
+									</p>
+									<ul class="actions">
+											<li><a href="#" name="copy" id="copy" class="button primary large icon solid fa-clone">주소복사하기</a></li>
+									</ul>
+									<h3>Quiz</h3><h4> {{ q["q"] }}</h4>
+									<div class="table-wrapper">
+										{% if q["type"] == "0" %}
+											<table>
+												<thead>
+													<tr>
+														<th>보기</th>
+														<th>정답 여부</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td>O</td>
+														<td>{% if q["answer"] == "O" %}O{% endif %}</td>
+													</tr>
+													<tr>
+														<td>X</td>
+														<td>{% if q["answer"] == "X" %}O{% endif %}</td>
+													</tr>
+												</tbody>
+											</table>
+										{% elif q["type"] == "1" %}
+										<table>
+											<thead>
+												<tr>
+													<th>보기</th>
+													<th>정답 여부</th>
+												</tr>
+											</thead>
+											<tbody>
+												{% for idx in range(5) %}
+													<tr>
+														<td>{{ q["look"][idx] }}</td>
+														<td>{% if q["answer"] == (idx + 1) | string %}O{% endif %}</td>
+													</tr>
+												{% endfor %}
+											</tbody>
+										</table>
+										{% elif q["type"] == "2" %}
+											<table>
+												<thead>
+													<tr>
+														<th>단답형 답</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td>{{ q["answer"] }}</td>
+													</tr>
+												</tbody>
+											</table>
+										{% endif %}
+									<p></p>
+									<ul class="actions">
+											<li><a onclick="location.reload()" name="refresh" id="refresh" class="button primary icon solid fa-sync">새로고침</a></li>
+											<li><a href="/quiz/list " name="list" id="list" class="button icon solid fa-book">목록으로</a></li>
+									</ul>
+									<h4>학생퀴즈풀이현황 : {{ length }}명 제출함</h4>
+										<p>새로고침버튼을 누르시면 실시간으로 학생들의 문제풀이 현황을 보실 수 있습니다.</p><a name="reload"></a>
+									<div class="table-wrapper" id="result">
+										<table>
+											<thead>
+												<tr>
+													<th>학생</th>
+													<th>제출답안</th>
+													<th>정답여부</th>
+													<th>제출시간</th>
+												</tr>
+											</thead>
+											<tbody>
+												{% for idx in range(length) %}
+													<tr>
+														<td>{{ answers[idx]["name"] }}</td>
+														<td>{{ answers[idx]["answer"] }}</td>
+														<td>{% if answers[idx]["answer"] == q["answer"] %}O{% else %}X{% endif %}</td>
+														<td>{{ answers[idx]["time"] }}</td>
+													</tr>
+												{% endfor %}
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</section>
+					</div>
+				</div>
+			</section>
+		</div>
 
-		<!-- Wrapper -->
-			<div id="wrapper" class="divided">
-
-				<!-- Additional Elements -->
-					<section class="wrapper style1 align-center">
-						<div class="inner">
-							<div class="index align-left">
-								<h2><img src="/static/quiz/logo_ebs.png" width="228" /></h2>
-
-								<!-- Table -->
-									<section>
-										<div class="content">
-
-
-											<p>
-												퀴즈가 성공적으로 생성되었습니다. 아래 주소를 화상수업 채팅창에 넣어주시고.<br/>
-												아래 '학생퀴즈풀이현황'에서 학생들의 퀴즈 답안제출 현황을 확인하실 수 있습니다.<br/>
-												<input type="text" id="urlcopy" value="http://sol-studio.tk:5000/quiz/question?qno={{ q["id"] }}" readonly />
-											</p>
-
-											<ul class="actions">
-													<li><a href="#" name="copy" id="copy" class="button primary large icon solid fa-clone">주소복사하기</a></li>
-											</ul>
-
-                                            <h3>Quiz</h3><h4> {{ q["q"] }}</h4>
-											<div class="table-wrapper">
-
-                                                {% if q["type"] == "0" %}
-                                                    <table>
-                                                        <thead>
-                                                            <tr>
-                                                                <th>보기</th>
-                                                                <th>정답 여부</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td>O</td>
-                                                                <td>{% if q["answer"] == "O" %}O{% endif %}</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>X</td>
-                                                                <td>{% if q["answer"] == "X" %}O{% endif %}</td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                {% elif q["type"] == "1" %}
-                                                <table>
-                                                    <thead>
-                                                        <tr>
-                                                            <th>보기</th>
-                                                            <th>정답 여부</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {% for idx in range(5) %}
-                                                            <tr>
-                                                                <td>{{ q["look"][idx] }}</td>
-                                                                <td>{% if q["answer"] == (idx + 1) | string %}O{% endif %}</td>
-                                                            </tr>
-                                                        {% endfor %}
-                                                    </tbody>
-                                                </table>
-                                                {% elif q["type"] == "2" %}
-                                                    <table>
-                                                        <thead>
-                                                            <tr>
-                                                                <th>단답형 답</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td>{{ q["answer"] }}</td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                {% endif %}
-																																															<p></p>
-											<ul class="actions">
-													<li><a onclick="window.location = '/quiz/answer?qno={{ q["id"] }}'" name="refresh" id="refresh" class="button primary icon solid fa-sync">새로고침</a></li>
-													<li><a href="/quiz/list " name="list" id="list" class="button icon solid fa-book">목록으로</a></li>
-											</ul>
-											<h4>학생퀴즈풀이현황 : {{ length }}명 제출함</h4>
-                                                <p>새로고침버튼을 누르시면 실시간으로 학생들의 문제풀이 현황을 보실 수 있습니다.</p><a name="reload"></a>
-											<div class="table-wrapper" id="result">
-												<table>
-													<thead>
-														<tr>
-															<th>학생</th>
-															<th>제출답안</th>
-															<th>정답여부</th>
-															<th>제출시간</th>
-														</tr>
-													</thead>
-													<tbody>
-                                                        {% for idx in range(length) %}
-                                                            <tr>
-                                                                <td>{{ answers[idx]["name"] }}</td>
-                                                                <td>{{ answers[idx]["answer"] }}</td>
-                                                                <td>{% if answers[idx]["answer"] == q["answer"] %}O{% else %}X{% endif %}</td>
-                                                                <td>{{ answers[idx]["time"] }}</td>
-                                                            </tr>
-                                                        {% endfor %}
-
-													</tbody>
-												</table>
-											</div>
-
-										</div>
-									</section>
-							</div>
-						</div>
-					</section>
-			</div>
-
-		<!-- Scripts -->
-			<script src="/static/quiz/jquery.min.js"></script>
-			<script src="/static/quiz/jquery.scrollex.min.js"></script>
-			<script src="/static/quiz/jquery.scrolly.min.js"></script>
-			<script src="/static/quiz/browser.min.js"></script>
-			<script src="/static/quiz/breakpoints.min.js"></script>
-			<script src="/static/quiz/util.js"></script>
-			<script src="/static/quiz/main.js"></script>
-			<script>
-
+		<script src="/static/quiz/jquery.min.js"></script>
+		<script src="/static/quiz/jquery.scrollex.min.js"></script>
+		<script src="/static/quiz/jquery.scrolly.min.js"></script>
+		<script src="/static/quiz/browser.min.js"></script>
+		<script src="/static/quiz/breakpoints.min.js"></script>
+		<script src="/static/quiz/util.js"></script>
+		<script src="/static/quiz/main.js"></script>
+		<script>
 	        $(document).ready(function() {
-
 		    		$('#list').on('click', function() {
 		            	if(confirm('목록으로 이동하시겠습니까?')){
-										var url = "http://ebsclass.net/list.php?roomid=";
-										$(location).attr('href',url);
+							var url = "http://ebsclass.net/list.php?roomid=";
+							$(location).attr('href',url);
 		            	}
-		        });
-
-		        /*
-		        $('#refresh').on('click', function() {
-
-								var url = $(location).attr('href');
-								$(location).attr('href',url);
-
-		        });
-		        */
+					});
 
 		        $('#copy').on('click', function() {
-
-								var copyText = document.getElementById("urlcopy");
-								/* Select the text field */
-							  copyText.select();
-							  //copyText.setSelectionRange(0, 99999); /* For mobile devices */
-
-							  /* Copy the text inside the text field */
-							  document.execCommand("copy");
-
-							  /* Alert the copied text */
-							  alert("주소가 성공적으로 복사되었습니다.\n화상수업채팅창에 붙여넣기로 학생들에게 전달하실 수 있습니다.\n(" + copyText.value + ")");
-
+					var copyText = document.getElementById("urlcopy");
+					copyText.select();
+					document.execCommand("copy");
+					alert("주소가 성공적으로 복사되었습니다.\n화상수업채팅창에 붙여넣기로 학생들에게 전달하실 수 있습니다.\n(" + copyText.value + ")");
 		        });
 	        });
 	    </script>
