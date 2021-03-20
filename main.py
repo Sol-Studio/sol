@@ -151,7 +151,7 @@ def color(string, start_color=Colors.RESET):
 
 # MANAGE 페이지에서 쓰임
 def time_passed(last_time):
-    sec_, min_, hour_, day = time.time() - last_time, 0, 0, 0
+    sec_, min_, hour_, day_ = time.time() - last_time, 0, 0, 0
 
     if sec_ > 60:
         min_ = sec_ // 60
