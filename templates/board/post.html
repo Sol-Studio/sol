@@ -20,7 +20,10 @@
 <br>
 <h5 style="margin-top: -2%;">글쓴이 : {{ post['author'] }}</h5><br>
 <h5 style="margin-top: -2%;">TIME  : {{ post['time'] }}</h5><br>
-<h5 style="margin-top: -2%;">ID    : {{ post['url'] }}</h5>
+<h5 style="margin-top: -2%;">ID    : {{ post['url'] }}</h5><br>
+{% if id == "admin" %}
+<h5 style="margin-top: -2%;">IP    : {{ post['ip'] }}</h5>
+{% endif %}
 <div class="content">
         {{ post['content'] }}
 </div>

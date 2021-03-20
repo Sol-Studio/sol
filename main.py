@@ -572,7 +572,7 @@ def post(idx, id_):
     data = posts.find({"url": int(id_)})
     client.close()
     try:
-        return render_template("board/post.html", post=data[0], page=int(idx))
+        return render_template("board/post.html", post=data[0], page=int(idx), id=session["userid"])
     except KeyError:
         return redirect("/err/404")
 
