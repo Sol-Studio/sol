@@ -50,10 +50,6 @@ try:
 except FileNotFoundError:
     ips = {}
 
-try:
-    hist = pickle.load(open("hist.bin", "rb"))
-except FileNotFoundError:
-    hist = {}
 
 black_list = []
 
@@ -240,17 +236,16 @@ def before_all_connect_():
             "id": session["userid"],
             "action": ips[ip]["action"] + 1
         }
-    if ip not in hist.keys():
-        hist[ip] = {
-            time.time(): request.full_path
-        }
-    else:
-        hist[ip][time.time()] = request.full_path
+    if os.path.isfile("hist/%s.bin" % ip):
+        hist = pickle.load(open("hist/%s.bin" % ip, "rb"))
+        hist = {time.time(): request.full_path}
 
+    else:
+        hist = {time.time(): request.full_path}
+    pickle.dump(hist, open("hist/%s.bin" % ip, "wb"))
     connect_count += 1
     if connect_count == config["save_point"]:
         pickle.dump(ips, open("ips.bin", "wb"))
-        pickle.dump(hist, open("hist.bin", "wb"))
         connect_count = 0
 
     # ip와 접근 url 출력
@@ -298,7 +293,7 @@ def manage():
             # 로그 삭제
             if cmd[0] == "del":
                 del ips[cmd[1]]
-                del hist[cmd[1]]
+                os.remove("hist/%s.bin" % cmd[1])
                 flash("완료")
 
             # 블랙리스트
@@ -320,7 +315,6 @@ def manage():
                     mongodb_test(cmd[2])
                     flash("완료")
             pickle.dump(ips, open("ips.bin", "wb"))
-            pickle.dump(hist, open("hist.bin", "wb"))
 
             return redirect("/manage")
 
@@ -341,7 +335,7 @@ def manage_ip(ip):
         # 로그 삭제
         if cmd == "del":
             del ips[ip]
-            del hist[ip]
+            os.remove("hist/%s.bin" % ip)
             flash("완료")
             return redirect("/manage")
 
@@ -359,14 +353,14 @@ def manage_ip(ip):
                 flash("블랙리스트에 없습니다")
 
         pickle.dump(ips, open("ips.bin", "wb"))
-        pickle.dump(hist, open("hist.bin", "wb"))
 
-    if ip not in hist.keys():
+    if not os.path.isfile("hist/%s.bin" % ip):
         flash("방문 기록이 없습니다.")
         return redirect("/manage")
     return_dict = {}
-    for key in hist[ip].keys():
-        return_dict[time_passed(key)] = hist[ip][key]
+    hist = pickle.load(open("hist/%s.bin" % ip, "rb"))
+    for key in hist.keys():
+        return_dict[time_passed(key)] = hist[key]
 
     return render_template("manage/hist_manage.html", hist=return_dict, keys=reversed(list(return_dict.keys())),
                            blacklist=black_list, ip=ip)
@@ -962,17 +956,21 @@ def send_message():
         abort(404)
 
 
+@app.route("/<redirect>", subdomain="s")
+def shortcut():
+    return ""
+
+
 Log = Log()
 messages = {}
 if is_debug:
     Log.log("server restarted")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)
 
 else:
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host="0.0.0.0", port=80, debug=False)
 
 
 # SERVER CLOSED
 pickle.dump(ips, open("ips.bin", "wb"))
-pickle.dump(hist, open("hist.bin", "wb"))
 print("saved")
