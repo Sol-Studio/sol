@@ -165,7 +165,7 @@ def time_passed(last_time):
                 day_ = hour_ // 24
                 hour_ -= day_ * 24
 
-    return "%d일 %d시간 %d분 %f초" % (day, hour_, min_, sec_)
+    return "%d일 %d시간 %d분 %f초" % (day_, hour_, min_, sec_)
 
 
 def manage_helper(data):
