@@ -1,0 +1,14 @@
+<form method="get">
+    내용 : <input type="text" name="m">
+    <input name="target" type="hidden" value="{{ ip }}">
+</form>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <script>
+      {% for message in messages %}
+        alert('{{ message }}');
+      {% endfor %}
+    </script>
+    {% endif %}
+    {% endwith %}
+    {% block body %}{% endblock %}

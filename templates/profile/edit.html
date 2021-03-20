@@ -6,7 +6,7 @@
     <body>
         <form method="post" action="/my-profile-edit" id="formByte" name="formByte">
         <script type="text/javascript">
-            // 이 코드를 수정해서 글자수를 초과할 경우, 예고없이 삭제되고, 아이피밴 될 수 있습니다.
+            // 이 코드를 수정해서 글자수를 초과할 경우, 예고없이 삭제되고, 차단 될 수 있습니다.
             $(document).ready(function() {
               // 상태메시지
               var ec = document.getElementsByClassName('status-info');
@@ -26,7 +26,6 @@
                     <tr>
                         <td></td>
                         <td></td>
-                        <td></td>
                     </tr>
     
                 </thead>
@@ -37,13 +36,15 @@
                                 <textarea name="status_message" cols=100 rows=1 id="byteInfo">{{ profile["status_message"] }}</textarea><br>
                                 <div class="status-info">0 / 60 (글자)</div>
                         </td>
-                        <td></td>
                     </tr>
                     <tr>
                         <td>현재 아이피</td>
                         <td>{{ ip }}</td>
-                        <td></td>
                     </tr>
+                <tr>
+                    <td>비밀번호</td>
+                    <td><a href="/change-pw">변경</a></td>
+                </tr>
                 </tbody>
             </table>
             <input type="submit">
@@ -51,3 +52,13 @@
     </form>
     </body>
 </html>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <script>
+      {% for message in messages %}
+        alert('{{ message }}');
+      {% endfor %}
+    </script>
+    {% endif %}
+    {% endwith %}
+    {% block body %}{% endblock %}

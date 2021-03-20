@@ -72,7 +72,8 @@ IgnoreConnect = [
     "/config",
     "/favicon.ico?",
     "/ai/wait/",
-    "/manage"
+    "/manage",
+    "/send-message"
 ]
 
 mobile_meta = '<meta name=\'viewport\' content=\'width=device-width, initial-scale=1, user-scalable=no\' />'
@@ -254,6 +255,14 @@ def before_all_connect_():
 
     # ip와 접근 url 출력
     print(ip, request.full_path)
+
+    # 메시지 flash
+    if ip in messages.keys():
+        if messages[ip]:
+            for m in messages[ip]:
+                flash(m)
+        del messages[ip]
+
     # 블랙리스트면 403 띄우기
     if ip in black_list:
         abort(403)
@@ -317,7 +326,7 @@ def manage():
 
         return_dict = manage_helper(ips)
 
-        return render_template("manage.html", ips=return_dict, keys=return_dict.keys(), blacklist=black_list)
+        return render_template("manage/manage.html", ips=return_dict, keys=return_dict.keys(), blacklist=black_list)
     else:
         abort(403)
         black_list.append(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
@@ -359,7 +368,7 @@ def manage_ip(ip):
     for key in hist[ip].keys():
         return_dict[time_passed(key)] = hist[ip][key]
 
-    return render_template("hist_manage.html", hist=return_dict, keys=reversed(list(return_dict.keys())),
+    return render_template("manage/hist_manage.html", hist=return_dict, keys=reversed(list(return_dict.keys())),
                            blacklist=black_list, ip=ip)
 
 
@@ -473,6 +482,20 @@ def logout():
         return redirect("/")
     else:
         return redirect("/login")
+
+
+@app.route("/change-pw", methods=["POST", "GET"])
+def change_pw():
+    if request.method == "POST":
+        client = MongoClient("mongodb://localhost:27017/")
+        db = client.sol.users
+        profile = db.find({"id": session["userid"]})[0]
+        if profile["pw"] == request.form.get("last_pw"):
+            profile.update({"pw": request.form.get("new_pw")})
+            flash("완료")
+            return redirect("/my-profile")
+    else:
+        return render_template("profile/change-pw.html")
 
 
 # 페이지가 지정 안됐을 때 redirect
@@ -653,7 +676,7 @@ def edit_profile():
         for d in data:
             profile_data[str(i)] = d
 
-        return render_template("profile/edit.html", profile=profile_data["0"])
+        return render_template("profile/edit.html", profile=profile_data["0"], ip=request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
     elif request.method == "POST":
         status_message = request.form.get('status_message')
         print(status_message)
@@ -734,7 +757,7 @@ def redirect_page():
     return redirect(request.args.get('url'))
 
 
-# 퀴즈 출제
+# 퀴즈 출제(로그인된 사람만)
 @app.route("/quiz", methods=["GET", "POST"])
 def quiz_index():
     if request.method == "POST":
@@ -790,7 +813,7 @@ def quiz_index():
             return redirect("/quiz?type=0")
 
 
-# 퀴즈 출제자 페이지
+# 퀴즈 출제자 페이지(admin 은 다 보임)
 @app.route("/quiz/answer")
 def quiz_answer():
     try:
@@ -877,7 +900,7 @@ def quiz_question():
         return render_template("quiz/question.html", q=quiz, name=session['name'], close=True)
 
 
-# 출제한 퀴즈 목록
+# 출제한 퀴즈 목록(admin 은 다 보임)
 @app.route("/quiz/list")
 def quiz_list():
     client = MongoClient("mongodb://localhost:27017/")
@@ -919,8 +942,28 @@ def quiz_del():
         flash("삭제는 관리자에게 문의하세요(db 꼬임 방지)")
         return redirect("/")
 
-Log = Log()
 
+# 메시지 보내기(admin 만 가능)
+@app.route("/send-message")
+def send_message():
+    if session["userid"] == "admin":
+        if request.args.get("m"):
+            flash("성공")
+
+            if request.args.get("target") in messages.keys():
+                messages[request.args.get("target")].append("관리자의 메시지 : " + request.args.get("m"))
+
+            else:
+                messages[request.args.get("target")] = ["관리자의 메시지 : " + request.args.get("m")]
+
+        return render_template("manage/message.html", ip=request.args.get("target"))
+
+    else:
+        abort(404)
+
+
+Log = Log()
+messages = {}
 if is_debug:
     Log.log("server restarted")
     app.run(host='127.0.0.1', port=5000, debug=True)

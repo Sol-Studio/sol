@@ -1,0 +1,64 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+        <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+    </head>
+    <body>
+        <form method="post" action="/my-profile-edit" id="formByte" name="formByte">
+            <script type="text/javascript">
+                // 이 코드를 수정해서 글자수를 초과할 경우, 예고없이 삭제되고, 차단 될 수 있습니다.
+                $(document).ready(function() {
+                    // 상태메시지
+                    var ec = document.getElementsByClassName('status-info');
+                    $('#byteInfo').on('keyup', function() {
+                        ec[0].innerHTML =$(this).val().length + " / 60 (글자)";
+                        if($(this).val().length > 60) {
+                            $(this).val($(this).val().substring(0, 59));
+                            alert("60글자 이내로 작성해주세요");
+                        }
+                    });
+                });
+            </script>
+            <div class="container">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>현재 비밀번호를 입력하세요</td>
+                            <td><input name="new_pw" type="password"></input></td>
+                        </tr>
+                        <tr>
+                            <td>새로운 비밀번호를 입력하세요</td>
+                            <td>
+                                <input name="last_pw" id="byteInfo" type="password"></input>
+                                <div class="status-info">0 / 60 (글자)</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>새로운 비밀번호를 다시 입력하세요</td>
+                            <td>
+                                <input name="last_pw_again" type="password"></input>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <input type="submit">
+            </div>
+        </form>
+    </body>
+</html>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <script>
+      {% for message in messages %}
+        alert('{{ message }}');
+      {% endfor %}
+    </script>
+    {% endif %}
+    {% endwith %}
+    {% block body %}{% endblock %}

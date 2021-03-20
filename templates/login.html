@@ -7,37 +7,47 @@
         <title>로그인</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
         <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-        <link rel="stylesheet" href="../plugin/bootstrap/css/style.css" media="screen" title="no title" charset="utf-8">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-        <script src="../plugin/bootstrap/js/bootstrap.min.js"></script>
-        <script src="../config/js/login.js"></script>
     </head>
     <body>
         <div class="container">
-            <div class="row">
-                <div class="col-sm-3">
-                    <div class="login-box well">
-                        <form accept-charset="UTF-8" role="form" method="post" action="/login">
-                            <legend>로그인</legend>
-                            한번의 로그인으로 모든 기능을 사용하세요. 10시간동안 아무 활동이 없으면 자동으로 로그아웃됩니다.
-                            <div class="input-group">
-                                <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                {{form.id.label("ID")}}
-                                {{form.id(class="form-control", placeholder="ID")}}
-                            </div>
+            <form accept-charset="UTF-8" role="form" method="post" action="/login">
+                <legend>로그인</legend>
+                한번의 로그인으로 모든 기능을 사용하세요. 10시간동안 아무 활동이 없으면 자동으로 로그아웃됩니다.
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    <label for="form-control">ID</label></div>
+                                    {{form.id(class="form-control", placeholder="ID")}}
+                            </td>
+                        </tr>
+                        <tr><td>
                             <div class="input-group">
                                 <span class="input-group-addon"><i class="fa fa-lock"></i></span>
-                                {{form.pw.label("PASSWORD")}}
+                                <label for="form-control">PASSWORD</label></div>
                                 {{form.pw(class="form-control", placeholder="PASSWORD")}}
-                            </div>
-                            <button type="submit" id="login-submit" class="btn btn-light">로그인</button>
-                            <div class="form-group">
-                                <a href="/signup" class="btn btn-light"> 회원가입</a>
-                            </div>
-                        </form>
-                    </div>
+                        </td></tr>
+                    <tr><td></td></tr>
+                    </tbody>
+                </table>
+
+                <button type="submit" id="login-submit" class="btn btn-light">로그인</button>
+                <div class="form-group">
+                    <a href="/signup" class="btn btn-light"> 회원가입</a>
                 </div>
-            </div>
+            </form>
         </div>
     </body>
 </html>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <script>
+      {% for message in messages %}
+        alert('{{ message }}');
+      {% endfor %}
+    </script>
+    {% endif %}
+    {% endwith %}
+    {% block body %}{% endblock %}

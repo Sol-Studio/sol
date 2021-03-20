@@ -19,7 +19,12 @@
       <td>{{ ips[key]["url"] }}</td>
       <td>{{ ips[key]["action"] }}</td>
       <td>{{ ips[key]["last"] }}</td>
-      <td><a href="?cmd=del {{key}}">삭제</a> / {% if key in blacklist %}<a href="?cmd=unblock {{key}}">차단 해제</a>{% else %}<a href="?cmd=block {{key}}">차단</a>{% endif %}</td>
+      <td>
+          <a href="?cmd=del {{key}}">삭제</a> /
+          {% if key in blacklist %}<a href="?cmd=unblock {{key}}">차단 해제</a>
+          {% else %}<a href="?cmd=block {{key}}">차단</a> /
+          {% endif %}<a href="/send-message?target={{ key }}">메시지 보내기</a>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
