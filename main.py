@@ -966,7 +966,7 @@ Log = Log()
 messages = {}
 if is_debug:
     Log.log("server restarted")
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
 else:
     app.run(host="0.0.0.0", port=5000, debug=False)
