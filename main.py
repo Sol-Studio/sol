@@ -22,11 +22,12 @@ from pymongo import MongoClient  # MongoDB
 import pickle  # 서버 변수 저장
 from werkzeug.debug import DebuggedApplication
 import sys
-
+import random
 
 # Create Flask App
 app = Flask(__name__)
-
+app.config['SECRET_KEY'] = open("secret_key.txt", "r").read()
+app.config["UPLOAD_DIR"] = "static/upload/"
 
 # debug set
 if len(sys.argv) > 1:
@@ -39,20 +40,17 @@ else:
 if is_debug:
     app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
 
-
-# APP CONFIG
-app.config['SECRET_KEY'] = open("secret_key.txt", "r").read()
-app.config["UPLOAD_DIR"] = "static/upload/"
-
+pool = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 connect_count = 0
+messages = {}
+
 try:
     ips = pickle.load(open("ips.bin", "rb"))
+
 except FileNotFoundError:
     ips = {}
 
-
 black_list = []
-
 NoLoginPages = [
     "/?",
     "/signup?",
@@ -61,7 +59,6 @@ NoLoginPages = [
     "/quiz/question",
     "/terms"
 ]
-
 IgnoreConnect = [
     "/static/",
     "/plugin/",
@@ -71,9 +68,7 @@ IgnoreConnect = [
     "/manage",
     "/send-message"
 ]
-
 mobile_meta = '<meta name=\'viewport\' content=\'width=device-width, initial-scale=1, user-scalable=no\' />'
-
 config = {"save_point": 1}
 
 
@@ -204,6 +199,14 @@ def mongodb_test(num):
     client.close()
 
 
+# 랜덤 색상
+def create_color():
+    c = ""
+    for i in range(6):
+        c += random.choice(list("56789ABCDEF"))
+    return "#" + c
+
+
 # 모든 연결에 대해 실행
 @app.before_request
 def before_all_connect_():
@@ -238,7 +241,7 @@ def before_all_connect_():
         }
     if os.path.isfile("hist/%s.bin" % ip):
         hist = pickle.load(open("hist/%s.bin" % ip, "rb"))
-        hist = {time.time(): request.full_path}
+        hist[time.time()] = request.full_path
 
     else:
         hist = {time.time(): request.full_path}
@@ -261,10 +264,13 @@ def before_all_connect_():
     # 블랙리스트면 403 띄우기
     if ip in black_list:
         abort(403)
+    
+    if "s." in str(request):
+        return
 
     # 로그인이 필요없으면 return
     for i in range(len(NoLoginPages)):
-        if NoLoginPages[i] in str(request.full_path):
+        if NoLoginPages[i] in request.full_path:
             return
 
     # 로그인이 필요하면 /login 으로 redirect
@@ -274,11 +280,28 @@ def before_all_connect_():
 
 # 홈
 @app.route("/")
-@app.route("/home")
 def index_page():
-    if "kakaotalk-callback." in str(request):
-        return "ok"
-    return render_template("index.html", logined=is_logined(session))
+    c = create_color(), create_color()
+    return render_template("index.html", logined=is_logined(session), c=c)
+
+
+# 단축 url
+@app.route("/<r>")
+def shortcut(r):
+    if "s." in str(request):
+        client = MongoClient("mongodb://localhost:27017/")
+        try:
+            url = client.sol.shortcuts.find({"id": r})[0]["target"]
+
+        except:
+            client.close()
+            return "잘못된 접근입니다."
+
+        else:
+            client.close()
+            return redirect(url)
+    else:
+        abort(404)
 
 
 # 관리자 페이지
@@ -312,7 +335,7 @@ def manage():
             # db test
             elif cmd[0] == "do":
                 if cmd[1] == "db_test":
-                    mongodb_test(cmd[2])
+                    mongodb_test(int(cmd[2]))
                     flash("완료")
             pickle.dump(ips, open("ips.bin", "wb"))
 
@@ -375,7 +398,8 @@ def login():
     form = LoginForm()
 
     if request.method == "GET":
-        return render_template("login.html", form=form)
+        c = create_color(), create_color()
+        return render_template("login.html", form=form, c=c)
 
     elif request.method == "POST":
         # db 연결
@@ -397,10 +421,12 @@ def login():
 
         # 아이디가 존재하지 않음
         if len(login_data) != 1:
+            flash("로그인 정보가 맞지 않습니다.")
             return redirect("/login")
 
         # 비밀번호가 안맞음
         if login_data["0"]["pw"] != pw:
+            flash("로그인 정보가 맞지 않습니다.")
             return redirect("/login")
 
         # 통과
@@ -478,18 +504,25 @@ def logout():
         return redirect("/login")
 
 
+# 비밀번호 바꾸기
 @app.route("/change-pw", methods=["POST", "GET"])
 def change_pw():
     if request.method == "POST":
         client = MongoClient("mongodb://localhost:27017/")
         db = client.sol.users
-        profile = db.find({"id": session["userid"]})[0]
-        if profile["pw"] == request.form.get("last_pw"):
-            profile.update({"pw": request.form.get("new_pw")})
+        profile = list(db.find({"id": session["userid"]}))[0]
+        if profile["pw"] == request.form.get("last_pw") and request.form.get("new_pw") == request.form.get("new_pw_again"):
+            db.update({"id": session["userid"]}, {"$set": {"pw": request.form.get("new_pw")}})
             flash("완료")
+            print("hello")
             return redirect("/my-profile")
+
+        else:
+            flash("다시 시도해주세요")
+            return redirect("/change-pw")
     else:
-        return render_template("profile/change-pw.html")
+        c = create_color(), create_color()
+        return render_template("profile/change-pw.html", c=c)
 
 
 # 페이지가 지정 안됐을 때 redirect
@@ -956,13 +989,44 @@ def send_message():
         abort(404)
 
 
-@app.route("/<redirect>", subdomain="s")
-def shortcut():
-    return ""
+# 단축 url 생성
+@app.route("/shortcut")
+def shortcut_maker():
+    if not request.args.get("url"):
+        return render_template("shortcut.html")
+    else:
+        client = MongoClient("mongodb://localhost:27017/")
+        last_id_ = client.sol.shortcuts.find().sort("_id", -1)[0]["id"]
+        new_id = ""
+        if last_id_ == "ZZ":
+            client.close()
+            return redirect("/shortcut-complete?id=망했다")
+
+        if pool.find(last_id_[1]) == 61:
+            new_id = pool[pool.find(last_id_[0]) + 1] + "a"
+        
+        else:
+            new_id = last_id_[0] + pool[pool.find(last_id_[1]) + 1]
+
+        client.sol.shortcuts.insert_one({
+            "id": new_id,
+            "target": request.args.get("url")
+        })
+
+        client.close()
+        return redirect("/shortcut-complete?id=%s" % new_id)
+
+
+# 단축된 url 확인시키기
+@app.route("/shortcut-complete")
+def shortcut_maker_complete():
+    if request.args.get("id") == "망했다":
+        return "망했어!!!"
+    return "shortcut url : http://s.sol-studio.tk/" + request.args.get("id")
 
 
 Log = Log()
-messages = {}
+
 if is_debug:
     Log.log("server restarted")
     app.run(host='0.0.0.0', port=80, debug=True)

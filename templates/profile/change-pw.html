@@ -1,58 +1,95 @@
-<html>
-    <head>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-        <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
-    </head>
-    <body>
-        <form method="post" action="/my-profile-edit" id="formByte" name="formByte">
-            <script type="text/javascript">
-                // 이 코드를 수정해서 글자수를 초과할 경우, 예고없이 삭제되고, 차단 될 수 있습니다.
-                $(document).ready(function() {
-                    // 상태메시지
-                    var ec = document.getElementsByClassName('status-info');
-                    $('#byteInfo').on('keyup', function() {
-                        ec[0].innerHTML =$(this).val().length + " / 60 (글자)";
-                        if($(this).val().length > 60) {
-                            $(this).val($(this).val().substring(0, 59));
-                            alert("60글자 이내로 작성해주세요");
-                        }
-                    });
-                });
-            </script>
-            <div class="container">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>현재 비밀번호를 입력하세요</td>
-                            <td><input name="new_pw" type="password"></input></td>
-                        </tr>
-                        <tr>
-                            <td>새로운 비밀번호를 입력하세요</td>
-                            <td>
-                                <input name="last_pw" id="byteInfo" type="password"></input>
-                                <div class="status-info">0 / 60 (글자)</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>새로운 비밀번호를 다시 입력하세요</td>
-                            <td>
-                                <input name="last_pw_again" type="password"></input>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <input type="submit">
-            </div>
-        </form>
-    </body>
-</html>
-    {% with messages = get_flashed_messages() %}
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>로그인</title>
+      <style>
+          @import url("http://fonts.googleapis.com/earlyaccess/nanumgothic.css");
+
+        html {
+            height: 100%;
+        }
+
+        body {
+            width:100%;
+            height:100%;
+            margin: 0;
+            padding-top: 80px;
+            padding-bottom: 40px;
+            font-family: "Nanum Gothic", arial, helvetica, sans-serif;
+            background-repeat: no-repeat;
+            background: linear-gradient(to bottom right, {{ c[0] }}, {{ c[1] }});
+        }
+
+        .card {
+            margin: 0 auto;
+            float: none;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+
+        .form-signin .form-control {
+            position: relative;
+            height: auto;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+                 box-sizing: border-box;
+            padding: 10px;
+            font-size: 16px;
+        }
+      </style>
+
+  </head>
+
+  <body>
+      <script type="text/javascript">
+        // 이 코드를 수정해서 글자수를 초과할 경우, 예고없이 삭제되고, 차단 될 수 있습니다.
+        $(document).ready(function() {
+            // 상태메시지
+            var ec = document.getElementsByClassName('status-info');
+            $('#byteInfo').on('keyup', function() {
+                ec[0].innerHTML =$(this).val().length + " / 60 (글자)";
+                if($(this).val().length > 60) {
+                    $(this).val($(this).val().substring(0, 59));
+                    alert("60글자 이내로 작성해주세요");
+                }
+            });
+        });
+    </script>
+	<div class="card align-middle" style="width:20rem; border-radius:20px;">
+		<div class="card-title" style="margin-top:30px;">
+			<h2 class="card-title text-center" style="color:#113366;">비밀번호 변경</h2>
+		</div>
+		<div class="card-body">
+          <form class="form-signin" method="POST" onSubmit="logincall();return false">
+            <p>
+                <label for="last_pw">현재 비밀번호를 입력하세요</label>
+                <input class="form-control" name="last_pw" type="password" id="last_pw">
+            </p>
+            <p>
+                <label for="inputPassword">새로운 비밀번호를 입력하세요</label>
+                <input class="form-control" name="new_pw" type="password">
+            </p>
+            <p>
+                <label for="inputPassword">새로운 비밀번호를 다시 입력하세요</label>
+                <input class="form-control" name="new_pw_again" type="password">
+            </p>
+            <button id="btn-Yes" class="btn btn-lg btn-primary btn-block" type="submit">제 출</button>
+          </form>
+
+		</div>
+	</div>
+	<div class="modal">
+	</div>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+      {% with messages = get_flashed_messages() %}
     {% if messages %}
     <script>
       {% for message in messages %}
@@ -62,3 +99,5 @@
     {% endif %}
     {% endwith %}
     {% block body %}{% endblock %}
+  </body>
+</html>
