@@ -201,10 +201,14 @@ def mongodb_test(num):
 
 # 랜덤 색상
 def create_color():
+    """
+    완전 랜덤
     c = ""
     for i in range(6):
         c += random.choice(list("56789ABCDEF"))
-    return "#" + c
+    """
+
+    return random.choice([])
 
 
 # 모든 연결에 대해 실행
@@ -281,8 +285,7 @@ def before_all_connect_():
 # 홈
 @app.route("/")
 def index_page():
-    c = create_color(), create_color()
-    return render_template("index.html", logined=is_logined(session), c=c)
+    return render_template("index.html", logined=is_logined(session))
 
 
 # 단축 url
@@ -398,8 +401,7 @@ def login():
     form = LoginForm()
 
     if request.method == "GET":
-        c = create_color(), create_color()
-        return render_template("login.html", form=form, c=c)
+        return render_template("login.html", form=form)
 
     elif request.method == "POST":
         # db 연결
@@ -521,8 +523,7 @@ def change_pw():
             flash("다시 시도해주세요")
             return redirect("/change-pw")
     else:
-        c = create_color(), create_color()
-        return render_template("profile/change-pw.html", c=c)
+        return render_template("profile/change-pw.html")
 
 
 # 페이지가 지정 안됐을 때 redirect
