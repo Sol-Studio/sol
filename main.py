@@ -18,6 +18,8 @@ from flask import request
 from flask import session
 from flask import flash
 from flask import abort  # -- 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
+from flask import send_file
+from flask import make_response
 from pymongo import MongoClient  # MongoDB
 import pickle  # 서버 변수 저장
 from werkzeug.debug import DebuggedApplication
@@ -57,7 +59,8 @@ NoLoginPages = [
     "/login?",
     "/redirect",
     "/quiz/question",
-    "/terms"
+    "/terms",
+    "/file-server"
 ]
 IgnoreConnect = [
     "/static/",
@@ -1024,6 +1027,20 @@ def shortcut_maker_complete():
     if request.args.get("id") == "망했다":
         return "망했어!!!"
     return "shortcut url : http://s.sol-studio.tk/" + request.args.get("id")
+
+
+@app.route("/file-server/upload", methods=["POST"])
+def file_server_upload():
+    upload_file = request.files.get('file', None)
+    upload_file.save("static/upload/" + request.form.get("id"))
+    print(request.form.get("id"))
+    return make_response(200)
+
+
+@app.route("/file-server/download", methods=["GET"])
+def file_server_download():
+    return send_file("static/upload/" + request.args.get("id"),
+                     attachment_filename=request.args.get("id"))
 
 
 Log = Log()
