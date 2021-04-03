@@ -69,7 +69,8 @@ IgnoreConnect = [
     "/favicon.ico?",
     "/ai/wait/",
     "/manage",
-    "/send-message"
+    "/send-message",
+    "/chat-load"
 ]
 mobile_meta = '<meta name=\'viewport\' content=\'width=device-width, initial-scale=1, user-scalable=no\' />'
 config = {"save_point": 1}
@@ -1042,6 +1043,10 @@ def file_server_download():
     return send_file("static/upload/" + request.args.get("id"),
                      attachment_filename=request.args.get("id"))
 
+
+@app.route("/chat")
+def chat_index():
+    return render_template("chat/index.html", room=request.args.get("room"), userid=session["userid"])
 
 Log = Log()
 

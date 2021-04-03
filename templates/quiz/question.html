@@ -16,7 +16,7 @@
                         <section>
                             <div class="content">
                                 <h2>Quiz</h2>
-                                <p>{{ name }} 님 아래 퀴즈를 풀어주세요. </p>
+                                <p class="display-name">{{ name }} 님 아래 퀴즈를 풀어주세요.</p>
                                 <form method="post" action="#">
                                 {% if q["type"] == '0' %}
 
@@ -81,7 +81,7 @@
 
                                     <br>
                                     <h4>이름을 입력해주세요</h4>
-                                    <textarea name="name">{{ name }}</textarea>
+                                    <textarea name="name" id="name">{{ name }}</textarea>
                                     <ul class="actions">
                                         <li><input type="submit" class="button primary icon solid fa-pen"></li>
                                         <li><a href="#" name="close" id="close" class="button icon solid fa-times">창닫기</a></li>
@@ -102,7 +102,15 @@
         <script src="/static/quizs/util.js"></script>
         <script src="/static/quiz/main.js"></script>
 
-
+        <script type="text/javascript">
+            // 이 코드를 수정해서 글자수를 초과할 경우, 예고없이 삭제되고, 차단 될 수 있습니다.
+            $(document).ready(function() {
+                var ec = document.getElementsByClassName("display-name");
+                $('#name').on('keyup', function() {
+                    ec[0].innerHTML =$(this).val() + "님 아래 퀴즈를 풀어주세요.";
+                });
+            });
+        </script>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         <script>
