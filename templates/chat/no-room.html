@@ -54,13 +54,10 @@
   <body>
 	<div class="card align-middle" style="width:50rem; border-radius:20px;">
 		<div class="card-title" style="margin-top:30px;">
-			<h2 class="card-title text-center" style="color:#599cff; margin-bottom: -10px;">채팅방 입장</h2>
+			<h2 class="card-title text-center" style="color:#599cff; margin-bottom: -10px;">원하시는 채팅방을 찾을 수 없습니다.</h2>
 		</div>
 		<div class="card-body">
-          <form class="form-signin" method="GET" onSubmit="logincall();return false">
-            <input placeholder="채팅방 이름을 입력하세요" name="room" type="text" style="margin-bottom: 30px; height: 3rem; width:100%; background: #202020; color: white; border-style: none;">
-            <button id="btn-Yes" class="btn btn-lg btn-primary btn-block" type="submit">입 장</button>
-          </form>
+            <button onclick="window.location = '/chat';" id="btn-Yes" class="btn btn-lg btn-primary btn-block" type="submit">돌아가기</button>
 
 		</div>
 	</div>

@@ -1046,8 +1046,16 @@ def file_server_download():
 
 @app.route("/chat")
 def chat_index():
-    return render_template("chat/beta.html", room=request.args.get("room"), userid=session["userid"])
+    if request.args.get("room"):
+        client = MongoClient("mongodb://localhost:27017/")
+        if request.args.get("room") in client["chat"].collection_names():
+            return render_template("chat/chat.html", room=request.args.get("room"), userid=session["userid"])
+        else:
+            return render_template("chat/no-room.html")
 
+    else:
+        return render_template("chat/index.html")
+        
 
 
 Log = Log()

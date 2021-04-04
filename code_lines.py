@@ -7,7 +7,7 @@ ROOT_DIR = 'C:\\Users\\최유찬\\Desktop\\sol-studio\\3.coding\\게시판'
 # 조사할 확장자 목록
 extensions = [
     '*.py',
-    '*.html',
+    '*.html'
 ]
 
 # 무시할 디렉토리 경로 목록
