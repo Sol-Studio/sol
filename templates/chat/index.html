@@ -4,6 +4,9 @@
 </head>
 <body>
 	<section class="chatbox">
+        <input type="checkbox" id="live_update" value="on">
+        <label for="live">실시간</label>
+        
 		<section class="chat-window" id="chat-area"></section>
 		<div class="chat-input" id="chat_form">
 			<input id="send_input" name="msg" type="text" autocomplete="on" placeholder="Type a message" />
@@ -30,7 +33,7 @@
         });
         function load(){ 
                 const request = new XMLHttpRequest();
-                request.open('GET', 'http://sol-studio.tk:2000/load?userid={{ userid }}&room={{ room }}&id=' + ms_count, true);
+                request.open('GET', '/load?room={{ room }}&id=' + ms_count, true);
                 request.onreadystatechange = function() {
                     if (request.readyState == 4) {
                         if (request.status == 200) {
@@ -50,12 +53,17 @@
         }
         function send(){
             const request = new XMLHttpRequest();
-            request.open('GET', "http://sol-studio.tk:2000/send?userid={{ userid }}&room={{ room }}&msg=" + document.getElementById('send_input').value, true);
+            request.open('GET', "/send?room={{ room }}&msg=" + document.getElementById('send_input').value, true);
             request.send();
             document.getElementById('send_input').value = "";
         }
         setInterval(function() {
-            load();
+            if (document.getElementById('live_update').checked){
+                load();
+            }
         }, 1000);
+        $(document).ready(function(){
+            document.getElementById('live_update').checked = true;
+        });
     </script>
 </body>

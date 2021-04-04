@@ -1,13 +1,8 @@
-from flask import Flask, request, render_template
-from datetime import datetime
+import asyncio
+import websockets
 from pytz import timezone
-def get_log_date():
-    dt = datetime.now(timezone("Asia/Seoul"))
-    log_date = dt.strftime("%Y%m%d_%H:%M:%S")
-    return log_date
+from datetime import datetime
 
-
-app = Flask(__name__)
 chat = [
     {
         "id":"공지",
@@ -15,36 +10,65 @@ chat = [
         "content": "server started"
     }
 ]
+def get_log_date():
+    dt = datetime.now(timezone("Asia/Seoul"))
+    log_date = dt.strftime("%Y%m%d_%H:%M:%S")
+    return log_date
 
-@app.route("/load")
-def chat_load():
-    room = request.args.get("room")
-    id_ = request.args.get("id")
-    try:
-        if request.args.get("userid") == chat[int(id_)]["id"]:
-            z = "msg-self"
-        else:
-            z = ""
+async def accept(websocket, path):
+    while True:
+        try:
+            data = await websocket.recv()
+            print("receive : " + data)
+            if data[0] == "l":
+                data = eval(data[1:])
+                room = data["room"]
+                id_ = data["id"]
+                try:
+                    rd = chat[id_]
+                    if data["userid"] == rd["id"]:
+                        z = "msg-self"
+                    else:
+                        z = ""
 
-        print(chat[int(id_)]["content"])
-        return render_template("chat/load.html", 
-                                name=chat[int(id_)]["id"],
-                                time=chat[int(id_)]["time"],
-                                content=chat[int(id_)]["content"],
-                                isself=z)
-    except Exception as e:
-        print(e)
-        return "fail"
+                    
+
+                    await websocket.send(
+                        """<article class="msg-container %s">
+                            <div class="msg-box">
+                                <div class="flr">
+                                    <div class="messages">
+                                        <p class="msg">%s</p>
+                                    </div>
+                                    <span class="timestamp">
+                                        <span class="username">%s</span>&bull;
+                                        <span class="posttime">%s</span>
+                                    </span>
+                                </div>
+                            </div>
+                            </article>""" % (z, rd["content"], rd["id"], rd["time"]))
+
+                except IndexError as e:
+                    await websocket.send("fail")
 
 
-@app.route("/send")
-def chat_send():
-    chat.append({
-        "id": request.args.get("userid"),
-        "time": get_log_date(),
-        "content": request.args.get("msg")
-    })
-    print(chat)
-    return ""
+            elif data[0] == "s":
+                data1 = eval(data[1:])
+                chat.append({
+                    "id": data1["userid"],
+                    "time": get_log_date(),
+                    "content": data1["content"]
+                })
 
-app.run(host="0.0.0.0", port=2000, debug=True)
+    
+        except KeyboardInterrupt:
+            exit()
+        
+        except Exception as e:
+            break
+
+start_server = websockets.serve(accept, "0.0.0.0", 2000)
+asyncio.get_event_loop().run_until_complete(start_server)
+asyncio.get_event_loop().run_forever()
+
+

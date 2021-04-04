@@ -95,7 +95,7 @@ class Log:
         # LOG SETTING
         dt = datetime.now(timezone("Asia/Seoul"))
         log_date = dt.strftime("%Y%m%d")
-        logging.basicConfig(filename="logs/" + log_date + "log.log", level=logging.DEBUG)
+        logging.basicConfig(filename="logs/" + log_date + "log.log", level=logging.ERROR)
 
     @staticmethod
     def get_log_date():
@@ -1046,7 +1046,9 @@ def file_server_download():
 
 @app.route("/chat")
 def chat_index():
-    return render_template("chat/index.html", room=request.args.get("room"), userid=session["userid"])
+    return render_template("chat/beta.html", room=request.args.get("room"), userid=session["userid"])
+
+
 
 Log = Log()
 

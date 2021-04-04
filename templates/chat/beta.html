@@ -1,0 +1,117 @@
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <link rel="stylesheet" href="/static/css/chat.css">
+    <title>{{ room }}</title> 
+</head>
+<body>
+	<section class="chatbox">
+        <nav class="navbar navbar-expand-sm bg-dark">
+            <ul class="navbar-nav">
+                <li class="nav-item active text-white"><a href="#" class="nav-link">Chatting</a></li>
+                <li class="nav-item"><a href="#" class="nav-link" id="live_update" onclick="switchLive();"><div style='color: green;'>실시간 업데이트 활성화됨</div></a></li>
+                <li class="nav-item"><a href="#" class="nav-link" id="close-tab" onclick="closeTab();">나가기</a></li>
+            </ul>
+        </nav>
+   
+        <section class="chat-window" id="chat-area"></section>
+		<div class="chat-input" id="chat_form">
+			<input id="send_input" name="msg" type="text" autocomplete="on" placeholder="Type a message" />
+			<button onclick="send_msg();">
+                <svg style="width:24px;height:24px" viewBox="0 0 24 24">
+                <path fill="rgba(0,0,0,.38)" d="M17,12L12,17V14H8V10H12V7L17,12M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L5,8.09V15.91L12,19.85L19,15.91V8.09L12,4.15Z" /></svg>
+            </button>
+        </div>
+	</section>
+    <script>var wsUri = "ws://sol-studio.tk:2000/";
+        var output;
+        count = 0;
+        live = true;
+        
+        
+        function init(){
+            output = document.getElementById("chat-area");
+            testWebSocket();
+        }
+        
+        
+        function testWebSocket(){
+            websocket = new WebSocket(wsUri);
+            websocket.onopen = function(evt){ onOpen(evt) };
+            websocket.onclose = function(evt){ onClose(evt) };
+            websocket.onmessage = function(evt){ onMessage(evt) };
+            websocket.onerror = function(evt){ onError(evt) };
+        }
+        
+        
+        function onOpen(evt){
+        }
+        
+        
+        function onClose(evt){
+        }
+        
+        
+        function onMessage(evt){
+            if (evt.data != "fail"){
+                writeToScreen(evt.data);
+                count++;
+            }
+        }
+        
+        
+        function onError(evt){
+            writeToScreen("<span style='color: red;'>에러 : </span>" + evt.data);
+        }
+        
+        
+        function doSend(message){
+            websocket.send(message);
+        }
+        
+        
+        function writeToScreen(message){
+            var pre = document.createElement("p");
+            pre.style.wordWrap = "break-word";
+            pre.innerHTML = message;
+            output.appendChild(pre);
+        }
+        
+        
+        function closeTab(){
+            websocket.close(1000);
+            window.close();
+        }
+        
+        
+        $('.chat-input input').keyup(function(e) {
+            if ($(this).val() == '') $(this).removeAttr('good');
+            else $(this).attr('good', '');
+        });
+        
+        
+        $("#send_input").keydown(function(e){
+            if (e.keyCode == 13) send_msg()
+        });
+        
+        
+        function send_msg(){
+            doSend("s{'userid': '{{ userid }}', 'room': '{{ room }}', 'content': '" + document.getElementById('send_input').value + "'}");
+            document.getElementById('send_input').value = "";
+        }
+        
+        
+        function switchLive(){
+            live = !live;
+            if (live){
+                $('#live_update').html("<div style='color: green;'>실시간 업데이트 활성화됨</div>");
+            }
+            else{
+                $('#live_update').html("<div style='color: red;'>실시간 업데이트 비활성화됨</div>");
+            }
+        }
+        
+        
+        setInterval(function() { if (live) doSend("l{'userid': '{{ userid }}', 'room': '{{ room }}', 'id': " + count + "}"); }, 1500);
+        window.addEventListener("load", init, false);
+        </script>
