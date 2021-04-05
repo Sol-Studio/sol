@@ -18,8 +18,6 @@
             <div class="collapse navbar-collapse" id="collapsibleNavbar"> 
                <ul class="navbar-nav navbar-dark">
                 <li class="nav-item active text-white"><a href="#" class="nav-link">{{ room }}</a></li>
-                <li class="nav-item"><a href="#" class="nav-link" id="live_update" onclick="switchLive();"><div style='color: green;'>실시간 업데이트 활성화됨</div></a></li>
-                <li class="nav-item"><a href="#" class="nav-link" id="close-tab" onclick="closeTab();">나가기</a></li> 
                 <li class="nav-item"><a href="#" class="nav-link" id="people">n명</a></li>
                </ul>
             </div>
@@ -37,8 +35,6 @@
     <script>
         var output;
         count = 0;
-        live = true;
-        var interval;
         var interval = setInterval(update, 1500);
         loading = 0;
         
@@ -90,7 +86,7 @@
                 count++;
                 $("#chat-area").scrollTop($("#chat-area")[0].scrollHeight);
                 clearInterval(interval);
-                interval = setInterval(update, 10);
+                interval = setInterval(update, 100);
             }
             
         }
@@ -112,13 +108,7 @@
             pre.innerHTML = message;
             output.appendChild(pre);
         }
-        
-        
-        function closeTab(){
-            websocket.close(1000);
-            window.close();
-        }
-        
+              
         
         $('.chat-input input').keyup(function(e) {
             if ($(this).val() == '') $(this).removeAttr('good');
@@ -135,24 +125,11 @@
             doSend("s{'userid': '{{ userid }}', 'room': '{{ room }}', 'content': '" + document.getElementById('send_input').value + "'}");
             document.getElementById('send_input').value = "";
         }
-        
-        
-        function switchLive(){
-            live = !live;
-            if (live){
-                $('#live_update').html("<div style='color: green;'>실시간 업데이트 활성화됨</div>");
-            }
-            else{
-                $('#live_update').html("<div style='color: red;'>실시간 업데이트 비활성화됨</div>");
-            }
-        }
-
-        
+               
 
 
         function update(){
-            if (live) 
-                doSend("l{'userid': '{{ userid }}', 'room': '{{ room }}', 'id': " + count + "}"); 
+            doSend("l{'userid': '{{ userid }}', 'room': '{{ room }}', 'id': " + count + "}"); 
         }
 
         function showLoading(){
