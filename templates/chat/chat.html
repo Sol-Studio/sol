@@ -5,20 +5,20 @@
     <script src="//netdna.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
     <meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=no' />
-    <title>{{ room }}</title> 
+    <title>{{ room }}</title>
 </head>
 <body>
-    
+
 	<section class="chatbox">
         <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
             <a class="navbar-brand" href="#">Chatting</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar"> 
-                <span class="navbar-toggler-icon"></span> 
-            </button> 
-            <div class="collapse navbar-collapse" id="collapsibleNavbar"> 
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="collapsibleNavbar">
                <ul class="navbar-nav navbar-dark">
                 <li class="nav-item active text-white"><a href="#" class="nav-link">{{ room }}</a></li>
-                <li class="nav-item"><a href="#" class="nav-link" id="people">n명</a></li>
+                <li class="nav-item"><a href="#" class="nav-link" id="people">?명</a></li>
                </ul>
             </div>
          </nav>
@@ -37,13 +37,13 @@
         count = 0;
         var interval = setInterval(update, 1500);
         loading = 0;
-        
+
         function init(){
             output = document.getElementById("chat-area");
             testWebSocket();
         }
-        
-        
+
+
         function testWebSocket(){
             websocket = new WebSocket("ws://sol-studio.tk:2000/");
 
@@ -52,24 +52,25 @@
             websocket.onmessage = function(evt){ onMessage(evt) };
             websocket.onerror = function(evt){ onError(evt) };
         }
-        
-        
+
+
         function onOpen(evt){
-            
+
         }
-        
-        
+
+
         function onClose(evt){
         }
-        
-        
+
+
         function onMessage(evt){
             console.log(evt.data);
             if (evt.data == "fail"){
+                count =- 1;
                 loading = 0;
                 closeLoading();              // 로딩 닫기
                 clearInterval(interval);
-                interval = setInterval(update, 1000);
+                interval = setInterval(update, 1500);
             }
             else if (evt.data.length < 10){
                 console.log(evt.data + "명");
@@ -78,67 +79,67 @@
             else{
                 loading++;
                 if (loading > 3){
-                    
-                    showLoading();           // 로딩 표시
+                    showLoading();
                 }
-                    
+
                 writeToScreen(evt.data);
-                count++;
+
                 $("#chat-area").scrollTop($("#chat-area")[0].scrollHeight);
                 clearInterval(interval);
-                interval = setInterval(update, 100);
+                interval = setInterval(update, 200);
             }
-            
+
         }
-        
-        
+
+
         function onError(evt){
             writeToScreen("<span style='color: red;'>에러 : </span>" + evt.data);
         }
-        
-        
+
+
         function doSend(message){
             websocket.send(message);
         }
-        
-        
+
+
         function writeToScreen(message){
             var pre = document.createElement("p");
             pre.style.wordWrap = "break-word";
             pre.innerHTML = message;
             output.appendChild(pre);
         }
-              
-        
+
+
         $('.chat-input input').keyup(function(e) {
             if ($(this).val() == '') $(this).removeAttr('good');
             else $(this).attr('good', '');
         });
-        
-        
+
+
         $("#send_input").keydown(function(e){
             if (e.keyCode == 13) send_msg()
         });
-        
-        
+
+
         function send_msg(){
+            count++;
             doSend("s{'userid': '{{ userid }}', 'room': '{{ room }}', 'content': '" + document.getElementById('send_input').value + "'}");
             document.getElementById('send_input').value = "";
         }
-               
+
 
 
         function update(){
-            doSend("l{'userid': '{{ userid }}', 'room': '{{ room }}', 'id': " + count + "}"); 
+            doSend("l{'userid': '{{ userid }}', 'room': '{{ room }}', 'id': " + count + "}");
         }
 
         function showLoading(){
-            $('#loading').show(); 
+            $('#loading').show();
             $('#loading-image').show();
         }
 
         function closeLoading(){
-            $('#loading').hide(); 
+            $('#loading').hide();
             $('#loading-image').hide();
         }
         window.addEventListener("load", init, false);
