@@ -25,6 +25,9 @@ import pickle  # 서버 변수 저장
 from werkzeug.debug import DebuggedApplication
 import sys
 import random
+import hashlib
+
+
 
 # Create Flask App
 app = Flask(__name__)
@@ -202,18 +205,6 @@ def mongodb_test(num):
     client.close()
 
 
-# 랜덤 색상
-def create_color():
-    """
-    완전 랜덤
-    c = ""
-    for i in range(6):
-        c += random.choice(list("56789ABCDEF"))
-    """
-
-    return random.choice([])
-
-
 # 모든 연결에 대해 실행
 @app.before_request
 def before_all_connect_():
@@ -280,9 +271,10 @@ def before_all_connect_():
         if NoLoginPages[i] in request.full_path:
             return
 
-    # 로그인이 필요하면 /login 으로 redirect
+    # 로그인이 필요하면 로그인 요청페이지
     if not is_logined(session):
-        return redirect("/login")
+        return render_template("index.html")
+
 
 
 # 홈
@@ -1003,7 +995,6 @@ def shortcut_maker():
     else:
         client = MongoClient("mongodb://localhost:27017/")
         last_id_ = client.sol.shortcuts.find().sort("_id", -1)[0]["id"]
-        new_id = ""
         if last_id_ == "ZZ":
             client.close()
             return redirect("/shortcut-complete?id=망했다")
@@ -1047,15 +1038,25 @@ def file_server_download():
 
 @app.route("/chat")
 def chat_index():
-    if request.args.get("room"):
-        client = MongoClient("mongodb://localhost:27017/")
-        if request.args.get("room") in client["chat"].collection_names():
-            return render_template("chat/chat.html", room=request.args.get("room"), userid=session["userid"])
-        else:
-            return render_template("chat/no-room.html")
+    return render_template("chat/index.html")
 
-    else:
-        return render_template("chat/index.html")
+
+@app.route("/chat/<room>")
+def chat_room(room):
+    client = MongoClient("mongodb://localhost:27017/")
+    if room in client["chat"].collection_names():
+        h = hashlib.sha1()
+        h.update(list(client["chat"]["index"].find({"room": room}))[0]["pw"].encode())
+        if str(h.hexdigest()) == request.args.get("pw"):
+            return render_template("chat/chat.html", room=request.args.get("room"), userid=session["userid"])
+
+
+    return render_template("err/chat-no-room.html")
+
+
+@app.errorhandler(404)
+def error_404(e):
+    return render_template("err/page-not-found.html")
 
 
 Log = Log()
