@@ -5,7 +5,7 @@
     <script src="//netdna.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
     <meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=no' />
-    <title>{{ room }}</title>
+    <title>chat - {{ room }}</title>
 </head>
 <body>
 
@@ -32,10 +32,10 @@
                 </button>
             </div>
 	    </section>
-    <script>
+      <script>
         var output;
         count = 0;
-        var interval = setInterval(update, 1500);
+        // var interval = setInterval(update, 1500);
         loading = 0;
 
         function init(){
@@ -45,8 +45,7 @@
 
 
         function testWebSocket(){
-            websocket = new WebSocket("ws://sol-studio.tk:2000/");
-
+            websocket = new WebSocket("ws://114.207.98.231:3632/");
             websocket.onopen = function(evt){ onOpen(evt) };
             websocket.onclose = function(evt){ onClose(evt) };
             websocket.onmessage = function(evt){ onMessage(evt) };
@@ -66,42 +65,23 @@
         function onMessage(evt){
             console.log(evt.data);
             if (evt.data == "fail"){
-                count =- 1;
                 loading = 0;
                 closeLoading();              // 로딩 닫기
-                clearInterval(interval);
-                interval = setInterval(update, 1500);
             }
             else if (evt.data.length < 10){
                 console.log(evt.data + "명");
                 $("#people").html(evt.data + "명");
             }
             else{
-                loading++;
-                if (loading > 3){
-                    showLoading();
-                }
-
                 writeToScreen(evt.data);
-
                 $("#chat-area").scrollTop($("#chat-area")[0].scrollHeight);
-                clearInterval(interval);
-                interval = setInterval(update, 200);
             }
-
         }
 
 
         function onError(evt){
             writeToScreen("<span style='color: red;'>에러 : </span>" + evt.data);
         }
-
-
-        function doSend(message){
-            websocket.send(message);
-        }
-
-
         function writeToScreen(message){
             var pre = document.createElement("p");
             pre.style.wordWrap = "break-word";
@@ -122,15 +102,8 @@
 
 
         function send_msg(){
-            count++;
-            doSend("s{'userid': '{{ userid }}', 'room': '{{ room }}', 'content': '" + document.getElementById('send_input').value + "'}");
+            websocket.send("{'content': '" + document.getElementById('send_input').value + "'}");
             document.getElementById('send_input').value = "";
-        }
-
-
-
-        function update(){
-            doSend("l{'userid': '{{ userid }}', 'room': '{{ room }}', 'id': " + count + "}");
         }
 
         function showLoading(){
@@ -142,6 +115,20 @@
             $('#loading').hide();
             $('#loading-image').hide();
         }
+
+
+        setTimeout(function(){
+            websocket.send("{'userid': '{{ userid }}', 'room': '{{ room }}'}");
+                setInterval(function(){
+                websocket.send("l");
+            }, 100);
+        }, 3000);
+
+
+
+
+
+
         window.addEventListener("load", init, false);
 
         </script>

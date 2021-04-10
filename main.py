@@ -37,7 +37,6 @@ if len(sys.argv) > 1:
 else:
     is_debug = False
 
-
 # debug app
 if is_debug:
     app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
@@ -272,7 +271,7 @@ def before_all_connect_():
     # 블랙리스트면 403 띄우기
     if ip in black_list:
         abort(403)
-    
+
     if "s." in str(request):
         return
 
@@ -517,7 +516,8 @@ def change_pw():
         client = MongoClient("mongodb://localhost:27017/")
         db = client.sol.users
         profile = list(db.find({"id": session["userid"]}))[0]
-        if profile["pw"] == request.form.get("last_pw") and request.form.get("new_pw") == request.form.get("new_pw_again"):
+        if profile["pw"] == request.form.get("last_pw") and request.form.get("new_pw") == request.form.get(
+                "new_pw_again"):
             db.update({"id": session["userid"]}, {"$set": {"pw": request.form.get("new_pw")}})
             flash("완료")
             print("hello")
@@ -708,7 +708,8 @@ def edit_profile():
         for d in data:
             profile_data[str(i)] = d
 
-        return render_template("profile/edit.html", profile=profile_data["0"], ip=request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+        return render_template("profile/edit.html", profile=profile_data["0"],
+                               ip=request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
     elif request.method == "POST":
         status_message = request.form.get('status_message')
         print(status_message)
@@ -1009,7 +1010,7 @@ def shortcut_maker():
 
         if pool.find(last_id_[1]) == 61:
             new_id = pool[pool.find(last_id_[0]) + 1] + "a"
-        
+
         else:
             new_id = last_id_[0] + pool[pool.find(last_id_[1]) + 1]
 
@@ -1055,7 +1056,6 @@ def chat_index():
 
     else:
         return render_template("chat/index.html")
-        
 
 
 Log = Log()
@@ -1066,7 +1066,6 @@ if is_debug:
 
 else:
     app.run(host="0.0.0.0", port=80, debug=False)
-
 
 # SERVER CLOSED
 pickle.dump(ips, open("ips.bin", "wb"))
