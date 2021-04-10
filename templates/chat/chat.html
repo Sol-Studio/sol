@@ -45,7 +45,7 @@
 
 
         function testWebSocket(){
-            websocket = new WebSocket("ws://114.207.98.231:3632/");
+            websocket = new WebSocket("ws://sol-studio.tk:2000/");
             websocket.onopen = function(evt){ onOpen(evt) };
             websocket.onclose = function(evt){ onClose(evt) };
             websocket.onmessage = function(evt){ onMessage(evt) };
