@@ -262,9 +262,6 @@ def before_all_connect_():
     if ip in black_list:
         abort(403)
 
-    if "s." in str(request):
-        return
-
     # 로그인이 필요없으면 return
     for i in range(len(NoLoginPages)):
         if NoLoginPages[i] in request.full_path:
@@ -272,7 +269,7 @@ def before_all_connect_():
 
     # 로그인이 필요하면 로그인 요청페이지
     if not is_logined(session):
-        return render_template("index.html")
+        return render_template("login.html")
 
 
 
