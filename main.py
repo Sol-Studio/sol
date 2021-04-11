@@ -399,7 +399,7 @@ def login():
         # 통과
         else:
             print("login passed")
-            session['userid'] = id_
+            session['userid'] = form.data.get('id')
             return redirect("/")
 
 
@@ -944,7 +944,7 @@ def drive():
 
         if request.args.get("c"):
             try:
-                os.mkdir("drive\\%s\\%s\\%s" % (session["userid"], full_path, request.args.get("c")))
+                os.mkdir("drive/%s/%s/%s" % (session["userid"], full_path, request.args.get("c")))
                 return redirect("/drive?path=" + full_path)
             except:
                 flash("같은 이름의 폴더가 이미 있습니다.")
@@ -957,13 +957,13 @@ def drive():
             upper = full_path[:full_path.find("/")]
 
         # file, dir list
-        files = os.listdir("drive\\%s\\%s" % (session["userid"], full_path))
+        files = os.listdir("drive/%s/%s" % (session["userid"], full_path))
 
 
         # file과 dir 분류
         dirs = []
         for file in files:
-            if os.path.isdir(os.path.join("drive\\%s\\%s" % (session["userid"], full_path), file)):
+            if os.path.isdir(os.path.join("drive%s/%s" % (session["userid"], full_path), file)):
                 dirs.append(file)
                 files.remove(file)
 
@@ -996,7 +996,7 @@ def drive():
 
 @app.route("/drive/file")
 def drive_file():
-    return send_file("drive\\" + session["userid"] + "\\" + request.args.get("id"), as_attachment=True)
+    return send_file("drive/" + session["userid"] + "/" + request.args.get("id"), as_attachment=True)
 
 
 
