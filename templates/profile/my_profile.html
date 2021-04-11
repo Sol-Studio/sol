@@ -3,15 +3,6 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     </head>
     <body>
-        {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <script>
-      {% for message in messages %}
-        alert('{{ message }}');
-      {% endfor %}
-    </script>
-    {% endif %}
-    {% endwith %}
     <div class="container">
         <table class="table table-hover">
             <h1>내 프로필</h1><br>

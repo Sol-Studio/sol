@@ -23,6 +23,7 @@ async def accept(websocket, path):
         try:
             d = await websocket.recv()
             if d == "l":
+                await websocket.send("%d" % people)
                 try:
                     rd = list(client["chat"][data["room"]].find())[i]
                     if data["userid"] == rd["id"]:
@@ -32,7 +33,6 @@ async def accept(websocket, path):
 
                     
                     await websocket.send("""<article class="msg-container %s"><div class="msg-box"><div class="flr"><div class="messages"><p class="msg">%s</p></div><span class="timestamp"><span class="username">%s</span>&bull;<span class="posttime">%s</span></span></div></div></article>""" % (z, rd["content"], rd["id"], rd["time"]))
-                    await websocket.send("%d" % people)
                     
                     i += 1
 
@@ -40,10 +40,7 @@ async def accept(websocket, path):
                     await websocket.send("fail")
 
             else:
-                await websocket.send(str(people))
-                print("receive : ", data)
                 d = eval(d)
-
                 if d["content"] == "#command : !clear!":
                     client["chat"][data["room"]].delete_many({})
                 

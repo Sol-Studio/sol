@@ -2,10 +2,7 @@
 <html lang="ko">
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <title>sol-studio</title>
       <style>
@@ -57,7 +54,7 @@
 			<h2 class="card-title text-center" style="color:#113366;">로그인이 필요합니다</h2>
 		</div>
 		<div class="card-body">
-            <button id="btn-Yes" class="btn btn-lg btn-primary btn-block" onclick="window.location='/login'">로 그 인</button>
+            <button id="btn-Yes" class="btn btn-lg btn-primary btn-block" onclick="window.location='/login?redirect={{ redirect }}'">로 그 인</button>
 		</div>
 	</div>
       {% else %}
@@ -85,14 +82,4 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
   </body>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <script>
-      {% for message in messages %}
-        alert('{{ message }}');
-      {% endfor %}
-    </script>
-    {% endif %}
-    {% endwith %}
-    {% block body %}{% endblock %}
 </html>

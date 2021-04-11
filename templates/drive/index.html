@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>{{ full_path }}</title>
+<style type="text/css">
+    .folder-ico {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-right: 1rem;
+    }
+    .folder {
+        font-size: 0.8rem;
+        height: 2rem;
+    }
+    li {
+        list-style: none;
+    }
+    a:link, a:visited, a:hover {
+        color: rgb(0, 65, 19);
+        text-decoration: none;
+    }
+    body {
+        width: 100%;
+        height: 100%;
+    }
+
+</style>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body> 
+    <form enctype="multipart/form-data" action="/drive?path={{ full_path }}" method="POST">
+        파일 업로드 : <input type="file" name="file[]" multiple /><input type="submit" />
+    </form>        
+    <input type="text" id="input" placeholder="폴더 이름을 입력하세요">
+    <button class="btn" onclick="location = '?path={{ full_path }}&c=' + $('#input').val()">제출</button>
+
+    
+    <div style="font-size: large;margin:1%;">
+        {% for i in range(paths_len) %}
+            /&nbsp;<a class="path" href="/drive?path={{ paths[i] }}">{{ full_path_l[i] }}</a>
+        {% endfor %}
+    </div>
+       <table class="table" style="cursor: pointer;">
+           <thead>
+               <tr>
+                   <th>구분</th>
+                   <th>파일 이름</th>
+               </tr>
+           </thead>
+           <tbody>
+               {% if upper %}
+               <tr onclick="location='/drive?path={{ upper }}';">
+                   <td></td>
+                   <td>상위 폴더로 이동</td>
+               </tr>
+               {% endif %}
+                {% for file in files %}
+                <tr onclick="location='/drive/file?id={{ full_path }}%2F{{ file }}';">
+                   <td>파일</td>
+                   <td>{{ file }}</td>
+                </tr>
+                {% endfor %}
+                {% for dir in dirs %}
+                <tr onclick="location='/drive?path={{ full_path }}%2F{{ dir }}';">
+                    <td>폴더</td>
+                    <td>{{ dir }}</td>
+                </tr>
+               {% endfor %}
+           </tbody>
+       </table>
+
+
+     
+
+            
+    
+       {% with messages = get_flashed_messages() %}
+       {% if messages %}
+           <script>
+           {% for message in messages %}
+               alert("{{ message }}");
+           {% endfor %}
+           </script>
+       {% endif %}
+       {% endwith %}
+       {% block body %}{% endblock %}  
+</body>
+</html>

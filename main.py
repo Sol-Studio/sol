@@ -1,40 +1,41 @@
-import mimetypes  # 파일 검증
-from werkzeug.utils import secure_filename  # 파일 이름 검증
-import logging  # 로깅
-import time  # 시간
-from datetime import datetime  # 시간
+import mimetypes
+from werkzeug.utils import secure_filename
+import logging
+import time
+from datetime import datetime
 from datetime import timedelta
-from flask_wtf import FlaskForm  # form
-from wtforms import StringField  # form
-from wtforms import PasswordField  # form
-from wtforms.validators import DataRequired  # form
-from wtforms.validators import EqualTo  # form
-from pytz import timezone  # 로깅
-import os  # multi 실행
-from flask import Flask  # Flask...
+from flask_wtf import FlaskForm
+from wtforms import StringField
+from wtforms import PasswordField
+from wtforms.validators import DataRequired
+from wtforms.validators import EqualTo
+from pytz import timezone
+import os
+from flask import Flask 
 from flask import render_template
 from flask import redirect
 from flask import request
 from flask import session
 from flask import flash
-from flask import abort  # -- 정상적이지 않은 상황에서 abort(403)하면 바로 403 띄워줌
+from flask import abort
 from flask import send_file
 from flask import make_response
-from pymongo import MongoClient  # MongoDB
-import pickle  # 서버 변수 저장
+from pymongo import MongoClient
+import pickle
 from werkzeug.debug import DebuggedApplication
 import sys
 import random
 import hashlib
-
+import glob
 
 
 # Create Flask App
 app = Flask(__name__)
 app.config['SECRET_KEY'] = open("secret_key.txt", "r").read()
 app.config["UPLOAD_DIR"] = "static/upload/"
+app.config['SERVER_NAME'] = 'localhost'
 
-# debug set
+# DEBUG
 if len(sys.argv) > 1:
     is_debug = True
 else:
@@ -43,6 +44,7 @@ else:
 # debug app
 if is_debug:
     app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
+
 
 pool = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 connect_count = 0
@@ -205,6 +207,10 @@ def mongodb_test(num):
     client.close()
 
 
+def custom_secure_filename(name):
+    return name.replace('/', "").replace("\\", "")
+
+
 # 모든 연결에 대해 실행
 @app.before_request
 def before_all_connect_():
@@ -252,13 +258,6 @@ def before_all_connect_():
     # ip와 접근 url 출력
     print(ip, request.full_path)
 
-    # 메시지 flash
-    if ip in messages.keys():
-        if messages[ip]:
-            for m in messages[ip]:
-                flash(m)
-        del messages[ip]
-
     # 블랙리스트면 403 띄우기
     if ip in black_list:
         abort(403)
@@ -273,7 +272,7 @@ def before_all_connect_():
 
     # 로그인이 필요하면 로그인 요청페이지
     if not is_logined(session):
-        return render_template("index.html")
+        return render_template("index.html", redirect=request.full_path)
 
 
 
@@ -281,25 +280,6 @@ def before_all_connect_():
 @app.route("/")
 def index_page():
     return render_template("index.html", logined=is_logined(session))
-
-
-# 단축 url
-@app.route("/<r>")
-def shortcut(r):
-    if "s." in str(request):
-        client = MongoClient("mongodb://localhost:27017/")
-        try:
-            url = client.sol.shortcuts.find({"id": r})[0]["target"]
-
-        except:
-            client.close()
-            return "잘못된 접근입니다."
-
-        else:
-            client.close()
-            return redirect(url)
-    else:
-        abort(404)
 
 
 # 관리자 페이지
@@ -392,7 +372,7 @@ def manage_ip(ip):
 def login():
     if session['userid']:
         flash("이미 로그인돼있습니다.")
-        return redirect("/")
+        return redirect(request.args.get("redirect"))
     form = LoginForm()
 
     if request.method == "GET":
@@ -419,17 +399,17 @@ def login():
         # 아이디가 존재하지 않음
         if len(login_data) != 1:
             flash("로그인 정보가 맞지 않습니다.")
-            return redirect("/login")
+            return redirect("/login?redirect=" + request.args.get("redirect"))
 
         # 비밀번호가 안맞음
         if login_data["0"]["pw"] != pw:
             flash("로그인 정보가 맞지 않습니다.")
-            return redirect("/login")
+            return redirect("/login?redirect=" + request.args.get("redirect"))
 
         # 통과
         else:
             session['userid'] = id_
-            return redirect("/")
+            return redirect(request.args.get("redirect"))
 
 
 # 회원가입
@@ -968,60 +948,6 @@ def quiz_del():
         return redirect("/")
 
 
-# 메시지 보내기(admin 만 가능)
-@app.route("/send-message")
-def send_message():
-    if session["userid"] == "admin":
-        if request.args.get("m"):
-            flash("성공")
-
-            if request.args.get("target") in messages.keys():
-                messages[request.args.get("target")].append("관리자의 메시지 : " + request.args.get("m"))
-
-            else:
-                messages[request.args.get("target")] = ["관리자의 메시지 : " + request.args.get("m")]
-
-        return render_template("manage/message.html", ip=request.args.get("target"))
-
-    else:
-        abort(404)
-
-
-# 단축 url 생성
-@app.route("/shortcut")
-def shortcut_maker():
-    if not request.args.get("url"):
-        return render_template("shortcut.html")
-    else:
-        client = MongoClient("mongodb://localhost:27017/")
-        last_id_ = client.sol.shortcuts.find().sort("_id", -1)[0]["id"]
-        if last_id_ == "ZZ":
-            client.close()
-            return redirect("/shortcut-complete?id=망했다")
-
-        if pool.find(last_id_[1]) == 61:
-            new_id = pool[pool.find(last_id_[0]) + 1] + "a"
-
-        else:
-            new_id = last_id_[0] + pool[pool.find(last_id_[1]) + 1]
-
-        client.sol.shortcuts.insert_one({
-            "id": new_id,
-            "target": request.args.get("url")
-        })
-
-        client.close()
-        return redirect("/shortcut-complete?id=%s" % new_id)
-
-
-# 단축된 url 확인시키기
-@app.route("/shortcut-complete")
-def shortcut_maker_complete():
-    if request.args.get("id") == "망했다":
-        return "망했어!!!"
-    return "shortcut url : http://s.sol-studio.tk/" + request.args.get("id")
-
-
 @app.route("/file-server/upload", methods=["POST"])
 def file_server_upload():
     upload_file = request.files.get('file', None)
@@ -1048,15 +974,101 @@ def chat_room(room):
         h = hashlib.sha1()
         h.update(list(client["chat"]["index"].find({"room": room}))[0]["pw"].encode())
         if str(h.hexdigest()) == request.args.get("pw"):
-            return render_template("chat/chat.html", room=request.args.get("room"), userid=session["userid"])
-
+            return render_template("chat/chat.html", room=room, userid=session["userid"])
 
     return render_template("err/chat-no-room.html")
 
 
+@app.route("/drive", methods=["GET", "POST"])
+def drive():
+    full_path = request.args.get("path")
+    if not full_path:
+        full_path = ""
+
+    if request.method == "POST":
+        files = request.files.getlist("file[]")
+        for file in files:
+            file.save(os.path.join("drive/%s/%s" % (session["userid"], full_path), custom_secure_filename(file.filename)))
+
+        return redirect("/drive?path=" + full_path)
+
+
+        
+    else:
+        # 그 사람 폴더 없으면 생성
+        if not os.path.isdir("drive/" + session["userid"]):
+            os.mkdir("drive/" + session["userid"])
+        
+        if request.args.get("c"):
+            try:
+                os.mkdir("drive\\%s\\%s\\%s" % (session["userid"], full_path, request.args.get("c")))
+                return redirect("/drive?path=" + full_path)
+            except:
+                flash("같은 이름의 폴더가 이미 있습니다.")
+                return redirect("/drive?path=" + full_path)
+
+        # 상위폴더 경로
+        if "/" not in full_path:
+            upper = None
+        else:
+            upper = full_path[:full_path.find("/")]
+        
+        # file, dir list
+        files = os.listdir("drive\\%s\\%s" % (session["userid"], full_path))
+
+        
+        # file과 dir 분류
+        dirs = []
+        for file in files:
+            if os.path.isdir(os.path.join("drive\\%s\\%s" % (session["userid"], full_path), file)):
+                dirs.append(file)
+                files.remove(file)
+
+        
+
+
+        full_path_l = full_path.split("/")
+        try:
+            full_path_l.remove("")
+        except:
+            pass
+        full_path_l = [session["userid"]] + full_path_l
+
+
+        paths = ["", ""]
+        for i in full_path_l[1:]:
+            paths.append(paths[-1] + "/" + i)
+
+
+        return render_template("drive/index.html", 
+                                files=files, 
+                                dirs=dirs, 
+                                full_path=full_path, 
+                                full_path_l=full_path_l,
+                                upper=upper, 
+                                paths=paths[1:],
+                                paths_len=len(paths)
+        )
+
+
+@app.route("/drive/file")
+def drive_file():
+    return send_file("drive\\" + session["userid"] + "\\" + request.args.get("id"), as_attachment=True)
+
+
+
+# errorhandler
 @app.errorhandler(404)
 def error_404(e):
-    return render_template("err/page-not-found.html")
+    return render_template("err/common.html", err_code="404", err_message="원하시는 페이지를 찾을 수 없습니다.")
+
+
+@app.errorhandler(500)
+def error_500(e):
+    return render_template("err/common.html", err_code="500", err_message="서버 내부 오류가 발견됐습니다.")
+
+
+
 
 
 Log = Log()

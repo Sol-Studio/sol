@@ -22,8 +22,7 @@
       <td>
           <a href="?cmd=del {{key}}">삭제</a> /
           {% if key in blacklist %}<a href="?cmd=unblock {{key}}">차단 해제</a>
-          {% else %}<a href="?cmd=block {{key}}">차단</a> /
-          {% endif %}<a href="/send-message?target={{ key }}" target="_blank">메시지 보내기</a>
+          {% else %}<a href="?cmd=block {{key}}">차단</a>
       </td>
     </tr>
     {% endfor %}
@@ -50,13 +49,3 @@
 
 </table>
 </div>
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-    <script>
-      {% for message in messages %}
-        alert('{{ message }}');
-      {% endfor %}
-    </script>
-{% endif %}
-{% endwith %}
-{% block body %}{% endblock %}

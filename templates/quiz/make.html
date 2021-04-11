@@ -134,13 +134,3 @@
 			<script src="/static/quiz/breakpoints.min.js"></script>
 			<script src="/static/quiz/util.js"></script>
 			<script src="/static/quiz/main.js"></script>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <script>
-      {% for message in messages %}
-        alert('{{ message }}');
-      {% endfor %}
-    </script>
-    {% endif %}
-    {% endwith %}
-    {% block body %}{% endblock %}

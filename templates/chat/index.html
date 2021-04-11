@@ -80,16 +80,5 @@
             if (e.keyCode == 13) enter();
         });
     </script>
-
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <script>
-      {% for message in messages %}
-        alert('{{ message }}');
-      {% endfor %}
-    </script>
-    {% endif %}
-    {% endwith %}
-    {% block body %}{% endblock %}
   </body>
 </html>

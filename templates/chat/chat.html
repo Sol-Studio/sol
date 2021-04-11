@@ -45,14 +45,13 @@
 
 
             function testWebSocket(){
-                websocket = new WebSocket("ws://sol-studio.tk:2000/");
+                websocket = new WebSocket("ws://localhost:2000/");
                 websocket.onmessage = function(evt){ onMessage(evt) };
             }
 
             function onMessage(evt){
                 console.log(evt.data);
                 if (evt.data == "fail"){
-                    loading = 0;
                     clearInterval(interval);
                     interval = setInterval(update, 2000);
                     $('#loading, #loading-image').hide();
@@ -63,7 +62,7 @@
                 }
                 else{
                     clearInterval(interval);
-                    interval = setInterval(update, 100);
+                    interval = setInterval(update, 1);
                     var pre = document.createElement("p");
                     pre.style.wordWrap = "break-word";
                     pre.innerHTML = evt.data;
