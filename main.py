@@ -369,7 +369,8 @@ def manage_ip(ip):
 def login():
     if session['userid']:
         flash("이미 로그인돼있습니다.")
-        return redirect(request.args.get("redirect"))
+        return redirect("/")
+
     form = LoginForm()
 
     if request.method == "GET":
@@ -394,7 +395,7 @@ def login():
             login_data[str(i)] = d
 
         # 아이디가 존재하지 않음
-        if len(login_data) != 1:
+        if len(login_data) == 0:
             flash("로그인 정보가 맞지 않습니다.")
             return redirect("/login")
 
@@ -565,9 +566,6 @@ def new():
 # 글 보기 (조회)
 @app.route("/board/list/<idx>/<id_>")
 def post(idx, id_):
-    if not is_logined(session):
-        return redirect("/login")
-
     client = MongoClient("mongodb://localhost:27017/")
     posts = client.sol.posts
     data = posts.find({"url": int(id_)})
@@ -592,51 +590,6 @@ def delete_post(idx, id_):
     else:
         flash("권한이 없습니다")
         return redirect("/board/list/" + idx + "/" + id_)
-
-
-# TODO : 보안 취약
-# 인공지능
-@app.route("/ai", methods=['POST', 'GET'])
-def ai_page():
-    if request.method == "GET":
-        return render_template("ai/index.html")
-    else:
-        upload_file = request.files.get('file', None)
-        if mimetypes.guess_type(secure_filename(upload_file.filename)) == ('image/jpeg', None):
-            id_ = len(os.listdir("ai/result")) + 1
-            filename = str(id_) + ".jpg"
-            save_file_path = os.path.join(app.config['UPLOAD_DIR'], filename)
-            upload_file.save(save_file_path)
-
-            os.system("start python ai.py %s %d %s" % (save_file_path, id_, session['userid']))
-            return redirect("/ai/wait/" + str(id_))
-
-        else:
-            black_list.append(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
-            return "해킹 시도 감지됨."
-
-
-# 인공지능 결과 나올때까지 대기
-@app.route("/ai/wait/<id_>")
-def ai_wait(id_):
-    if os.path.isfile("ai/result/" + id_ + ".txt"):
-        return redirect("/ai/result/" + id_)
-
-    else:
-        return render_template("ai/wait.html")
-
-
-# 인공지능 결과
-@app.route("/ai/result/<id_>")
-def ai_result(id_):
-    if os.path.isfile("ai/result/" + id_ + ".txt"):
-        result = eval(open("ai/result/" + id_ + ".txt", "r").read())
-        if session["userid"] == result[-100]:
-            return render_template("ai/result.html", max_=result[max(result.keys())],
-                                   confidence=round(max(result.keys()), 3), img=result[-101])
-        return "다른 사람의 결과는 볼 수 없습니다."
-
-    return "잘못된 결과 id 입니다."
 
 
 # 내 프로필
@@ -1063,8 +1016,6 @@ def error_404(e):
 @app.errorhandler(500)
 def error_500(e):
     return render_template("err/common.html", err_code="500", err_message="서버 내부 오류가 발견됐습니다.")
-
-
 
 
 

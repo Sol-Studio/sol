@@ -23,5 +23,15 @@
         <button onclick="window.location = '/chat';" id="btn-Yes" class="btn btn-lg btn-primary btn-block" type="submit">돌아가기</button>
       </div>
     </div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <script>
+        {% for message in messages %}
+            alert("{{ message }}");
+        {% endfor %}
+        </script>
+    {% endif %}
+    {% endwith %}
+    {% block body %}{% endblock %}
   </body>
 </html>

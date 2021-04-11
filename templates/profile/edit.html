@@ -27,9 +27,9 @@
                         <td></td>
                         <td></td>
                     </tr>
-    
+
                 </thead>
-                <tbody> 
+                <tbody>
                     <tr>
                         <td>상태메시지(한줄소개)</td>
                         <td>
@@ -50,5 +50,15 @@
             <input type="submit">
         </div>
     </form>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <script>
+        {% for message in messages %}
+            alert("{{ message }}");
+        {% endfor %}
+        </script>
+    {% endif %}
+    {% endwith %}
+    {% block body %}{% endblock %}
     </body>
 </html>

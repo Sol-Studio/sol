@@ -100,5 +100,15 @@
             window.addEventListener("load", init, false);
 
         </script>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <script>
+            {% for message in messages %}
+                alert("{{ message }}");
+            {% endfor %}
+            </script>
+        {% endif %}
+        {% endwith %}
+        {% block body %}{% endblock %}
     </body>
 </html>

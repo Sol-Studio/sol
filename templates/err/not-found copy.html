@@ -12,5 +12,15 @@
 		<div class="card-title" style="margin-top:30px;"><h2 class="card-title text-center" style="color:#599cff; margin-bottom: -10px;">존재하지 않는 페이지입니다.</h2></div>
         <div class="card-body"></div>
 	</div>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+      <script>
+      {% for message in messages %}
+          alert("{{ message }}");
+      {% endfor %}
+      </script>
+  {% endif %}
+  {% endwith %}
+  {% block body %}{% endblock %}
   </body>
 </html>

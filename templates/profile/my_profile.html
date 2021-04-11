@@ -18,7 +18,7 @@
                 <tr>
                     <td>아이디</td>
                     <td>{{ profile["id"] }}</td>
-                </tr> 
+                </tr>
                 <tr>
                     <td>상태메시지(한줄소개)</td>
                     <td>{{ profile["status_message"] }}</td>
@@ -31,5 +31,15 @@
         </table>
         <a href="/my-profile-edit">수정</a>
     </div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <script>
+        {% for message in messages %}
+            alert("{{ message }}");
+        {% endfor %}
+        </script>
+    {% endif %}
+    {% endwith %}
+    {% block body %}{% endblock %}
     </body>
 </html>

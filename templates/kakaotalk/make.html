@@ -5,3 +5,13 @@
   URL(필수)  :<input type="url" name="url"/><br/>
   <input type="submit">
 </form>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    <script>
+    {% for message in messages %}
+        alert("{{ message }}");
+    {% endfor %}
+    </script>
+{% endif %}
+{% endwith %}
+{% block body %}{% endblock %}
