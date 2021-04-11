@@ -33,7 +33,7 @@ import glob
 app = Flask(__name__)
 app.config['SECRET_KEY'] = open("secret_key.txt", "r").read()
 app.config["UPLOAD_DIR"] = "static/upload/"
-app.config['SERVER_NAME'] = 'sol-studio.tk'
+
 
 # DEBUG
 if len(sys.argv) > 1:
