@@ -11,7 +11,7 @@ from wtforms.validators import DataRequired
 from wtforms.validators import EqualTo
 from pytz import timezone
 import os
-from flask import Flask 
+from flask import Flask
 from flask import render_template
 from flask import redirect
 from flask import request
@@ -33,7 +33,7 @@ import glob
 app = Flask(__name__)
 app.config['SECRET_KEY'] = open("secret_key.txt", "r").read()
 app.config["UPLOAD_DIR"] = "static/upload/"
-app.config['SERVER_NAME'] = 'localhost'
+app.config['SERVER_NAME'] = 'sol-studio.tk'
 
 # DEBUG
 if len(sys.argv) > 1:
@@ -993,12 +993,12 @@ def drive():
         return redirect("/drive?path=" + full_path)
 
 
-        
+
     else:
         # 그 사람 폴더 없으면 생성
         if not os.path.isdir("drive/" + session["userid"]):
             os.mkdir("drive/" + session["userid"])
-        
+
         if request.args.get("c"):
             try:
                 os.mkdir("drive\\%s\\%s\\%s" % (session["userid"], full_path, request.args.get("c")))
@@ -1012,11 +1012,11 @@ def drive():
             upper = None
         else:
             upper = full_path[:full_path.find("/")]
-        
+
         # file, dir list
         files = os.listdir("drive\\%s\\%s" % (session["userid"], full_path))
 
-        
+
         # file과 dir 분류
         dirs = []
         for file in files:
@@ -1024,7 +1024,7 @@ def drive():
                 dirs.append(file)
                 files.remove(file)
 
-        
+
 
 
         full_path_l = full_path.split("/")
@@ -1040,12 +1040,12 @@ def drive():
             paths.append(paths[-1] + "/" + i)
 
 
-        return render_template("drive/index.html", 
-                                files=files, 
-                                dirs=dirs, 
-                                full_path=full_path, 
+        return render_template("drive/index.html",
+                                files=files,
+                                dirs=dirs,
+                                full_path=full_path,
                                 full_path_l=full_path_l,
-                                upper=upper, 
+                                upper=upper,
                                 paths=paths[1:],
                                 paths_len=len(paths)
         )

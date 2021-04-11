@@ -24,7 +24,7 @@
 
             <section class="chat-window" id="chat-area"><div id="loading"><img id="loading-image" src="/static/img/loading.gif" alt="Loading..." /></div></section>
                 <div class="chat-input" id="chat_form">
-                    
+
                     <input id="send_input" name="msg" type="text" autocomplete="on" placeholder="Type a message" />
                     <button onclick="send_msg();">
                         <svg style="width:24px;height:24px" viewBox="0 0 24 24">
@@ -45,7 +45,7 @@
 
 
             function testWebSocket(){
-                websocket = new WebSocket("ws://localhost:2000/");
+                websocket = new WebSocket("ws://sol-studio.tk:2000/");
                 websocket.onmessage = function(evt){ onMessage(evt) };
             }
 
