@@ -367,45 +367,38 @@ def manage_ip(ip):
 # 로그인
 @app.route("/login", methods=['POST', 'GET'])
 def login():
-    if session['userid']:
-        flash("이미 로그인돼있습니다.")
-        return redirect("/")
-
     form = LoginForm()
 
     if request.method == "GET":
+        if session['userid']:
+            flash("이미 로그인돼있습니다.")
+            return redirect("/")
         return render_template("login.html", form=form)
 
-    elif request.method == "POST":
+    else:
         # db 연결
         client = MongoClient("mongodb://localhost:27017/")
         posts = client.sol.users
         # 입력값 불러오기
         id_ = form.data.get('id')
         pw = form.data.get('pw')
-        data = posts.find({"id": id_})
-
-        # db 연결 종료
+        data = list(posts.find({"id": id_}))
         client.close()
 
-        # 정보 검색
-        login_data = {}
-        i = 0
-        for d in data:
-            login_data[str(i)] = d
 
         # 아이디가 존재하지 않음
-        if len(login_data) == 0:
+        if len(data) == 0:
             flash("로그인 정보가 맞지 않습니다.")
             return redirect("/login")
 
         # 비밀번호가 안맞음
-        if login_data["0"]["pw"] != pw:
+        if data[0]["pw"] != pw:
             flash("로그인 정보가 맞지 않습니다.")
             return redirect("/login")
 
         # 통과
         else:
+            print("login passed")
             session['userid'] = id_
             return redirect("/")
 
