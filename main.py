@@ -272,7 +272,7 @@ def before_all_connect_():
 
     # 로그인이 필요하면 로그인 요청페이지
     if not is_logined(session):
-        return render_template("index.html", redirect=request.full_path)
+        return render_template("index.html")
 
 
 
@@ -399,17 +399,17 @@ def login():
         # 아이디가 존재하지 않음
         if len(login_data) != 1:
             flash("로그인 정보가 맞지 않습니다.")
-            return redirect("/login?redirect=" + request.args.get("redirect"))
+            return redirect("/login")
 
         # 비밀번호가 안맞음
         if login_data["0"]["pw"] != pw:
             flash("로그인 정보가 맞지 않습니다.")
-            return redirect("/login?redirect=" + request.args.get("redirect"))
+            return redirect("/login")
 
         # 통과
         else:
             session['userid'] = id_
-            return redirect(request.args.get("redirect"))
+            return redirect("/")
 
 
 # 회원가입
