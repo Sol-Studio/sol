@@ -1,90 +1,220 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="UTF-8">
-<title>{{ full_path }}</title>
-<style type="text/css">
-    .folder-ico {
-        width: 1.5rem;
-        height: 1.5rem;
-        margin-right: 1rem;
-    }
-    .folder {
-        font-size: 0.8rem;
-        height: 2rem;
-    }
-    li {
-        list-style: none;
-    }
-    a:link, a:visited, a:hover {
-        color: rgb(0, 65, 19);
-        text-decoration: none;
-    }
-    body {
-        width: 100%;
-        height: 100%;
-    }
+    <head>
+        <meta name='viewport' content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+        <meta charset="UTF-8">
+        <title>sol-drive</title>
+        <style type="text/css">
+            .prog{
+                width: 500px;
+                background: rgb(189, 177, 177);
+            }
+            .progs{
+                width: 10%;
+                height: 50px;
+                background: rgb(74, 54, 255);
+                color:#fff;
+                text-align: center;
+                line-height: 50px;
+            }
+            .filebox input[type="file"] {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip:rect(0,0,0,0);
+                border: 0;
+                }
 
-</style>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-</head>
-<body> 
-    <form enctype="multipart/form-data" action="/drive?path={{ full_path }}" method="POST">
-        파일 업로드 : <input type="file" name="file[]" multiple /><input type="submit" />
-    </form>        
-    <input type="text" id="input" placeholder="폴더 이름을 입력하세요">
-    <button class="btn" onclick="location = '?path={{ full_path }}&c=' + $('#input').val()">제출</button>
+            .filebox label, .btn {
+                display: inline-block;
+                padding: .5em .75em;
+                color: rgb(255, 255, 255);
+                font-size: inherit;
+                line-height: normal;
+                vertical-align: middle;
+                background-color: #0084ff;
+                cursor: pointer;
+                border: 1px solid #ebebeb;
+                border-bottom-color: #e2e2e2;
+                border-radius: .25em;
+            }
 
-    
-    <div style="font-size: large;margin:1%;">
-        {% for i in range(paths_len) %}
-            /&nbsp;<a class="path" href="/drive?path={{ paths[i] }}">{{ full_path_l[i] }}</a>
-        {% endfor %}
-    </div>
-       <table class="table" style="cursor: pointer;">
-           <thead>
-               <tr>
-                   <th>구분</th>
-                   <th>파일 이름</th>
-               </tr>
-           </thead>
-           <tbody>
-               {% if upper %}
-               <tr onclick="location='/drive?path={{ upper }}';">
-                   <td></td>
-                   <td>상위 폴더로 이동</td>
-               </tr>
-               {% endif %}
-                {% for file in files %}
-                <tr onclick="location='/drive/file?id={{ full_path }}%2F{{ file }}';">
-                   <td>파일</td>
-                   <td>{{ file }}</td>
-                </tr>
-                {% endfor %}
-                {% for dir in dirs %}
-                <tr onclick="location='/drive?path={{ full_path }}%2F{{ dir }}';">
-                    <td>폴더</td>
-                    <td>{{ dir }}</td>
-                </tr>
-               {% endfor %}
-           </tbody>
-       </table>
+            /* named upload */
+            .filebox .upload-name {
+                display: inline-block;
+                padding: .5em .75em;  /* label의 패딩값과 일치 */
+                font-size: inherit;
+                font-family: inherit;
+                line-height: normal;
+                vertical-align: middle;
+                background-color: #f5f5f5;
+                border: 1px solid #ebebeb;
+                border-bottom-color: #e2e2e2;
+                border-radius: .25em;
+                -webkit-appearance: none; /* 네이티브 외형 감추기 */
+                -moz-appearance: none;
+                appearance: none;
+            }
+            html, body { height: 100%; }
 
-
-     
-
+            .custom-context-menu {
+                position: absolute;
+                box-sizing: border-box;
+                min-height: 100px;
+                min-width: 200px;
+                background-color: #ffffff;
+                box-shadow: 0 0 1px 2px lightgrey;
+            }
             
-    
-       {% with messages = get_flashed_messages() %}
-       {% if messages %}
-           <script>
-           {% for message in messages %}
-               alert("{{ message }}");
-           {% endfor %}
-           </script>
-       {% endif %}
-       {% endwith %}
-       {% block body %}{% endblock %}  
-</body>
+            .custom-context-menu ul {
+                list-style: none;
+                padding: 0;
+                background-color: transparent;
+            }
+            
+            .custom-context-menu li {
+                padding: 3px 5px;
+                cursor: pointer;
+            }
+            
+            .custom-context-menu li:hover {
+                background-color: #f0f0f0;
+            } 
+        </style>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+        <script src="https://code.jquery.com/jquery-latest.js"></script>
+
+
+    </head>
+    <body>             
+                <form enctype="multipart/form-data" action="/drive?path={{ full_path }}" method="POST">
+                    <div class="filebox">
+                        <input class="upload-name" value="선택된 파일 없음" disabled="disabled">
+                        <label for="ex_filename" type="submit">파일선택</label>
+                        <input type="file" name="file[]" multiple id="ex_filename" class="upload-hidden" />
+                        <input type="submit" onclick="$('.prog').show()"/>
+                    </div>
+                </form>
+                <div class="prog">
+                    <div class="progs" id="progressing">0%</div>
+                </div>
+                <button class="btn" onclick="create_dir();">새폴더</button>
+                <div style="font-size: large;margin:1%;">
+                    {% for i in range(paths_len) %}
+                        /&nbsp;<a class="path" href="/drive?path={{ paths[i] }}">{{ full_path_l[i] }}</a>
+                    {% endfor %}
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>파일 이름</th>
+                            <th>크기</th>
+                            <th>엑션</th>
+                        </tr>
+                    </thead>
+                        <tbody>
+                            {% if upper %}
+                            <tr onclick="location='/drive?path={{ upper }}';">
+                                <td>상위 폴더로 이동</td>
+                            </tr>
+                            {% endif %}
+
+                            {% for dir in dirs %}
+                            <tr>
+                                <td  style="cursor: pointer;" onclick="location='/drive?path={{ full_path }}%2F{{ dir }}';">{{ dir }}</td>
+                                <td>{{ dirs[dir] }}바이트</td>
+                                <td><a href="" onclick="remove_dir('{{ full_path }}&rmdir={{ dir }}');">삭제</a></td>
+                            </tr>
+                            {% endfor %}
+                            {% for file in files %}
+                            <tr>
+                            <td  style="cursor: pointer;" onclick="downloadFile('{{ full_path }}%2F{{ file }}');">{{ file }}</td>
+                            <td>{{ files[file] }}바이트</td>
+                            <td><a href="/drive?path={{ full_path }}&del={{ file }}">삭제</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            
+
+                <script>
+                    $(".prog").hide();
+
+
+                    $(function() {
+                        var ele=document.getElementById('progressing');
+                        var width = 0;
+                        ele.style.width=width+"%";
+                        ele.innerHTML=width+"%";
+                        $('form').ajaxForm({
+                            beforeSend: function() {
+                            },
+                            uploadProgress: function(event, position, total, percentComplete) {
+                                width = percentComplete;
+                                ele.style.width=width+"%";
+                                ele.innerHTML=width + "%";
+                            },
+                            complete: function(xhr) {
+                                location.reload();
+                            },
+                            error:function(e){
+                                alert('실패');
+                            }
+                        });
+                    }); 
+
+
+                    $(document).ready(function(){
+                    var fileTarget = $('.filebox .upload-hidden');
+
+                    fileTarget.on('change', function(){  // 값이 변경되면
+                        if(window.FileReader){  // modern browser
+                            var filename = $(this)[0].files[0].name;
+                            } 
+                            else {  // old IE
+                            var filename = $(this).val().split('/').pop().split('\\').pop();  // 파일명만 추출
+                            }
+                            
+                            // 추출한 파일명 삽입
+                            $(this).siblings('.upload-name').val(filename);
+                        });
+                    }); 
+                    function create_dir(){
+                        folder = prompt("폴더 이름을 입력해주세요");
+                        if (folder)
+                            location = '?path={{ full_path }}&mkdir=' + folder;
+                    }
+                    function remove_dir(dir){
+                        if (confirm("폴더 안의 내용을 모두 삭제하시겠습니까?")){
+                            location = "/drive?path=" + dir;
+                        }
+                    }
+                    function downloadFile(filename){
+                        $.ajax({
+                            method:"GET",
+                            url : '#',
+                            success : function(data) {
+                                window.location ='/drive?file=' + filename;
+                            },
+                            error:function(request,status){
+                                alert("오류가 발생했습니다.");
+                            }
+                        });
+                    }
+</script>
+        
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <script>
+        {% for message in messages %}
+            alert("{{ message }}");
+        {% endfor %}
+        </script>
+    {% endif %}
+    {% endwith %}
+    {% block body %}{% endblock %}  
+    </body>
 </html>

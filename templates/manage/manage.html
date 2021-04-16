@@ -1,5 +1,4 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-<div class="container">
 <table class="table-hover table">
   <thead>
     <tr>
@@ -13,18 +12,18 @@
   </thead>
   <tbody>
     {% for key in keys %}
-    <tr style = "cursor:pointer;" onClick = "location.href='/manage/{{ key }}'" name='{{ key }}'>
-      <td>{{ key }}</td>
-      <td>{{ ips[key]["id"] }}</td>
-      <td>{{ ips[key]["url"] }}</td>
-      <td>{{ ips[key]["action"] }}</td>
-      <td>{{ ips[key]["last"] }}</td>
-      <td>
-          <a href="?cmd=del {{key}}">삭제</a> /
-          {% if key in blacklist %}<a href="?cmd=unblock {{key}}">차단 해제</a>
-          {% else %}<a href="?cmd=block {{key}}">차단</a>
-      </td>
-    </tr>
+      <tr style = "cursor:pointer;" onClick = "location.href='/manage/{{ key }}'" name='{{ key }}'>
+        <td>{{ key }}</td>
+        <td>{{ ips[key]["id"] }}</td>
+        <td>{{ ips[key]["url"] }}</td>
+        <td>{{ ips[key]["action"] }}</td>
+        <td>{{ ips[key]["last"] }}</td>
+        <td>
+            <a href="?cmd=del {{key}}">삭제</a> /
+            {% if key in blacklist %}<a href="?cmd=unblock {{key}}">차단 해제</a>
+            {% else %}<a href="?cmd=block {{key}}">차단</a>{% endif %}
+        </td>
+      </tr>
     {% endfor %}
   </tbody>
 </table>
@@ -48,7 +47,7 @@
     </tbody>
 
 </table>
-</div>
+
 {% with messages = get_flashed_messages() %}
 {% if messages %}
     <script>

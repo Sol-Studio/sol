@@ -27,7 +27,7 @@ import sys
 import random
 import hashlib
 import glob
-
+import shutil
 
 # Create Flask App
 app = Flask(__name__)
@@ -189,7 +189,7 @@ def is_logined(s):
 
 # post 여러개 올리기
 def mongodb_test(num):
-    client = MongoClient("mongodb://localhost:27017/")
+    client = MongoClient("mongodb://localhost:27017")
     posts = client.sol.posts
 
     for i in range(num):
@@ -209,6 +209,17 @@ def mongodb_test(num):
 
 def custom_secure_filename(name):
     return name.replace('/', "").replace("\\", "")
+
+
+def get_dir_size(path):
+    total = 0
+    with os.scandir(path) as it:
+        for entry in it:
+            if entry.is_file():
+                total += entry.stat().st_size
+            elif entry.is_dir():
+                total += get_dir_size(entry.path)
+    return total
 
 
 # 모든 연결에 대해 실행
@@ -262,6 +273,9 @@ def before_all_connect_():
     if ip in black_list:
         abort(403)
 
+    if request.environ.get('SERVER_PROTOCOL') != "HTTP/1.1":
+        return make_response("Only Support HTTP 1.1<br>sol-studio", 502)
+
     # 로그인이 필요없으면 return
     for i in range(len(NoLoginPages)):
         if NoLoginPages[i] in request.full_path:
@@ -269,7 +283,7 @@ def before_all_connect_():
 
     # 로그인이 필요하면 로그인 요청페이지
     if not is_logined(session):
-        return render_template("login.html")
+        return redirect("/login")
 
 
 
@@ -290,20 +304,21 @@ def manage():
 
             # 로그 삭제
             if cmd[0] == "del":
-                del ips[cmd[1]]
-                os.remove("hist/%s.bin" % cmd[1])
-                flash("완료")
+                try:
+                    del ips[cmd[1]]
+                    os.remove("hist/%s.bin" % cmd[1])
+                except:
+                    pass
 
             # 블랙리스트
             elif cmd[0] == "block":
                 black_list.append(cmd[1])
-                flash("완료")
+
 
             # 블랙리스트 해제
             elif cmd[0] == "unblock":
                 if cmd[1] in black_list:
                     black_list.remove(cmd[1])
-                    flash("완료")
                 else:
                     flash("블랙리스트에 없습니다")
 
@@ -377,7 +392,7 @@ def login():
 
     else:
         # db 연결
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient("mongodb://localhost:27017")
         posts = client.sol.users
         # 입력값 불러오기
         id_ = form.data.get('id')
@@ -416,7 +431,7 @@ def signup():
         return render_template("signup.html", form=form)
 
     elif request.method == "POST":
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient("mongodb://localhost:27017")
         database = client["sol"]
         users = database["users"]
         data = users.find({"id": form.data.get('id')})
@@ -476,7 +491,7 @@ def logout():
 @app.route("/change-pw", methods=["POST", "GET"])
 def change_pw():
     if request.method == "POST":
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient("mongodb://localhost:27017")
         db = client.sol.users
         profile = list(db.find({"id": session["userid"]}))[0]
         if profile["pw"] == request.form.get("last_pw") and request.form.get("new_pw") == request.form.get(
@@ -505,7 +520,7 @@ def index_of_board():
 def pages_(index_num):
     if int(index_num) < 1:
         return redirect("/board/list/1")
-    client = MongoClient("mongodb://localhost:27017/")
+    client = MongoClient("mongodb://localhost:27017")
     posts = client.sol.posts
     i = int(index_num) * 20 - 20
     return_posts = {}
@@ -536,7 +551,7 @@ def new():
         return render_template("board/new.html")
 
     ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-    client = MongoClient("mongodb://localhost:27017/")
+    client = MongoClient("mongodb://localhost:27017")
     posts = client.sol.posts
     content = str(request.form.get('content')).replace("\n", "<br>")
 
@@ -559,7 +574,7 @@ def new():
 # 글 보기 (조회)
 @app.route("/board/list/<idx>/<id_>")
 def post(idx, id_):
-    client = MongoClient("mongodb://localhost:27017/")
+    client = MongoClient("mongodb://localhost:27017")
     posts = client.sol.posts
     data = posts.find({"url": int(id_)})
     client.close()
@@ -572,7 +587,7 @@ def post(idx, id_):
 # 글 삭제
 @app.route("/board/list/<idx>/<id_>/delete")
 def delete_post(idx, id_):
-    client = MongoClient("mongodb://localhost:27017/")
+    client = MongoClient("mongodb://localhost:27017")
     posts = client.sol.posts
     data = posts.find({"url": int(id_)})
     client.close()
@@ -589,7 +604,7 @@ def delete_post(idx, id_):
 @app.route("/my-profile")
 def my_profile():
     ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-    client = MongoClient("mongodb://localhost:27017/")
+    client = MongoClient("mongodb://localhost:27017")
     users = client.sol.users
     data = users.find({"id": session['userid']})
     # db 연결 종료
@@ -611,7 +626,7 @@ def my_profile():
 @app.route("/my-profile-edit", methods=["POST", "GET"])
 def edit_profile():
     if request.method == "GET":
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient("mongodb://localhost:27017")
         users = client["sol"]["users"]
         data = users.find({"id": session['userid']})
         # db 연결 종료
@@ -628,7 +643,7 @@ def edit_profile():
     elif request.method == "POST":
         status_message = request.form.get('status_message')
         print(status_message)
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient("mongodb://localhost:27017")
         users = client.sol.users
         users.update({"id": session["userid"]}, {"$set": {"status_message": status_message}})
         # db 연결 종료
@@ -639,7 +654,7 @@ def edit_profile():
 # 남의 프로필 보기
 @app.route("/profile/<id_>")
 def other_profile(id_):
-    client = MongoClient("mongodb://localhost:27017/")
+    client = MongoClient("mongodb://localhost:27017")
     users = client.sol.users
     data = users.find({"id": id_})
     # db 연결 종료
@@ -709,7 +724,7 @@ def redirect_page():
 @app.route("/quiz", methods=["GET", "POST"])
 def quiz_index():
     if request.method == "POST":
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient("mongodb://localhost:27017")
         quizdb = client.sol.quiz
         register_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
@@ -771,7 +786,7 @@ def quiz_answer():
     except TypeError:
         return "문제 URL이 잘못되었습니다."
 
-    client = MongoClient("mongodb://localhost:27017/")
+    client = MongoClient("mongodb://localhost:27017")
     answers = list(client.sol.quiz_answer.find({"id": int(request.args.get("qno"))}))
     try:
         quiz = client.sol.quiz.find({"id": int(request.args.get("qno"))})[0]
@@ -799,7 +814,7 @@ def quiz_question():
         except TypeError:
             return mobile_meta + "문제 URL이 잘못되었습니다."
 
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient("mongodb://localhost:27017")
         quizdb = client.sol.quiz
 
         try:
@@ -821,7 +836,7 @@ def quiz_question():
         except TypeError:
             return mobile_meta + "문제 URL이 잘못되었습니다."
 
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient("mongodb://localhost:27017")
         quizdb = client.sol.quiz
         quiz_answerdb = client.sol.quiz_answer
         quiz = quizdb.find({"id": int(request.args.get("qno"))})[0]
@@ -851,7 +866,7 @@ def quiz_question():
 # 출제한 퀴즈 목록(admin 은 다 보임)
 @app.route("/quiz/list")
 def quiz_list():
-    client = MongoClient("mongodb://localhost:27017/")
+    client = MongoClient("mongodb://localhost:27017")
     if session["userid"] == "admin":
         given_quiz_list = list(client.sol.quiz.find())
     else:
@@ -871,7 +886,7 @@ def quiz_del():
         except TypeError:
             return mobile_meta + "문제 URL이 잘못되었습니다."
 
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient("mongodb://localhost:27017")
         quizdb = client.sol.quiz
         quiz_answerdb = client.sol.quiz_answer
         target = {"id": int(request.args.get("qno"))}
@@ -912,7 +927,7 @@ def chat_index():
 
 @app.route("/chat/<room>")
 def chat_room(room):
-    client = MongoClient("mongodb://localhost:27017/")
+    client = MongoClient("mongodb://localhost:27017")
     if room in client["chat"].collection_names():
         h = hashlib.sha1()
         h.update(list(client["chat"]["index"].find({"room": room}))[0]["pw"].encode())
@@ -925,6 +940,11 @@ def chat_room(room):
 @app.route("/drive", methods=["GET", "POST"])
 def drive():
     full_path = request.args.get("path")
+
+    if "게시판\\drive\\" + session["userid"] not in os.path.abspath("drive/%s/%s" % (session["userid"], full_path)):
+        return "이 바부야 내가 이걸 안막았겠냐"
+
+
     if not full_path:
         full_path = ""
 
@@ -932,6 +952,11 @@ def drive():
         files = request.files.getlist("file[]")
         for file in files:
             file.save(os.path.join("drive/%s/%s" % (session["userid"], full_path), custom_secure_filename(file.filename)))
+
+        if get_dir_size("drive/" + session["userid"]) > 1000000000:
+            os.remove(os.path.join("drive/%s/%s" % (session["userid"], full_path), custom_secure_filename(file.filename)))
+            return redirect("/drive?path=" + full_path + "&overflow=yes")
+
 
         return redirect("/drive?path=" + full_path)
 
@@ -942,13 +967,42 @@ def drive():
         if not os.path.isdir("drive/" + session["userid"]):
             os.mkdir("drive/" + session["userid"])
 
-        if request.args.get("c"):
+        if request.args.get("mkdir"):
             try:
-                os.mkdir("drive/%s/%s/%s" % (session["userid"], full_path, request.args.get("c")))
+                os.mkdir("drive/%s/%s/%s" % (session["userid"], full_path, request.args.get("mkdir")))
                 return redirect("/drive?path=" + full_path)
+
             except:
-                flash("같은 이름의 폴더가 이미 있습니다.")
+                flash("같은 이름의 폴더가 이미 있거나 폴더 이름으로 사용할 수 없는 기호가 포함돼있습니다.")
                 return redirect("/drive?path=" + full_path)
+
+        
+        if request.args.get("rmdir"):
+            shutil.rmtree("drive/%s/%s/%s" % (session["userid"], full_path, request.args.get("rmdir")))
+            return redirect("/drive?path=" + full_path)
+
+        
+        if request.args.get("del"):
+            try:
+                os.remove("drive/%s/%s/%s" % (session["userid"], full_path, request.args.get("del")))
+                return redirect("/drive?path=" + full_path)
+            
+            except:
+                flash("해당 파일이 없거나 오류가 발생했습니다.")
+                return redirect("/drive?path=" + full_path)
+        
+        if request.args.get("overflow"):
+            flash("사용 가능한 용량을 초과했습니다.")
+            return ""
+
+        if request.args.get("file"):
+            if "게시판\\drive\\" + session["userid"] not in os.path.abspath("drive/%s/%s" % (session["userid"], request.args.get("file"))):
+                return "이 바부야 내가 이걸 안막았겠냐"
+            try:
+                return send_file("drive/" + session["userid"] + "/" + request.args.get("file"), as_attachment=True)
+            except:
+                return ""
+
 
         # 상위폴더 경로
         if "/" not in full_path:
@@ -956,18 +1010,20 @@ def drive():
         else:
             upper = full_path[:full_path.find("/")]
 
+
         # file, dir list
-        files = os.listdir("drive/%s/%s" % (session["userid"], full_path))
+        tmp = os.listdir("drive/%s/%s" % (session["userid"], full_path))
+        dirs = {}
+        files = {}
+        exten = {}
 
-
-        # file과 dir 분류
-        dirs = []
-        for file in files:
-            if os.path.isdir(os.path.join("drive%s/%s" % (session["userid"], full_path), file)):
-                dirs.append(file)
-                files.remove(file)
-
-
+        for dir in tmp:
+            if os.path.isdir("drive/%s/%s" % (session["userid"], full_path) + "/" + dir):
+                dirs[dir] = get_dir_size(os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path, dir)))
+                tmp.remove(dir)
+        
+        for file in tmp:
+            files[file] = os.path.getsize(os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path, file)))
 
 
         full_path_l = full_path.split("/")
@@ -984,19 +1040,16 @@ def drive():
 
 
         return render_template("drive/index.html",
-                                files=files,
-                                dirs=dirs,
-                                full_path=full_path,
-                                full_path_l=full_path_l,
-                                upper=upper,
-                                paths=paths[1:],
-                                paths_len=len(paths)
+            files=files,
+            dirs=dirs,
+            full_path=full_path,
+            full_path_l=full_path_l,
+            upper=upper,
+            paths=paths[1:],
+            paths_len=len(paths),
+            extensions=exten
         )
 
-
-@app.route("/drive/file")
-def drive_file():
-    return send_file("drive/" + session["userid"] + "/" + request.args.get("id"), as_attachment=True)
 
 
 
@@ -1010,6 +1063,10 @@ def error_404(e):
 def error_500(e):
     return render_template("err/common.html", err_code="500", err_message="서버 내부 오류가 발견됐습니다.")
 
+
+@app.errorhandler(403)
+def error_500(e):
+    return render_template("err/common.html", err_code="403", err_message="접근 권한이 없습니다.")
 
 
 Log = Log()
