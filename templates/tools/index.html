@@ -1,0 +1,150 @@
+<title>도구 모음</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<style>
+    @import url(https://fonts.googleapis.com/css?family=Lato);
+    body {
+      margin: 0;
+    }
+    nav {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 200px 20px 300px;
+      box-sizing: border-box;
+    }
+    a:hover {
+        text-decoration: none;
+        color: rgb(151, 255, 246);
+    }
+    .nav { 
+        background: linear-gradient(90deg, #1a2980 , #26d0ce); 
+    }
+    nav::before {
+      position: absolute;
+      top: 10%;
+      left: 0;
+      width: 100%;
+      color: #fff;
+      font: 400 24px/1 'Lato', sans-serif;
+      text-align: center;
+    }
+    .nav::before { 
+        content: '마우스를 올려 메뉴 보기'; 
+    }
+    nav ul {
+      position: relative;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    nav ul::after {
+      display: block;
+      clear: both;
+      content: '';
+    }
+    nav ul li {
+      position: relative;
+      float: left;
+      border: 2px solid #fff;
+    }
+    nav ul li:not(:first-child) {
+      border-left: none;
+    }
+    nav ul li:hover {
+      background-color: rgba(255,255,255,.3);
+    }
+    nav ul li a {
+      display: inline-block;
+      padding: 1em 3em;
+      color: #fff;
+      font: 400 18px/1 'Lato', sans-serif;
+      text-align: center;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    nav ul ul {
+      position: absolute;
+      top: 100%;
+      left: -2px;
+    }
+    nav ul ul li {
+      float: none;
+      margin: 0;
+    }
+    nav ul ul li:not(:first-child) {
+      border: 2px solid #fff;
+      border-top: none;
+    }
+    nav ul ul ul {
+      position: absolute;
+      top: -2px;
+      left: 100%;
+    }
+
+    .nav ul li {
+      perspective: 300px;
+    }
+    .nav ul ul {
+      visibility: hidden;
+      opacity: 0;
+      transition: .3s ease-in-out;
+      transform: rotateX(-90deg) rotateY(0);
+      transform-origin: 0 0;
+    }
+    .nav ul ul li {
+      perspective: 1500px;
+    }
+    .nav ul ul ul {
+      transform: rotateX(0) rotateY(-90deg);
+    }
+    .nav ul li:hover > ul {
+      visibility: visible;
+      opacity: 1;
+      transform: rotateX(0) rotateY(0);
+    }
+</style>
+
+<nav class="nav">
+    <ul>
+        <li>        
+            <a href="#">웹툴</a>
+            <ul>
+                <li><a href="w/hash">해시</a></li>
+
+
+                <li><a href="w/camera">웹캠 테스트</a></li>
+
+
+                <li>
+                    <a href="#">계산</a>
+                    <ul>
+                        <li><a href="w/base">진수 계산기</a>
+                        <li><a href="w/d-day">D-DAY 계산기</a>
+                    </ul>
+                </li>
+
+
+                <li><a href="w/eng-kor">한영타 변환기</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#">프로그램 다운로드</a>
+            <ul>
+                <li>
+                    <a href="#">친구 놀리기</a>
+                    <ul>
+                        <li>
+                            <a href="#">블루스크린 띄우기</a>
+                            <ul>
+                                <li><a href="p/blue-screen.bat">bat파일</a></li>
+                                <li><a href="p/blue-screen.exe">exe파일</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+  </nav>

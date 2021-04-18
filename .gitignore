@@ -1,7 +1,6 @@
-/logs
-/upload
 /static/upload
-/ai/result
 *.bin
 /drive
 /.vs
+/.idea
+*.log

@@ -1,4 +1,3 @@
-import mimetypes
 from werkzeug.utils import secure_filename
 import logging
 import time
@@ -24,16 +23,13 @@ from pymongo import MongoClient
 import pickle
 from werkzeug.debug import DebuggedApplication
 import sys
-import random
 import hashlib
-import glob
 import shutil
 
 # Create Flask App
 app = Flask(__name__)
 app.config['SECRET_KEY'] = open("secret_key.txt", "r").read()
 app.config["UPLOAD_DIR"] = "static/upload/"
-
 
 # DEBUG
 if len(sys.argv) > 1:
@@ -45,17 +41,8 @@ else:
 if is_debug:
     app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
 
-
-pool = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+# 변수 선언
 connect_count = 0
-messages = {}
-
-try:
-    ips = pickle.load(open("ips.bin", "rb"))
-
-except FileNotFoundError:
-    ips = {}
-
 black_list = []
 NoLoginPages = [
     "/?",
@@ -63,7 +50,6 @@ NoLoginPages = [
     "/login?",
     "/redirect",
     "/quiz/question",
-    "/terms",
     "/file-server"
 ]
 IgnoreConnect = [
@@ -71,13 +57,18 @@ IgnoreConnect = [
     "/plugin/",
     "/config",
     "/favicon.ico?",
-    "/ai/wait/",
     "/manage",
     "/send-message",
     "/chat-load"
 ]
 mobile_meta = '<meta name=\'viewport\' content=\'width=device-width, initial-scale=1, user-scalable=no\' />'
 config = {"save_point": 1}
+
+# 커넥션 로그파일
+try:
+    ips = pickle.load(open("ips.bin", "rb"))
+except FileNotFoundError:
+    ips = {}
 
 
 # LOGIN FORMS
@@ -286,11 +277,13 @@ def before_all_connect_():
         return redirect("/login")
 
 
-
-# 홈
+# 홈 INDEX
 @app.route("/")
 def index_page():
-    return render_template("index.html", logined=is_logined(session))
+    if is_logined(session):
+        return render_template("index.html")
+    else:
+        return render_template("index_before_login.html")
 
 
 # 관리자 페이지
@@ -313,7 +306,6 @@ def manage():
             # 블랙리스트
             elif cmd[0] == "block":
                 black_list.append(cmd[1])
-
 
             # 블랙리스트 해제
             elif cmd[0] == "unblock":
@@ -400,7 +392,6 @@ def login():
         data = list(posts.find({"id": id_}))
         client.close()
 
-
         # 아이디가 존재하지 않음
         if len(data) == 0:
             flash("로그인 정보가 맞지 않습니다.")
@@ -464,15 +455,6 @@ def signup():
         else:
             flash("해당 아이디는 이미 사용중입니다.")
             return render_template("signup.html", form=form)
-
-
-@app.route("/terms")
-def terms():
-    return mobile_meta + "id와 비밀번호는 다른 사이트에서 사용하지 않는 것으로 해주세요(유출 위험)<br>이 사이트는 해킹에 취약합니다.<br><br>" \
-                         "1. 개인정보 처리에 관한 동의.<br>이 사이트는 개발을 목적으로 만들어졌고, 아주 가끔은 오류가 발생하기도 합니다.<br>" \
-                         "이 오류를 수정하고, 개인을 식별하기 위해 모든 사용자의 연결을 기록하는데에 동의합니다." \
-                         " 이 기록은 오류가 발생하지 않는 한 열어보지 않고, 1주일마다 삭제합니다(보통은 더 자주 삭제합니다)<br>" \
-                         "수집하는 정보 : ip, url, id<br><br><a href='/signup'>돌아가기</a>"
 
 
 # 로그아웃
@@ -920,11 +902,14 @@ def file_server_download():
                      attachment_filename=request.args.get("id"))
 
 
+# chat
+#   index
 @app.route("/chat")
 def chat_index():
     return render_template("chat/index.html")
 
 
+#   room
 @app.route("/chat/<room>")
 def chat_room(room):
     client = MongoClient("mongodb://localhost:27017")
@@ -937,13 +922,13 @@ def chat_room(room):
     return render_template("err/chat-no-room.html")
 
 
+# drive
 @app.route("/drive", methods=["GET", "POST"])
 def drive():
     full_path = request.args.get("path")
 
     if "게시판\\drive\\" + session["userid"] not in os.path.abspath("drive/%s/%s" % (session["userid"], full_path)):
-        return "이 바부야 내가 이걸 안막았겠냐"
-
+        return "누구인가 누가 해킹을 하려고 하는가!!!"
 
     if not full_path:
         full_path = ""
@@ -951,16 +936,15 @@ def drive():
     if request.method == "POST":
         files = request.files.getlist("file[]")
         for file in files:
-            file.save(os.path.join("drive/%s/%s" % (session["userid"], full_path), custom_secure_filename(file.filename)))
+            file.save(
+                os.path.join("drive/%s/%s" % (session["userid"], full_path), custom_secure_filename(file.filename)))
 
         if get_dir_size("drive/" + session["userid"]) > 1000000000:
-            os.remove(os.path.join("drive/%s/%s" % (session["userid"], full_path), custom_secure_filename(file.filename)))
+            os.remove(
+                os.path.join("drive/%s/%s" % (session["userid"], full_path), custom_secure_filename(file.filename)))
             return redirect("/drive?path=" + full_path + "&overflow=yes")
 
-
         return redirect("/drive?path=" + full_path)
-
-
 
     else:
         # 그 사람 폴더 없으면 생성
@@ -976,33 +960,32 @@ def drive():
                 flash("같은 이름의 폴더가 이미 있거나 폴더 이름으로 사용할 수 없는 기호가 포함돼있습니다.")
                 return redirect("/drive?path=" + full_path)
 
-        
         if request.args.get("rmdir"):
             shutil.rmtree("drive/%s/%s/%s" % (session["userid"], full_path, request.args.get("rmdir")))
             return redirect("/drive?path=" + full_path)
 
-        
         if request.args.get("del"):
             try:
                 os.remove("drive/%s/%s/%s" % (session["userid"], full_path, request.args.get("del")))
                 return redirect("/drive?path=" + full_path)
-            
+
             except:
                 flash("해당 파일이 없거나 오류가 발생했습니다.")
                 return redirect("/drive?path=" + full_path)
-        
+
         if request.args.get("overflow"):
             flash("사용 가능한 용량을 초과했습니다.")
             return ""
 
         if request.args.get("file"):
-            if "게시판\\drive\\" + session["userid"] not in os.path.abspath("drive/%s/%s" % (session["userid"], request.args.get("file"))):
+            if "게시판\\drive\\" + session["userid"] not in os.path.abspath(
+                    "drive/%s/%s" % (session["userid"], request.args.get("file"))):
                 return "이 바부야 내가 이걸 안막았겠냐"
             try:
                 return send_file("drive/" + session["userid"] + "/" + request.args.get("file"), as_attachment=True)
+
             except:
                 return ""
-
 
         # 상위폴더 경로
         if "/" not in full_path:
@@ -1010,21 +993,19 @@ def drive():
         else:
             upper = full_path[:full_path.find("/")]
 
-
         # file, dir list
         tmp = os.listdir("drive/%s/%s" % (session["userid"], full_path))
         dirs = {}
         files = {}
         exten = {}
 
-        for dir in tmp:
-            if os.path.isdir("drive/%s/%s" % (session["userid"], full_path) + "/" + dir):
-                dirs[dir] = get_dir_size(os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path, dir)))
-                tmp.remove(dir)
-        
+        for dir_ in tmp:
+            if os.path.isdir("drive/%s/%s" % (session["userid"], full_path) + "/" + dir_):
+                dirs[dir_] = get_dir_size(os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path, dir_)))
+                tmp.remove(dir_)
+
         for file in tmp:
             files[file] = os.path.getsize(os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path, file)))
-
 
         full_path_l = full_path.split("/")
         try:
@@ -1033,50 +1014,97 @@ def drive():
             pass
         full_path_l = [session["userid"]] + full_path_l
 
-
         paths = ["", ""]
         for i in full_path_l[1:]:
             paths.append(paths[-1] + "/" + i)
 
-
         return render_template("drive/index.html",
-            files=files,
-            dirs=dirs,
-            full_path=full_path,
-            full_path_l=full_path_l,
-            upper=upper,
-            paths=paths[1:],
-            paths_len=len(paths),
-            extensions=exten
+                                files=files,
+                                dirs=dirs,
+                                full_path=full_path,
+                                full_path_l=full_path_l,
+                                upper=upper,
+                                paths=paths[1:],
+                                paths_len=len(paths),
+                                extensions=exten
+                                )
+
+
+# TOOL
+#   index
+@app.route("/tools")
+@app.route("/tools/")
+def tools_index():
+    return render_template("tools/index.html")
+
+
+#   wtool
+@app.route("/tools/w/<tool>")
+def tools_w(tool):
+    try:
+        return render_template("tools/" + tool + ".html")
+
+    except:
+        return render_template("err/common.html", err_code="404", err_message="원하시는 페이지를 찾을 수 없습니다.")
+
+
+#   ptool
+@app.route("/tools/p/<tool>")
+def tools_p(tool):
+    try:
+        return send_file(
+            "templates/tools/p/" + tool,
+            attachment_filename=tool,
+            as_attachment=True
         )
 
+    except:
+        return render_template("err/common.html", err_code="404", err_message="원하시는 페이지를 찾을 수 없습니다.")
 
 
+# intro
+@app.route("/intro")
+def intro():
+    return render_template("intro.html")
 
+
+#
+#
+#
+#
+#
+#
 # errorhandler
+# 404
 @app.errorhandler(404)
 def error_404(e):
     return render_template("err/common.html", err_code="404", err_message="원하시는 페이지를 찾을 수 없습니다.")
 
 
+# 500
 @app.errorhandler(500)
 def error_500(e):
     return render_template("err/common.html", err_code="500", err_message="서버 내부 오류가 발견됐습니다.")
 
 
+# 403
 @app.errorhandler(403)
 def error_500(e):
     return render_template("err/common.html", err_code="403", err_message="접근 권한이 없습니다.")
 
 
+#
+#
+#
+#
+#
+#
+#
+#
+# SERVER RUN
 Log = Log()
-
-if is_debug:
-    Log.log("server restarted")
-    app.run(host='0.0.0.0', port=80, debug=True)
-
-else:
-    app.run(host="0.0.0.0", port=80, debug=False)
+Log.log("server restarted")
+app.run(host="0.0.0.0", port=80, debug=is_debug)
 
 # SERVER CLOSED
 pickle.dump(ips, open("ips.bin", "wb"))

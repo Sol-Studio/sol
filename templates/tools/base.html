@@ -1,0 +1,15 @@
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
+10진수 : <input type="text" id="10"><br>
+2진수 : <div id="2"></div><br>
+8진수 : <div id="8"></div><br>
+16진수 : <div id="16"></div><br>
+<script>
+    $("#10").keyup(function () {
+        var dec = $("#10").val();
+        dec = dec *= 1
+        $("#2").text((dec.toString(2)))
+        $("#8").text((dec.toString(8)))
+        $("#16").text((dec.toString(16)))
+    });
+</script>

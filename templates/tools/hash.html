@@ -1,0 +1,26 @@
+<title>해시</title>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
+<textarea id="input"></textarea>
+<select id="way">
+    <option value="sha1">SHA1</option>
+    <option value="sha256">SHA256</option>
+    <option value="md5">MD5</option>
+</select>
+<br><br>결과 : <div id="output"></div>
+<script>
+    setInterval(function(e){
+        if ($("#way").val() == "sha1")
+            var hash = CryptoJS.SHA1($("#input").val());
+
+        if ($("#way").val() == "sha256")
+            var hash = CryptoJS.SHA256($("#input").val());
+        
+        if ($("#way").val() == "md5")
+            var hash = CryptoJS.MD5($("#input").val());
+        
+        $("#output").text(CryptoJS.enc.Hex.stringify(hash));
+    }, 500);
+</script>

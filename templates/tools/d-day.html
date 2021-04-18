@@ -1,0 +1,18 @@
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+​ 
+<script language="JavaScript">
+    function calc(){
+        var now = new Date($("#start").val());
+        var then = new Date($("#end").val());
+        var gap = now.getTime() - then.getTime();
+        gap = Math.floor(gap / (1000 * 60 * 60 * 24));
+        if (gap < 0)
+            $("#output").text(("D " + gap));
+        else
+        $("#output").text(("D + " + gap));
+    }
+</script>
+시작일 : <input type="date" id="start"><br>
+종료일 : <input type="date" id="end"><br>
+<input type="button" onclick="calc();" value="계산!"><br><br>
+결과 : <div id="output"></div>
