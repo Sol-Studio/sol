@@ -87,7 +87,7 @@
         </style>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
         <script src="https://code.jquery.com/jquery-latest.js"></script>
-
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js" integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn" crossorigin="anonymous"></script>
 
     </head>
     <body>             
@@ -143,20 +143,16 @@
 
                 <script>
                     $(".prog").hide();
-
-
                     $(function() {
                         var ele=document.getElementById('progressing');
                         var width = 0;
                         ele.style.width=width+"%";
                         ele.innerHTML=width+"%";
                         $('form').ajaxForm({
-                            beforeSend: function() {
-                            },
+                            beforeSend: function() {},
                             uploadProgress: function(event, position, total, percentComplete) {
-                                width = percentComplete;
-                                ele.style.width=width+"%";
-                                ele.innerHTML=width + "%";
+                                ele.style.width=percentComplete+"%";
+                                ele.innerHTML=percentComplete + "%";
                             },
                             complete: function(xhr) {
                                 location.reload();
@@ -175,10 +171,6 @@
                         if(window.FileReader){  // modern browser
                             var filename = $(this)[0].files[0].name;
                             } 
-                            else {  // old IE
-                            var filename = $(this).val().split('/').pop().split('\\').pop();  // 파일명만 추출
-                            }
-                            
                             // 추출한 파일명 삽입
                             $(this).siblings('.upload-name').val(filename);
                         });
@@ -205,7 +197,7 @@
                             }
                         });
                     }
-</script>
+                </script>
         
     {% with messages = get_flashed_messages() %}
     {% if messages %}

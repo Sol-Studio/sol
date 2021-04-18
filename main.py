@@ -927,11 +927,11 @@ def chat_room(room):
 def drive():
     full_path = request.args.get("path")
 
-    if "게시판\\drive\\" + session["userid"] not in os.path.abspath("drive/%s/%s" % (session["userid"], full_path)):
-        return "누구인가 누가 해킹을 하려고 하는가!!!"
-
     if not full_path:
         full_path = ""
+
+    if "게시판\\drive\\" + session["userid"] not in os.path.abspath("drive/%s/%s" % (session["userid"], full_path)):
+        return "누구인가 누가 해킹을 하려고 하는가!!!"
 
     if request.method == "POST":
         files = request.files.getlist("file[]")
