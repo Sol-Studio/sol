@@ -555,7 +555,7 @@ def new():
 
 # 글 보기 (조회)
 @app.route("/board/post/<id_>")
-def post(idx, id_):
+def post(id_):
     client = MongoClient("mongodb://localhost:27017")
     posts = client.sol.posts
     data = posts.find({"url": int(id_)})
