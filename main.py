@@ -554,15 +554,15 @@ def new():
 
 
 # 글 보기 (조회)
-@app.route("/board/list/<idx>/<id_>")
+@app.route("/board/list/<id_>")
 def post(idx, id_):
     client = MongoClient("mongodb://localhost:27017")
     posts = client.sol.posts
     data = posts.find({"url": int(id_)})
     client.close()
     try:
-        return render_template("board/post.html", post=data[0], page=int(idx), id=session["userid"])
-    except KeyError:
+        return render_template("board/post.html", post=data[0], page=int(request.args.get("v")), id=session["userid"])
+    except:
         return redirect("/err/404")
 
 
