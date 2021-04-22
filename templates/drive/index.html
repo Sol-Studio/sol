@@ -199,15 +199,15 @@
                     }
                 </script>
         
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <script>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
         {% for message in messages %}
-            alert("{{ message }}");
-        {% endfor %}
-        </script>
-    {% endif %}
-    {% endwith %}
-    {% block body %}{% endblock %}  
+            <script>
+                alert("{{ message }}");
+            </script>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+        {% block body %}{% endblock %}
     </body>
 </html>

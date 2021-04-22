@@ -45,7 +45,7 @@
 
 
             function testWebSocket(){
-                websocket = new WebSocket("ws://sol-studio.tk:2000/");
+                websocket = new WebSocket("ws://sol-studio.tk:2000");
                 websocket.onmessage = function(evt){ onMessage(evt) };
             }
 
@@ -102,11 +102,11 @@
         </script>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
+        {% for message in messages %}
             <script>
-            {% for message in messages %}
                 alert("{{ message }}");
-            {% endfor %}
             </script>
+            {% endfor %}
         {% endif %}
         {% endwith %}
         {% block body %}{% endblock %}
