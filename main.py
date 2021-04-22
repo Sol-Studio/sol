@@ -554,7 +554,7 @@ def new():
 
 
 # 글 보기 (조회)
-@app.route("/board/list/<id_>")
+@app.route("/board/post/<id_>")
 def post(idx, id_):
     client = MongoClient("mongodb://localhost:27017")
     posts = client.sol.posts
@@ -563,12 +563,12 @@ def post(idx, id_):
     try:
         return render_template("board/post.html", post=data[0], page=int(request.args.get("v")), id=session["userid"])
     except:
-        return redirect("/err/404")
+        return abort(404)
 
 
 # 글 삭제
-@app.route("/board/list/<idx>/<id_>/delete")
-def delete_post(idx, id_):
+@app.route("/board/post/<id_>/delete")
+def delete_post(id_):
     client = MongoClient("mongodb://localhost:27017")
     posts = client.sol.posts
     data = posts.find({"url": int(id_)})
@@ -579,7 +579,7 @@ def delete_post(idx, id_):
         return redirect("/board/list")
     else:
         flash("권한이 없습니다")
-        return redirect("/board/list/" + idx + "/" + id_)
+        return redirect("/board/post/" + request.args.get("v") + "/" + id_)
 
 
 # 내 프로필

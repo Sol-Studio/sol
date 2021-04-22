@@ -47,7 +47,7 @@
     })();
 </script>
 <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="/board/list/{{ page }}/{{ post['url'] }}/delete">삭제</a>
+<a href="/board/post/{{ post['url'] }}/delete?v={{ page }}">삭제</a>
 
 {% with messages = get_flashed_messages() %}
 {% if messages %}
