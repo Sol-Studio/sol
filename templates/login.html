@@ -8,8 +8,8 @@
     <style>
       @import url('https://fonts.googleleapis.com/css?family=Noto+Sans+KR&display=swap');
       *{
-        margin: 0; 
-        padding: 0; 
+        margin: 0;
+        padding: 0;
         box-sizing: border-box;
       }
       body {
@@ -19,7 +19,7 @@
         align-items: center;
         height: 100vh;
         background: url("https://mblogthumb-phinf.pstatic.net/MjAxNzAyMDJfMjg5/MDAxNDg1OTk2ODc2Njc0.YLls08aCtZPAMR8GBJ4ktIadCtUzpPeS1jdzBTkt6nUg.W-p_93_51zJ9YvoxTevbSB0WO3YV1F0Qr91XpepRrg0g.JPEG.pho6400/1.jpg?type=w800") no-repeat center;
-        background-size: cover; 
+        background-size: cover;
       }
       body::before {
         content: "";
@@ -45,19 +45,19 @@
           background: transparent;
           border: none;
           border-bottom: 1px solid #999;
-          font-size: 18px; 
+          font-size: 18px;
           color: #ffffff;
           outline: none;
       }
         .int-area label {
-          position: absolute; left: 10px; top: 15px; 
+          position: absolute; left: 10px; top: 15px;
           font-size: 18px; color: #999;
           transition: all .5s ease;
         }
         .int-area label.warning {
           color: red !important;
           animation: warning .3s ease;
-          animation-iteration-count: 3; 
+          animation-iteration-count: 3;
         }
         @keyframes warning {
           0% {transform: translateX(-8px);}
@@ -67,8 +67,8 @@
         }
         .int-area input:focus + label,
         .int-area input:valid + label {
-          top: 0; 
-          font-size: 13px; color: #166cea; 
+          top: 0;
+          font-size: 13px; color: #166cea;
         }
 
         .btn-area {margin-top: 30px;}
@@ -94,7 +94,7 @@
   <body>
     <section class="login-form">
       <h1>L O G I N</h1>
-      <form action="">
+      <form action="" method="post">
           <div class="int-area">
             {{form.id(id="id", class="form-control")}}
             <label for="id">USER NAME</label>
@@ -114,24 +114,24 @@
     let id = $('#id');
     let pw = $('#pw');
     let btn = $('#btn');
-    
+
     $("#btn").click(function () {
       console.log("??")
-    
+
       if($(id).val() == "") {
         $(id).next('label').addClass('warning');
         setTimeout(function () {
           $('label').removeClass('warning');
         },1500);
       }
-    
+
       else if($(pw).val() == "") {
         $(pw).next('label').addClass('warning');
         setTimeout(function() {
           $('label').removeClass('warning');
         },1500);
       }
-    
+
     });
   </script>
     {% with messages = get_flashed_messages() %}
@@ -146,4 +146,3 @@
     {% block body %}{% endblock %}
   </body>
 </html>
-
