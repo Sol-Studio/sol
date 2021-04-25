@@ -1,70 +1,139 @@
 <!DOCTYPE html>
 <html lang="ko">
   <head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script src="https://code.jquery.com/jquery-latest.js"></script>
     <link href="/static/dist/images/logo.svg" rel="shortcut icon" type="image/x-icon">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <title>로그인</title>
-      <style>
-          @import url("http://fonts.googleapis.com/earlyaccess/nanumgothic.css");
+    <style>
+      @import url('https://fonts.googleleapis.com/css?family=Noto+Sans+KR&display=swap');
+      *{
+        margin: 0; 
+        padding: 0; 
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Noto Sans KR', sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: url("https://mblogthumb-phinf.pstatic.net/MjAxNzAyMDJfMjg5/MDAxNDg1OTk2ODc2Njc0.YLls08aCtZPAMR8GBJ4ktIadCtUzpPeS1jdzBTkt6nUg.W-p_93_51zJ9YvoxTevbSB0WO3YV1F0Qr91XpepRrg0g.JPEG.pho6400/1.jpg?type=w800") no-repeat center;
+        background-size: cover; 
+      }
+      body::before {
+        content: "";
+        position: absolute; z-index: 1;
+        top: 0; right: 0; bottom: 0; left: 0;
+        background-color: rgba(0,0,0,.7);
+      }
 
-        html {
-            height: 100%;
+      .login-form {position: relative; z-index: 2;}
+      .login-form h1 {
+          font-size: 32px; color: #fff;
+          text-align: center;
+          margin-bottom: 60px;
+      }
+      .int-area {
+        width: 400px; position: relative;
+        margin-top: 20px;
+        }
+        .int-area:first-child {margin-top: 0;}
+      .int-area input {
+          width: 100%;
+          padding: 20px 10px 10px;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid #999;
+          font-size: 18px; 
+          color: #ffffff;
+          outline: none;
+      }
+        .int-area label {
+          position: absolute; left: 10px; top: 15px; 
+          font-size: 18px; color: #999;
+          transition: all .5s ease;
+        }
+        .int-area label.warning {
+          color: red !important;
+          animation: warning .3s ease;
+          animation-iteration-count: 3; 
+        }
+        @keyframes warning {
+          0% {transform: translateX(-8px);}
+          25% {transform: translateX(8px);}
+          50% {transform: translateX(-8px);}
+          75% {transform: translateX(8px);}
+        }
+        .int-area input:focus + label,
+        .int-area input:valid + label {
+          top: 0; 
+          font-size: 13px; color: #166cea; 
         }
 
-        body {
-            width:100%;
-            height:100%;
-            margin: 0;
-            padding-top: 80px;
-            padding-bottom: 40px;
-            font-family: "Nanum Gothic", arial, helvetica, sans-serif;
-            background-repeat: no-repeat;
-            background: linear-gradient(to bottom right, #45C2B1, #FFFFFF);
+        .btn-area {margin-top: 30px;}
+        .btn-area button {
+          width: 100%; height: 50px;
+          background: #666cea;
+          color: #fff;
+          font-size: 20px;
+          border: none;
+          border-radius: 25px;
+          cursor: pointer;
         }
 
-        .card {
-            margin: 0 auto; /* Added */
-            float: none; /* Added */
-            margin-bottom: 10px; /* Added */
-            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        .caption {
+          margin-top: 20px;
+          text-align: center;
         }
-
-        .form-signin .form-control {
-            position: relative;
-            height: auto;
-            -webkit-box-sizing: border-box;
-            -moz-box-sizing: border-box;
-                 box-sizing: border-box;
-            padding: 10px;
-            font-size: 16px;
+        .caption a {
+          font-size: 15px; color: #999;
         }
-      </style>
-
+    </style>
   </head>
-
   <body>
-	<div class="card align-middle" style="width:20rem; border-radius:20px;">
-		<div class="card-title" style="margin-top:30px;">
-			<h2 class="card-title text-center" style="color:#113366;">로그인</h2>
-		</div>
-		<div class="card-body">
-          <form class="form-signin" method="POST" onSubmit="logincall();return false">
-            <h5 class="form-signin-heading">로그인 정보를 입력하세요</h5>
-              {{form.id(class="form-control", placeholder="YOUR ID")}}
-              {{form.pw(class="form-control", placeholder="PASSWORD")}}
-            <button id="btn-Yes" class="btn btn-lg btn-primary btn-block" type="submit">로 그 인</button>
-          </form>
-
-		</div>
-	</div>
-
-	<div class="modal">
-	</div>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <section class="login-form">
+      <h1>L O G I N</h1>
+      <form action="">
+          <div class="int-area">
+            {{form.id(id="id", class="form-control")}}
+            <label for="id">USER NAME</label>
+          </div>
+          <div class="int-area">
+            {{form.pw(id="pw", class="form-control")}}
+            <label for="pw">PASSWORD</label>
+            </div>
+            <div class="btn-area">
+                <button id="btn" type="submit">S U B M I T</button>
+          </div>
+        </form>
+        <div class="caption">
+        </div>
+        </section>
+ <script>
+    let id = $('#id');
+    let pw = $('#pw');
+    let btn = $('#btn');
+    
+    $("#btn").click(function () {
+      console.log("??")
+    
+      if($(id).val() == "") {
+        $(id).next('label').addClass('warning');
+        setTimeout(function () {
+          $('label').removeClass('warning');
+        },1500);
+      }
+    
+      else if($(pw).val() == "") {
+        $(pw).next('label').addClass('warning');
+        setTimeout(function() {
+          $('label').removeClass('warning');
+        },1500);
+      }
+    
+    });
+  </script>
     {% with messages = get_flashed_messages() %}
     {% if messages %}
         <script>
@@ -75,6 +144,6 @@
     {% endif %}
     {% endwith %}
     {% block body %}{% endblock %}
-</body>
   </body>
 </html>
+
