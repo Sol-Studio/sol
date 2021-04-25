@@ -57,7 +57,8 @@ NoLoginPages = [
     "/login?",
     "/redirect",
     "/quiz/question",
-    "/file-server"
+    "/file-server",
+    "/ip-collect/c"
 ]
 IgnoreConnect = [
     "/static/",
