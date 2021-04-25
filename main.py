@@ -29,7 +29,7 @@ import urllib.request
 import json
 import html
 import random
-
+import pprint
 
 
 
@@ -243,10 +243,10 @@ def url_short(orignalurl):
 
 def make_id():
     key = ""
-    for i in range(8):
+    for i in range(10):
         key += random.choice("0123456789ABCDEF")
     key += "-"
-    for i in range(8):
+    for i in range(10):
         key += random.choice("0123456789ABCDEF")
     print("\033[32m" + key + "\033[0m")
     return key
@@ -1169,7 +1169,7 @@ def ip_collect_():
 @app.route("/ip-collect/data")
 def ip_collect_list():
     if session["userid"] == "admin":
-        return str(ip_track) + "<br><br>네이버 api 사용량 : <a href='https://developers.naver.com/apps/#/myapps/T_IA04FSNb5FsLtQcqD9/overview'>보기</a>"
+        return pprint.pformat(ip_track).replace("\n", "<br>") + "<br><br>네이버 api 사용량 : <a href='https://developers.naver.com/apps/#/myapps/T_IA04FSNb5FsLtQcqD9/overview'>보기</a>"
     abort(404)
 
 #
