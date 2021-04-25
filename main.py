@@ -1147,22 +1147,25 @@ def ip_collect_view(track_id):
     rd = ip_track[track_id + "-rd"]
     return render_template("ip-track/view.html", 
         info=ip_track[track_id],
-        url=url_short("http://sol-studio.tk/ip-collect/c?track_id=%s&rd=%s" % (track_id, rd)), 
-        full_url="http://sol-studio.tk/ip-collect/c?track_id=%s&rd=%s" % (track_id, rd)
+        url=url_short("http://sol-studio.tk/ip-collect/c?track_id=" + track_id), 
+        full_url="http://sol-studio.tk/ip-collect/c?track_id=" + track_id
     )
 
 
 @app.route("/ip-collect/c")
 def ip_collect_():
-    rd = request.args.get("rd")
-    track_id = request.args.get("track_id")
-    if track_id in ip_track.keys():
-        ip_track[track_id].append(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
-    else:
-        ip_track[track_id] = [request.environ.get('HTTP_X_REAL_IP', request.remote_addr)]
-    
-    
-    return redirect(rd)
+    try:
+        track_id = request.args.get("track_id")
+        rd = ip_track[track_id + "-rd"]
+        if track_id in ip_track.keys():
+            ip_track[track_id].append(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+        else:
+            ip_track[track_id] = [request.environ.get('HTTP_X_REAL_IP', request.remote_addr)]
+        
+        
+        return redirect(rd)
+    except:
+        return redirect("https://naver.com")
 #
 #
 #
