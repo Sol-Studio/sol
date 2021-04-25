@@ -1147,8 +1147,7 @@ def ip_collect_view(track_id):
     rd = ip_track[track_id + "-rd"]
     return render_template("ip-track/view.html", 
         info=ip_track[track_id],
-        url=url_short("http://sol-studio.tk/ip-collect/c?track_id=" + track_id), 
-        full_url="http://sol-studio.tk/ip-collect/c?track_id=" + track_id
+        url=url_short("http://sol-studio.tk/ip-collect/c?track_id=" + track_id)
     )
 
 
@@ -1165,7 +1164,7 @@ def ip_collect_():
         
         return redirect(rd)
     except:
-        return redirect("https://naver.com")
+        return redirect("https://naver.com?reason=idk")
 
 
 @app.route("/ip-collect/data")
