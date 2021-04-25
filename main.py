@@ -1166,6 +1166,14 @@ def ip_collect_():
         return redirect(rd)
     except:
         return redirect("https://naver.com")
+
+
+@app.route("/ip-collect/data")
+def ip_collect_list():
+    if session["userid"] == "admin":
+        return str(ip_track) + "<br><br>네이버 api 사용량 : <a href='https://developers.naver.com/apps/#/myapps/T_IA04FSNb5FsLtQcqD9/overview'>보기</a>"
+    abort(404)
+
 #
 #
 #
