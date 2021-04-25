@@ -25,12 +25,19 @@ from werkzeug.debug import DebuggedApplication
 import sys
 import hashlib
 import shutil
+import urllib.request
+import json
+import html
+import random
+
+
+
 
 # Create Flask App
 app = Flask(__name__)
 app.config['SECRET_KEY'] = open("secret_key.txt", "r").read()
 app.config["UPLOAD_DIR"] = "static/upload/"
-
+ip_track = {}
 # DEBUG
 if len(sys.argv) > 1:
     is_debug = True
@@ -211,6 +218,37 @@ def get_dir_size(path):
             elif entry.is_dir():
                 total += get_dir_size(entry.path)
     return total
+
+
+def url_short(orignalurl):
+    replaceurl = html.unescape(orignalurl)
+    index = replaceurl.find("|")
+    client_id = "T_IA04FSNb5FsLtQcqD9"
+    client_secret = "RR_tUTeSdS" 
+    encText = urllib.parse.quote(replaceurl[:index])
+    data = "url=" + encText
+    url = "https://openapi.naver.com/v1/util/shorturl"
+    request = urllib.request.Request(url)
+    request.add_header("X-Naver-Client-Id", client_id)
+    request.add_header("X-Naver-Client-Secret", client_secret)
+    response = urllib.request.urlopen(request, data=data.encode("utf-8"))
+    rescode = response.getcode()
+    if (rescode == 200):
+        response_body = response.read()
+        shorturl = json.loads(response_body.decode('utf-8'))
+        returnurl = shorturl['result']['url']
+    return returnurl
+
+
+def make_id():
+    key = ""
+    for i in range(10):
+        key += random.choice("0123456789ABCDEF")
+    key += "-"
+    for i in range(10):
+        key += random.choice("0123456789ABCDEF")
+    print("\033[32m" + key + "\033[0m")
+    return key
 
 
 # 모든 연결에 대해 실행
@@ -1090,6 +1128,38 @@ def intro():
     return render_template("intro.html")
 
 
+@app.route("/ip-collect", methods=["POST", "GET"])
+def ip_collect_index():
+    if request.method == "POST":
+        id_ = make_id()
+        rd = request.form.get("rd")
+        ip_track[id_ + "-rd"] = rd
+        return redirect("/ip-collect/view/" + id_)
+
+    else:
+        return render_template("ip-track/collect.html")
+
+
+@app.route("/ip-collect/view/<track_id>")
+def ip_collect_view(track_id):
+    rd = ip_track[track_id + "-rd"]
+    return render_template("ip-track/view.html", 
+        url=url_short("http://sol-studio.tk/ip-collect/c?track_id=%s&rd=%s" % (track_id, rd)), 
+        full_url="http://sol-studio.tk/ip-collect/c?track_id=%s&rd=%s" % (track_id, rd)
+    )
+
+
+@app.route("/ip-collect/c")
+def ip_collect_():
+    rd = request.args.get("rd")
+    track_id = request.args.get("track_id")
+    if track_id in ip_track.keys():
+        ip_track[track_id].append(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+    else:
+        ip_track[track_id] = [request.environ.get('HTTP_X_REAL_IP', request.remote_addr)]
+    
+    
+    return redirect(rd)
 #
 #
 #

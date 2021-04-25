@@ -1,6 +1,6 @@
 <meta name='viewport' content='width=device-width, initial-scale=1.0'>
 <link href="/static/img/icon.ico" rel="shortcut icon" type="image/x-icon">
-
+<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
 <title>게시판 - {{ post['title'] }}</title>
 <style>
     .content{
@@ -48,7 +48,9 @@
 </script>
 <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 <a href="/board/post/{{ post['url'] }}/delete?v={{ page }}">삭제</a>
-
+<script>
+  ("#footer > ul > li.disqus-footer__logo > a").hide();
+</script>
 {% with messages = get_flashed_messages() %}
 {% if messages %}
     <script>
