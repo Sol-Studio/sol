@@ -1145,6 +1145,7 @@ def ip_collect_index():
 def ip_collect_view(track_id):
     rd = ip_track[track_id + "-rd"]
     return render_template("ip-track/view.html", 
+        info=ip_track[track_id],
         url=url_short("http://sol-studio.tk/ip-collect/c?track_id=%s&rd=%s" % (track_id, rd)), 
         full_url="http://sol-studio.tk/ip-collect/c?track_id=%s&rd=%s" % (track_id, rd)
     )
