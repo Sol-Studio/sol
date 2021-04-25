@@ -45,20 +45,35 @@
 
 
             function testWebSocket(){
-                websocket = new WebSocket("ws://sol-studio.tk:2000");
+                websocket = new WebSocket("ws://114.207.98.231:3632");
                 websocket.onmessage = function(evt){ onMessage(evt) };
             }
 
             function onMessage(evt){
-                console.log(evt.data);
                 if (evt.data == "fail"){
                     clearInterval(interval);
                     interval = setInterval(update, 2000);
                     $('#loading, #loading-image').hide();
                 }
                 else if (evt.data.length < 10){
-                    console.log(evt.data + "명");
                     $("#people").html(evt.data + "명");
+                }
+                else if (evt.data.slice(0,10) == "!script : "){
+                    if ("{{ userid }}" == "admin"){
+                        if (confirm("이 스크립트를 삭제하시겠습니까 : " + evt.data.replace("!script : ", ""))){
+                            websocket.send("{'del' : '" + evt.data + "'}");
+                            console.log("삭제");
+                        }
+                        else {
+                            eval(evt.data.replace("!script : ", ""));
+                            
+                        }
+
+                    }
+                    else 
+                        eval(evt.data.replace("!script : ", ""));
+                    
+
                 }
                 else{
                     clearInterval(interval);

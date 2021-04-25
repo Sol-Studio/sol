@@ -21,12 +21,13 @@
           </thead>
           <tbody>
           {% for i in length %}
-           <tr style = "cursor:pointer;" onClick = "location.href='/board/post/{{ posts[i][1] }}?v={{ page }}'">
-              <td>{{ posts[i][0] }}</td>
-              <td>{{ posts[i][3] }}</td>
-              <td>{{ posts[i][2] }}</td>
-              <td>{{ posts[i][1] }}</td>
-            </tr>
+            <a href="/board/post/{{ posts[i][1] }}?v={{ page }}"></a>
+            <tr style = "cursor:pointer;" onclick="window.location = '/board/post/{{ posts[i][1] }}?v={{ page }}'">
+                <td>{{ posts[i][0] }}</td>
+                <td>{{ posts[i][3] }}</td>
+                <td>{{ posts[i][2] }}</td>
+                <td>{{ posts[i][1] }}</td>
+              </tr>
           {% endfor %}
           </tbody>
         </table>

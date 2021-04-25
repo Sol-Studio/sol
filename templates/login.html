@@ -94,7 +94,7 @@
   <body>
     <section class="login-form">
       <h1>L O G I N</h1>
-      <form action="" method="post">
+      <form action="{{ action }}" method="post">
           <div class="int-area">
             {{form.id(id="id", class="form-control")}}
             <label for="id">USER NAME</label>
@@ -116,8 +116,6 @@
     let btn = $('#btn');
 
     $("#btn").click(function () {
-      console.log("??")
-
       if($(id).val() == "") {
         $(id).next('label').addClass('warning');
         setTimeout(function () {

@@ -58,7 +58,8 @@ NoLoginPages = [
     "/redirect",
     "/quiz/question",
     "/file-server",
-    "/ip-collect/c"
+    "/ip-collect/c",
+    "/board"
 ]
 IgnoreConnect = [
     "/static/",
@@ -180,7 +181,7 @@ def manage_helper(data):
 
 # 로그인되어있다면 아이디, 아니면 False
 def is_logined(s):
-    if not s["userid"]:
+    if s["userid"][:6] == "guest-":
         return False
     else:
         return s["userid"]
@@ -267,7 +268,7 @@ def before_all_connect_():
 
     # 로그인이 아직 안됐을때 None 을 아이디로
     if "userid" not in session.keys():
-        session["userid"] = None
+        session["userid"] = "guest-" + make_id()
 
     # 마지막 접속 기록을 남김
     if ip not in ips.keys():
@@ -305,15 +306,15 @@ def before_all_connect_():
 
     if request.environ.get('SERVER_PROTOCOL') != "HTTP/1.1":
         return make_response("Only Support HTTP 1.1<br>sol-studio", 502)
-
-    # 로그인이 필요없으면 return
-    for i in range(len(NoLoginPages)):
-        if NoLoginPages[i] in request.full_path:
-            return
+    
+    if is_logined(session):
+        return
 
     # 로그인이 필요하면 로그인 요청페이지
-    if not is_logined(session):
-        return redirect("/login")
+    if request.full_path[:7] == "/drive?"\
+    or request.full_path[:6] == "/chat/"\
+    or request.full_path[:11] == "/my-profile":
+        return redirect("/login?next=" + request.full_path)
 
 
 # 홈 INDEX
@@ -414,13 +415,14 @@ def manage_ip(ip):
 @app.route("/login", methods=['POST', 'GET'])
 def login():
     form = LoginForm()
-
     if request.method == "GET":
-        if session['userid']:
+        if is_logined(session):
             flash("이미 로그인돼있습니다.")
             return redirect("/")
-        return render_template("login.html", form=form)
-
+        if request.args.get("next"):
+            return render_template("login.html", form=form, action="/login?next=" + request.args.get("next"))
+        else:
+            return render_template("login.html", form=form, action="/login?next=/")
     else:
         # db 연결
         client = MongoClient("mongodb://localhost:27017")
@@ -445,7 +447,7 @@ def login():
         else:
             print("login passed")
             session['userid'] = form.data.get('id')
-            return redirect("/")
+            return redirect(request.args.get("next"))
 
 
 # 회원가입
@@ -551,6 +553,8 @@ def pages_(index_num):
         i += 1
 
     client.close()
+    if len(return_posts.keys()) == 0:
+        abort(404)
     return render_template("board/index.html",
                            posts=return_posts,
                            length=list(return_posts.keys()),
@@ -618,7 +622,7 @@ def delete_post(id_):
         return redirect("/board/list")
     else:
         flash("권한이 없습니다")
-        return redirect("/board/post/" + request.args.get("v") + "/" + id_)
+        return redirect("/board/post/" + id_ + "?v=" + request.args.get("v"))
 
 
 # 내 프로필

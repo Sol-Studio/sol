@@ -31,6 +31,11 @@ async def accept(websocket, path):
                     else:
                         z = ""
 
+                    if rd["content"][:10] == "!script : ":
+                        i += 1
+                        await websocket.send(rd["content"])
+                        continue
+
                     
                     await websocket.send("""<article class="msg-container %s"><div class="msg-box"><div class="flr"><div class="messages"><p class="msg">%s</p></div><span class="timestamp"><span class="username">%s</span>&bull;<span class="posttime">%s</span></span></div></div></article>""" % (z, rd["content"], rd["id"], rd["time"]))
                     
@@ -41,9 +46,15 @@ async def accept(websocket, path):
 
             else:
                 d = eval(d)
-                if d["content"] == "#command : !clear!":
+                if "del" in d.keys():
+                    client["chat"][data["room"]].delete_one({"content": d["del"]})
+                    print("deleted")
+
+
+                elif d["content"] == "#command : !clear!":
                     client["chat"][data["room"]].delete_many({})
-                
+                    
+
                 else:
                     client["chat"][data["room"]].insert_one({
                         "id": data["userid"],
