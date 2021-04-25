@@ -1153,18 +1153,16 @@ def ip_collect_view(track_id):
 
 @app.route("/ip-collect/c")
 def ip_collect_():
-    try:
-        track_id = request.args.get("track_id")
-        rd = ip_track[track_id + "-rd"]
-        if track_id in ip_track.keys():
-            ip_track[track_id].append(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
-        else:
-            ip_track[track_id] = [request.environ.get('HTTP_X_REAL_IP', request.remote_addr)]
-        
-        
-        return redirect(rd)
-    except:
-        return redirect("https://naver.com?reason=idk")
+    track_id = request.args.get("track_id")
+    rd = ip_track[track_id + "-rd"]
+    if track_id in ip_track.keys():
+        ip_track[track_id].append(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+    else:
+        ip_track[track_id] = [request.environ.get('HTTP_X_REAL_IP', request.remote_addr)]
+    
+    
+    return redirect(rd)
+
 
 
 @app.route("/ip-collect/data")
