@@ -1134,6 +1134,7 @@ def ip_collect_index():
     if request.method == "POST":
         id_ = make_id()
         rd = request.form.get("rd")
+        ip_track[id_] = []
         ip_track[id_ + "-rd"] = rd
         return redirect("/ip-collect/view/" + id_)
 
