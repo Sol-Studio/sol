@@ -243,10 +243,10 @@ def url_short(orignalurl):
 
 def make_id():
     key = ""
-    for i in range(10):
+    for i in range(8):
         key += random.choice("0123456789ABCDEF")
     key += "-"
-    for i in range(10):
+    for i in range(8):
         key += random.choice("0123456789ABCDEF")
     print("\033[32m" + key + "\033[0m")
     return key
