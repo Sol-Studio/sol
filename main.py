@@ -411,6 +411,10 @@ def manage_ip(ip):
                            blacklist=black_list, ip=ip)
 
 
+@app.route("/log/view/<date>")
+def veiw_log(date):
+    return send_file("logs/" + date + "log.log")
+
 # 로그인
 @app.route("/login", methods=['POST', 'GET'])
 def login():
