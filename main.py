@@ -981,11 +981,12 @@ def chat_room(room):
 
 
 def drive_path_check(session, full_path_, path_):
-    if "게시판\\drive\\" + session["userid"] not in os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))):
+    if "게시판\\drive\\" + session["userid"] in os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))):
+        return False
+    elif "server\\drive\\" + session["userid"] in os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))):
+        return False
+    else:
         return True
-    elif "/home/ec2-user/server/drive/" + session["userid"] not in os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))):
-        return True
-    return False
 
 
 # drive
@@ -1017,7 +1018,7 @@ def drive():
             or drive_path_check(session, full_path, request.args.get("mkdir"))\
             or drive_path_check(session, full_path, request.args.get("rmdir"))\
             or drive_path_check(session, full_path, request.args.get("del")):
-            return "누구인가 누가 해킹을 하려고 하는가!!!" + os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path, ""))
+            return "누구인가 누가 해킹을 하려고 하는가!!!" + os.path.abspath("drive/%s/%s" % (session["userid"], full_path))
 
 
 
