@@ -983,7 +983,7 @@ def chat_room(room):
 def drive_path_check(session, full_path_, path_):
     if "게시판\\drive\\" + session["userid"] not in os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))):
         return True
-    elif "\\home\\ec2-user\\server\\drive" + session["userid"] not in os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))):
+    elif "/home/ec2-user/server/drive/" + session["userid"] not in os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))):
         return True
     return False
 
