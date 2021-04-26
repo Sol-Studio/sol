@@ -982,12 +982,11 @@ def chat_room(room):
 
 def drive_path_check(session, full_path_, path_):
     if "게시판\\drive\\" + session["userid"] in os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))):
-        print(os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))))
         return False
     elif "server\\drive\\" + session["userid"] in os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))):
-        print(os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))))
         return False
     else:
+        print(os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))))
         return True
 
 
