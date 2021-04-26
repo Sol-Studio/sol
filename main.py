@@ -1017,7 +1017,7 @@ def drive():
             or drive_path_check(session, full_path, request.args.get("mkdir"))\
             or drive_path_check(session, full_path, request.args.get("rmdir"))\
             or drive_path_check(session, full_path, request.args.get("del")):
-            return "누구인가 누가 해킹을 하려고 하는가!!!" + os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, "")
+            return "누구인가 누가 해킹을 하려고 하는가!!!"
 
 
 
