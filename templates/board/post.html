@@ -4,9 +4,8 @@
 <title>게시판 - {{ post['title'] }}</title>
 <style>
     .content{
-        border-style: groove;
         width: 97%;
-        min-height: 80%;
+        min-height: 20%;
         margin: auto;
     }
     h1{
@@ -25,32 +24,19 @@
 {% if id == "admin" %}
 <h5 style="margin-top: -2%;">IP    : {{ post['ip'] }}</h5>
 {% endif %}
+<hr style="border: solid 1px rgb(20,20,20);">
 <div class="content">
         {{ post['content'] }}
 </div>
-<div class="container"><div id="disqus_thread"></div><div>
+<hr style="border: solid 1px rgb(20,20,20);">
+<div id="comment"></div>
 <script>
-    /**
-    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
-    /*
-    var disqus_config = function () {
-    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
-    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-    };
-    */
-    (function() { // DON'T EDIT BELOW THIS LINE
-    var d = document, s = d.createElement('script');
-    s.src = 'https://sol-studio-tk.disqus.com/embed.js';
-    s.setAttribute('data-timestamp', +new Date());
-    (d.head || d.body).appendChild(s);
-    })();
+    $("#comment").load("/comment/load?url=" + window.location.pathname)
 </script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="/board/post/{{ post['url'] }}/delete?v={{ page }}">삭제</a>
-<script>
-  ("#footer > ul > li.disqus-footer__logo > a").hide();
-</script>
+<a href="/board/post/{{ post['url'] }}/delete?v={{ page }}">글 삭제</a>
+
+
+
 {% with messages = get_flashed_messages() %}
 {% if messages %}
     <script>

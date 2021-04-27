@@ -226,7 +226,7 @@ def url_short(orignalurl):
     replaceurl = html.unescape(orignalurl)
     index = replaceurl.find("|")
     client_id = "T_IA04FSNb5FsLtQcqD9"
-    client_secret = "RR_tUTeSdS" 
+    client_secret = "RR_tUTeSdS"
     encText = urllib.parse.quote(replaceurl[:index])
     data = "url=" + encText
     url = "https://openapi.naver.com/v1/util/shorturl"
@@ -306,7 +306,7 @@ def before_all_connect_():
 
     if request.environ.get('SERVER_PROTOCOL') != "HTTP/1.1":
         return make_response("Only Support HTTP 1.1<br>sol-studio", 502)
-    
+
     if is_logined(session):
         return
 
@@ -597,13 +597,12 @@ def new():
 
     next_id = posts.find().sort('_id', -1)[0]["url"] + 1
 
-    x = datetime.now()
     posts.insert_one({
         "title": request.form.get('title'),
         "author": session['userid'],
         "content": content,
         "url": next_id,
-        "time": x.strftime("%Y년 %m월 %d일 %H시 %M분 %S초"),
+        "time": Log.get_log_date(),
         "ip": ip
     })
 
@@ -633,11 +632,56 @@ def delete_post(id_):
     client.close()
     if session['userid'] == data[0]['author'] or session["userid"] == "admin":
         posts.delete_one({"url": int(id_)})
+        client.sol.comments.delete_many({"url": "/board/post/" + id_})
         flash("삭제됐습니다")
         return redirect("/board/list")
     else:
         flash("권한이 없습니다")
         return redirect("/board/post/" + id_ + "?v=" + request.args.get("v"))
+
+
+# 댓글 로드
+@app.route("/comment/load")
+def comment_load():
+    url = request.args.get("url")
+    client = MongoClient("mongodb://localhost:27017")
+    commentsdb = client.sol.comments
+    comments = commentsdb.find({"url": url})
+    return render_template("comment.html", comments=list(comments), userid=session["userid"])
+
+
+# 댓글 추가
+@app.route("/comment/add")
+def comment_add():
+    client = MongoClient("mongodb://localhost:27017")
+    commentsdb = client.sol.comments
+    commentsdb.insert_one({
+        "url": request.args.get("url"),
+        "user": session["userid"],
+        "date": Log.get_log_date(),
+        "content": request.args.get("content"),
+        "id": commentsdb.find().sort('_id', -1)[0]["id"] + 1
+    })
+    client.close()
+    return "complete"
+
+
+# 댓글 삭제
+@app.route("/comment/del")
+def comment_del():
+    client = MongoClient("mongodb://localhost:27017")
+    commentsdb = client.sol.comments
+    data = list(commentsdb.find({
+        "id": int(request.args.get("id"))
+    }))
+    if data[0]["user"] == session["userid"] or session["userid"] == "admin":
+        commentsdb.delete_one({
+            "id": int(request.args.get("id"))
+        })
+        client.close()
+        return ''
+    client.close()
+    return ''
 
 
 # 내 프로필
@@ -694,6 +738,13 @@ def edit_profile():
 # 남의 프로필 보기
 @app.route("/profile/<id_>")
 def other_profile(id_):
+    if id_[:6] == "guest-":
+        return render_template("profile/other_profile.html",
+                        profile={
+                            "id": "게스트",
+                            "status_message": "없음"
+                        }
+                        )
     client = MongoClient("mongodb://localhost:27017")
     users = client.sol.users
     data = users.find({"id": id_})
@@ -981,7 +1032,6 @@ def chat_room(room):
 
 
 def drive_path_check(session, full_path_, path_):
-    print(os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))))
     if session["userid"] not in os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))):
         return True
     elif session["userid"] not in os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))):
@@ -1169,7 +1219,7 @@ def ip_collect_index():
 def ip_collect_view(track_id):
     rd = ip_track[track_id + "-rd"]
     print("http://sol-studio.tk/ip-collect/c?track_id=" + track_id)
-    return render_template("ip-track/view.html", 
+    return render_template("ip-track/view.html",
         info=ip_track[track_id],
         url=url_short("http://sol-studio.tk/ip-collect/c?track_id=" + track_id + "_")
     )
@@ -1183,8 +1233,8 @@ def ip_collect_():
         ip_track[track_id].append(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
     else:
         ip_track[track_id] = [request.environ.get('HTTP_X_REAL_IP', request.remote_addr)]
-    
-    
+
+
     return redirect(rd)
 
 
@@ -1195,12 +1245,7 @@ def ip_collect_list():
         return pprint.pformat(ip_track).replace("\n", "<br>") + "<br><br>네이버 api 사용량 : <a href='https://developers.naver.com/apps/#/myapps/T_IA04FSNb5FsLtQcqD9/overview'>보기</a>"
     abort(404)
 
-#
-#
-#
-#
-#
-#
+
 # errorhandler
 # 404
 @app.errorhandler(404)
@@ -1220,14 +1265,6 @@ def error_500(e):
     return render_template("err/common.html", err_code="403", err_message="접근 권한이 없습니다.")
 
 
-#
-#
-#
-#
-#
-#
-#
-#
 # SERVER RUN
 key = make_id()
 Log = Log()
