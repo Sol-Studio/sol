@@ -2,33 +2,23 @@
 <link href="/static/img/icon.ico" rel="shortcut icon" type="image/x-icon">
 <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
 <title>게시판 - {{ post['title'] }}</title>
-<style>
-    .content{
-        width: 97%;
-        min-height: 20%;
-        margin: auto;
-    }
-    h1{
-        margin-left: 2%;
-    }
-    h5{
-        margin-left:3%;
-    }
-</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8112542064837410" crossorigin="anonymous"></script>
 <a href="/board/list/{{ page }}">이전</a>
 <h1>{{ post['title'] }}</h1>
 <br>
-<h5 style="margin-top: -2%;">글쓴이 : {{ post['author'] }}</h5><br>
-<h5 style="margin-top: -2%;">TIME  : {{ post['time'] }}</h5><br>
-<h5 style="margin-top: -2%;">ID    : {{ post['url'] }}</h5><br>
+<img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png" class="avatar" alt="user_icon" style="list-style-type: none;opacity: 1;border-radius: 4px;position: relative;float: left;margin-left: 0;margin-top: 0;width: 65px;height: 65px;">
+<h5 style="margin-top: -2px;">{{ post['author'] }}</h5>
+<h5 style="margin-top: -20px;color:gray">{{ post['time'] }}</h5>
 {% if id == "admin" %}
-<h5 style="margin-top: -2%;">IP    : {{ post['ip'] }}</h5>
+<h5 style="margin-top: -2px">IP    : {{ post['ip'] }}</h5>
 {% endif %}
-<hr style="border: solid 1px rgb(20,20,20);">
+
+<hr style="margin-top: 30px;border: solid 1px rgb(150, 150, 150);">
 <div class="content">
         {{ post['content'] }}
 </div>
-<hr style="border: solid 1px rgb(20,20,20);">
+
+<br><br><br><br>
 <div id="comment"></div>
 <script>
     $("#comment").load("/comment/load?url=" + window.location.pathname)

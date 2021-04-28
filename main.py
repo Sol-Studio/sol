@@ -104,7 +104,7 @@ class Log:
     @staticmethod
     def get_log_date():
         dt = datetime.now(timezone("Asia/Seoul"))
-        log_date = dt.strftime("%Y%m%d_%H:%M:%S")
+        log_date = dt.strftime("%Y.%m.%d %H:%M:%S")
         return log_date
 
     def log(self, message, r=0):
@@ -644,6 +644,8 @@ def delete_post(id_):
 @app.route("/comment/load")
 def comment_load():
     url = request.args.get("url")
+    if not url:
+        return "ㅋㅋㄹㅃㅃ"
     client = MongoClient("mongodb://localhost:27017")
     commentsdb = client.sol.comments
     comments = commentsdb.find({"url": url})
@@ -660,7 +662,8 @@ def comment_add():
         "user": session["userid"],
         "date": Log.get_log_date(),
         "content": request.args.get("content"),
-        "id": commentsdb.find().sort('_id', -1)[0]["id"] + 1
+        "id": commentsdb.find().sort('_id', -1)[0]["id"] + 1,
+        "ip": request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     })
     client.close()
     return "complete"
