@@ -582,18 +582,19 @@ def pages_(index_num):
 def new():
     if request.method == "GET":
         return render_template("board/new.html")
-    content = str(request.form.get('content'))
+    content = str(request.form.get('content')).replace("\n", "<br>").replace("<script", "&lt;script")
+
     if not content:
         flash("내용을 입력해주세요")
         return render_template("board/new.html")
     if not request.form.get('title'):
         flash("제목을 입력해주세요")
         return render_template("board/new.html")
-
+    
     ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     client = MongoClient("mongodb://localhost:27017")
     posts = client.sol.posts
-    content = str(request.form.get('content')).replace("\n", "<br>")
+    
 
     next_id = posts.find().sort('_id', -1)[0]["url"] + 1
 
