@@ -565,14 +565,15 @@ def pages_(index_num):
     return_posts = {}
     if request.args.get("tag"):
         for post_ in posts.find().sort('_id', -1):
-            if request.args.get("tag") in post_["tags"]:
-                if i < (int(index_num)-1) * 20:
+            if "tags" in post_.keys():
+                if request.args.get("tag") in post_["tags"]:
+                    if i < (int(index_num)-1) * 20:
+                        i += 1
+                        continue
+                    return_posts[post_['url']] = post_['title'], post_['url'], post_['time'], post_['author']
                     i += 1
-                    continue
-                return_posts[post_['url']] = post_['title'], post_['url'], post_['time'], post_['author']
-                i += 1
-                if len(return_posts.keys()) == 20:
-                    break
+                    if len(return_posts.keys()) == 20:
+                        break
 
         client.close()
         if len(return_posts.keys()) == 0:
