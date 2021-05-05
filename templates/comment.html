@@ -104,12 +104,20 @@
         
     </head>
     <body>
+
         <div class="bootstrap snippets bootdey">
             <div class="row">
                 <div class="col-md-12">
                     <div class="blog-comment">
-                        <h3 class="text-success">댓글</h3><h4><a onclick='$("#comment").html("loading..");$("#comment").load("/comment/load?url=" + window.location.pathname);'>새로고침</a></h4>
+                        <h3 class="text-success">댓글</h3><h4><a onclick='$("#comment").load("/comment/load?url=" + window.location.pathname);'>새로고침</a></h4>
                         <hr/>
+                        <div class="container">
+                            <div class="container__item">
+                                <input type="text" id="content" placeholder="댓글 입력" />
+                                <button type="button" onclick="send();">GO!</button>
+                            </div>
+                        </div>
+                        <hr>
                         <ul class="comments">
                             {% for comment in comments %}
                                 <li class="clearfix">
@@ -130,29 +138,23 @@
             </div>
         </div>
         
-        <div class="container">
-            <div class="container__item">
-                <input type="text" id="content" placeholder="댓글 입력" />
-                <button type="button" onclick="send();">GO!</button>
-            </div>
-        </div>
-            
+
+        <script type="text/javascript" src="http://jsgetip.appspot.com"></script>
         <script>
             function send(){
                 if (!$("#content").val())
                     return false
                 $.get("/comment/add?url=" + window.location.pathname + "&content=" + $("#content").val());
-                $("#comment").html("loading..");
                 setTimeout(function (){
                     $("#comment").load("/comment/load?url=" + window.location.pathname);
-                }, 500)
+                }, 500);
             }
             function del(id){
                 $.get('/comment/del?id=' + id);
                 $("#comment").html("loading..");
                 setTimeout(function (){
                     $("#comment").load("/comment/load?url=" + window.location.pathname);
-                }, 500)
+                }, 500);
             }
             $("#content").keydown(function (e){
                 if (e.keyCode == 13) send();

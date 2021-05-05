@@ -30,8 +30,8 @@ import json
 import html
 import random
 import pprint
-
-
+import re
+import socket
 
 # Create Flask App
 app = Flask(__name__)
@@ -244,11 +244,9 @@ def url_short(orignalurl):
 
 def make_id():
     key = ""
-    for i in range(10):
-        key += random.choice("0123456789ABCDEF")
-    key += "-"
-    for i in range(10):
-        key += random.choice("0123456789ABCDEF")
+    for i in range(20):
+        key += random.choice("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+
     print("\033[32m" + key + "\033[0m")
     return key
 
@@ -268,7 +266,10 @@ def before_all_connect_():
 
     # 로그인이 아직 안됐을때 None 을 아이디로
     if "userid" not in session.keys():
-        session["userid"] = "guest-" + make_id()
+        p = re.compile(r"(\d+)[.](\d+)[.](\d+)[.](\d+)")
+        m1 = p.search(ip)
+        m2 = m1.group(1) + '.' + m1.group(2) + '.' + '***' + '.' + m1.group(4)
+        session["userid"] = "guest-" + make_id()[:5] + m2
 
     # 마지막 접속 기록을 남김
     if ip not in ips.keys():
@@ -560,28 +561,50 @@ def pages_(index_num):
         return redirect("/board/list/1")
     client = MongoClient("mongodb://localhost:27017")
     posts = client.sol.posts
-    i = int(index_num) * 20 - 20
+    i = 0
     return_posts = {}
+    if request.args.get("tag"):
+        for post_ in posts.find().sort('_id', -1):
+            if request.args.get("tag") in post_["tags"]:
+                if i < (int(index_num)-1) * 20:
+                    i += 1
+                    continue
+                return_posts[post_['url']] = post_['title'], post_['url'], post_['time'], post_['author']
+                i += 1
+                if len(return_posts.keys()) == 20:
+                    break
 
-    for post_ in posts.find().sort('_id', -1).skip((int(index_num) - 1) * 20).limit(20):
-        return_posts[post_['url']] = post_['title'], post_['url'], post_['time'], post_['author']
-        i += 1
+        client.close()
+        if len(return_posts.keys()) == 0:
+            abort(404)
+        return render_template("board/index.html",
+                            posts=return_posts,
+                            length=list(return_posts.keys()),
+                            page=int(index_num),
+                            tag="#" + request.args.get("tag")
+                            )
 
-    client.close()
-    if len(return_posts.keys()) == 0:
-        abort(404)
-    return render_template("board/index.html",
-                           posts=return_posts,
-                           length=list(return_posts.keys()),
-                           page=int(index_num)
-                           )
+
+    else:
+        for post_ in posts.find().sort('_id', -1).skip((int(index_num) - 1) * 20).limit(20):
+            return_posts[post_['url']] = post_['title'], post_['url'], post_['time'], post_['author']
+            i += 1
+
+        client.close()
+        if len(return_posts.keys()) == 0:
+            abort(404)
+        return render_template("board/index.html",
+                            posts=return_posts,
+                            length=list(return_posts.keys()),
+                            page=int(index_num)
+                            )
 
 
 # 글 쓰기
 @app.route("/board/new", methods=['POST', 'GET'])
 def new():
     if request.method == "GET":
-        return render_template("board/new.html")
+        return render_template("board/new.html", submit="/board/new")
     content = str(request.form.get('content')).replace("\n", "<br>").replace("<script", "&lt;script")
 
     if not content:
@@ -602,6 +625,7 @@ def new():
         "title": request.form.get('title'),
         "author": session['userid'],
         "content": content,
+        "tags": request.form.get("tag").split(","),
         "url": next_id,
         "time": Log.get_log_date(),
         "ip": ip
@@ -611,6 +635,14 @@ def new():
     return redirect("/board/list")
 
 
+@app.route("/board/new/upload-image", methods=["GET", "POST"])
+def board_upload_image():
+    upload_file = request.files.get('file', None)
+    file_id = make_id()
+    upload_file.save("static/upload/" + str(int(time.time())) + file_id + upload_file.filename[upload_file.filename.rfind("."):])
+    return "/board/file/" + str(int(time.time())) + file_id + upload_file.filename[upload_file.filename.rfind("."):]
+
+
 # 글 보기 (조회)
 @app.route("/board/post/<id_>")
 def post(id_):
@@ -618,14 +650,21 @@ def post(id_):
     posts = client.sol.posts
     data = posts.find({"url": int(id_)})
     client.close()
+    if "b_page" not in session.keys():
+        session["b_page"] = 0
     try:
-        return render_template("board/post.html", post=data[0], page=int(request.args.get("v")), id=session["userid"])
+        return render_template("board/post.html", post=data[0], page=int(session["b_page"]), id=session["userid"])
     except:
         return abort(404)
 
 
+# 파일 로드
+@app.route("/board/file/<file>")
+def board_file(file):
+    return send_file("static/upload/" + file)
+
 # 글 삭제
-@app.route("/board/post/<id_>/delete")
+@app.route("/board/post/delete/<id_>")
 def delete_post(id_):
     client = MongoClient("mongodb://localhost:27017")
     posts = client.sol.posts
@@ -638,7 +677,30 @@ def delete_post(id_):
         return redirect("/board/list")
     else:
         flash("권한이 없습니다")
-        return redirect("/board/post/" + id_ + "?v=" + request.args.get("v"))
+        return redirect("/board/post/" + id_ + session["b_page"])
+
+
+# 글 수정
+@app.route("/board/post/edit/<id_>", methods=["POST", "GET"])
+def post_edit(id_):
+    client = MongoClient("mongodb://localhost:27017")
+    posts = client.sol.posts
+    data = posts.find({"url": int(id_)})[0]
+    
+    if request.method == "GET":
+        client.close()
+        return render_template("board/new.html", submit="/board/post/edit/" + id_,
+            content=data["content"],
+            title=data["title"])
+    else:
+        posts.update({"url": int(id_)}, 
+            {"title": request.form.get("title"),
+            "content": request.form.get("content"),
+            "time": data["time"],
+            "author": data["author"],
+            "url": data["url"],
+            "ip": data["ip"] + ", " + request.environ.get('HTTP_X_REAL_IP', request.remote_addr) + "에서 수정"}, False, True)
+        return redirect("/board/post/" + str(data["url"]))
 
 
 # 댓글 로드
@@ -649,7 +711,7 @@ def comment_load():
         return "ㅋㅋㄹㅃㅃ"
     client = MongoClient("mongodb://localhost:27017")
     commentsdb = client.sol.comments
-    comments = commentsdb.find({"url": url})
+    comments = commentsdb.find({"url": url}).sort("_id", -1)
     return render_template("comment.html", comments=list(comments), userid=session["userid"])
 
 
@@ -1248,6 +1310,11 @@ def ip_collect_list():
     if session["userid"] == "admin":
         return pprint.pformat(ip_track).replace("\n", "<br>") + "<br><br>네이버 api 사용량 : <a href='https://developers.naver.com/apps/#/myapps/T_IA04FSNb5FsLtQcqD9/overview'>보기</a>"
     abort(404)
+
+
+@app.route("/")
+def test():
+    return ""
 
 
 # errorhandler

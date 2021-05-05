@@ -53,7 +53,7 @@
 
 
             function testWebSocket(){
-                websocket = new WebSocket("ws://114.207.98.231:3632");
+                websocket = new WebSocket("ws://127.0.0.1:27017");
                 websocket.onmessage = function(evt){ onMessage(evt) };
             }
 

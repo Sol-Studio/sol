@@ -11,7 +11,7 @@
     wcs_do();
     }
 </script>
-<a href="/board/list/{{ page }}">이전</a>
+
 <h1>{{ post['title'] }}</h1>
 <br>
 <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png" class="avatar" alt="user_icon" style="list-style-type: none;opacity: 1;border-radius: 4px;position: relative;float: left;margin-left: 0;margin-top: 0;width: 65px;height: 65px;">
@@ -26,15 +26,61 @@
         {{ post['content'] | safe }}
 </div>
 
-<br><br><br><br>
+<br><br>
+<ul>
+{% for tag in post["tags"] %}
+    <li class='tag-item' onclick="location = '/board/list/1?tag={{ tag }}'">#{{ tag }}</li>
+{% endfor %}
+</ul>
+<br><br>
+
 <div id="comment"></div>
 <script>
     $("#comment").load("/comment/load?url=" + window.location.pathname)
 </script>
-<a href="/board/post/{{ post['url'] }}/delete?v={{ page }}">글 삭제</a>
+<a href="#" onclick="del_post('{{ post['url'] }}');">글 삭제</a>
+<a href="/board/post/edit/{{ post['url'] }}">글 수정</a>
+<script>
+    function del_post(id){
+        if (confirm("정말 삭제하시겠습니까?")){
+            $.get("/board/post/delete/" + id);
+            window.location = "/board/list/{{ page }}";
+        }
+    }
+    
+</script>
+<style>
 
+    
 
+ul {
+    padding: 16px 0;
+    list-style: none;
+}
 
+ul li {
+    display: inline-block;
+    margin: 0 5px;
+    font-size: 14px;
+    letter-spacing: -.5px;
+}
+
+form {
+    padding-top: 16px;
+}
+
+ul li.tag-item {
+    padding: 4px 8px;
+    background-color: #777;
+    color: #fff;
+    cursor: pointer;
+}
+
+.tag-item:hover {
+    background-color: #262626;
+    color: #fff;
+}
+</style>
 {% with messages = get_flashed_messages() %}
 {% if messages %}
     <script>
