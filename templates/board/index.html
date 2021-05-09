@@ -5,6 +5,7 @@
       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
       <link href="/static/img/icon.ico" rel="shortcut icon" type="image/x-icon">
       <title>sol - {{ page }}페이지</title>
+      <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
       <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8112542064837410" crossorigin="anonymous"></script>
       <script type="text/javascript" src="//wcs.naver.net/wcslog.js"></script>
       <script type="text/javascript">
@@ -14,10 +15,13 @@
           wcs_do();
           }
       </script> 
+      <style>
+         tr{cursor:pointer;} 
+      </style>
   </head>
   <body>
       <div class='container'>
-        <a href="/">홈</a>
+        <a href="/">홈</a><button style="float: right;" type="button" onclick="window.location='/board/new'" class="btn btn-light pull-right">글쓰기</button>
         <h1>{{ tag }}</h1>
         <table class="table table-hover table-striped">
           <thead>
@@ -27,15 +31,10 @@
               <th>날짜</th>
             </tr>
           </thead>
-          <tbody>
-          {% for i in length %}
-            <a href="/board/post/{{ posts[i][1] }}"></a>
-            <tr style = "cursor:pointer;" onclick="window.location = '/board/post/{{ posts[i][1] }}'">
-                <td>{{ posts[i][0] }}</td>
-                <td>{{ posts[i][3] }}</td>
-                <td>{{ posts[i][2] }}</td>
-              </tr>
-          {% endfor %}
+          <tbody id="tbody">
+            {% for i in length %}
+            <a href="/board/post/{{ posts[i][1] }}"></a><tr onclick="window.location = '/board/post/{{ posts[i][1] }}'"><td>{{ posts[i][0] }}</td><td>{{ posts[i][3] }}</td><td>{{ posts[i][2] }}</td></tr>
+            {% endfor %}
           </tbody>
         </table>
         <hr/>
@@ -48,6 +47,29 @@
           </ul>
         </div>
       </div>
+      <script>
+        var Visible = {{ page }};
+        setInterval(function() {
+            if (checkVisible($('#event'))) {
+              content = $.get("/board/list/load/" + Visible);
+              $("#tbody").html($("#tbody").html() + content.responseText);
+              Visible++;
+              $('#event').remove();
+            }
+        }, 2000);
+        function checkVisible( elm, eval ) {
+            eval = eval || "object visible";
+            var viewportHeight = $(window).height(), // Viewport Height
+                scrolltop = $(window).scrollTop(), // Scroll Top
+                y = $(elm).offset().top,
+                elementHeight = $(elm).height();   
+            
+            if (eval == "object visible") return ((y < (viewportHeight + scrolltop)) && (y > (scrolltop - elementHeight)));
+            if (eval == "above") return ((y < (viewportHeight + scrolltop)));
+        }
+        
+      </script>
+      
       {% with messages = get_flashed_messages() %}
       {% if messages %}
           <script>
