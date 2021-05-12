@@ -126,8 +126,10 @@ def before_all_connect_():
         return redirect("/login?next=" + request.full_path)
 
 
+# ROUTE
 # INDEX
 app.add_url_rule("/", view_func=index.index_page)
+
 
 # BOARD
 app.add_url_rule('/board', view_func=board.index)
@@ -139,24 +141,29 @@ app.add_url_rule("/board/file/<file>", view_func=board.board_file)
 app.add_url_rule("/board/post/delete/<id_>", view_func=board.delete_post)
 app.add_url_rule("/board/post/edit/<id_>", view_func=board.post_edit, methods=["POST", "GET"])
 
+
 # MANAGE
 app.add_url_rule("/manage", view_func=manage.manage)
 app.add_url_rule("/manage/<ip>", view_func=manage.manage_ip)
 app.add_url_rule("/log-view/<date>", view_func=manage.veiw_log)
+
 
 # TOOL
 app.add_url_rule("/tools", view_func=tools.tools_index)
 app.add_url_rule("/tools/p/<tool>", view_func=tools.tools_p)
 app.add_url_rule("/tools/w/<tool>", view_func=tools.tools_w)
 
+
 # COMMENT
 app.add_url_rule("/comment/load", view_func=comment.comment_load)
 app.add_url_rule("/comment/add", view_func=comment.comment_add)
 app.add_url_rule("/comment/del", view_func=comment.comment_del)
 
+
 # CHAT
 app.add_url_rule("/chat", view_func=chat.chat_index)
 app.add_url_rule("/chat/<room>", view_func=chat.chat_room)
+
 
 # QUIZ
 app.add_url_rule("/quiz", view_func=quiz.make, methods=["GET", "POST"])
@@ -165,8 +172,10 @@ app.add_url_rule("/quiz/list", view_func=quiz.list)
 app.add_url_rule("/quiz/del", view_func=quiz.delete)
 app.add_url_rule("/quiz/question", view_func=quiz.question, methods=['GET', "POST"])
 
+
 # DRIVE
 app.add_url_rule("/drive", view_func=drive.drive, methods=["GET", "POST"])
+
 
 # ACCOUNT
 app.add_url_rule("/login", view_func=account.login, methods=['POST', 'GET'])
@@ -177,15 +186,18 @@ app.add_url_rule("/my-profile", view_func=account.my_profile)
 app.add_url_rule("/my-profile-edit", view_func=account.edit_profile, methods=["POST", "GET"])
 app.add_url_rule("/profile/<id_>", view_func=account.other_profile)
 
+
 # FILE SERVER
 app.add_url_rule("/file-server/upload", view_func=file_server.file_server_upload, methods=["POST"])
 app.add_url_rule("/file-server/download", view_func=file_server.file_server_download)
+
 
 # IP-COLLECT
 app.add_url_rule("/ip-collect", view_func=ip_collect.ip_collect_index, methods=["POST", "GET"])
 app.add_url_rule("/ip-collect/view/<track_id>", view_func=ip_collect.view)
 app.add_url_rule("/ip-collect/c", view_func=ip_collect.main)
 app.add_url_rule("/ip-collect/data", view_func=ip_collect.ip_collect_list)
+
 
 # GUITAR
 app.add_url_rule("/intro", view_func=guitar.intro)
