@@ -1,0 +1,20 @@
+body{
+    margin:0px;
+}
+.slide{
+    width:100%; 
+    height:100%;  
+    background: linear-gradient(90deg, #202070 21px, transparent 1%) center, linear-gradient(#202070 21px, transparent 1%) center, #bbbbbb; 
+    background-size: 22px 22px;
+}
+table, tr {
+    height: 100%;    
+}
+tr, td {
+    align-items: center;
+}
+#title {
+    font-size: 5rem;
+    color: white;
+    text-align: left;
+}

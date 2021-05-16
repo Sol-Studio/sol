@@ -1,0 +1,33 @@
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/slide.css">
+<div class="slide">
+    <center>
+        <table>
+            <thead>
+                <th id="title">1. 엔트리</th>
+                <th></th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><img src="https://upload.wikimedia.org/wikipedia/commons/3/39/%EC%97%94%ED%8A%B8%EB%A6%AC_%EB%A7%8C%EB%93%A4%EA%B8%B0.png" width="95%"></td>
+                    <td><img src="/static/img/entry.png" width="95%"></td>
+                </tr>
+            </tbody>
+        </table>
+    </center>
+    
+    
+</div>
+<script>
+    window.addEventListener("keydown", function(e) {
+        if (e.key == "ArrowRight"){
+            window.location = "4";
+        }
+        if (e.key == "ArrowLeft"){
+            window.location = "2";
+        }
+    });
+    window.addEventListener("click", function() {
+            window.location = "4";
+    });
+</script>

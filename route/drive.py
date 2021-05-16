@@ -12,8 +12,7 @@ import shutil
 def drive_path_check(session, full_path_, path_):
     if session["userid"] not in os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))):
         return True
-    elif session["userid"] not in os.path.abspath("drive/%s/%s/%s" % (session["userid"], full_path_, str(path_))):
-        return True
+
     else:
         return False
 

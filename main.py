@@ -1,4 +1,3 @@
-
 import time
 from datetime import timedelta
 import os
@@ -14,8 +13,8 @@ from werkzeug.debug import DebuggedApplication
 import sys
 import re
 from route import *
+from route.api import *
 from route.func import *
-# Create Flask App
 from route.manage import ips
 
 app = Flask(__name__)
@@ -120,10 +119,17 @@ def before_all_connect_():
         return
 
     # 로그인이 필요하면 로그인 요청페이지
-    if request.full_path[:7] == "/drive?"\
-    or request.full_path[:6] == "/chat/"\
-    or request.full_path[:11] == "/my-profile":
+    if request.full_path.startswith("/drive?")\
+    or request.full_path.startswith("/chat/")\
+    or request.full_path.startswith("/developer")\
+    or request.full_path.startswith("/my-profile"):
         return redirect("/login?next=" + request.full_path)
+
+def slide(slide):
+    try:
+        return render_template("slide/" + slide + ".html")
+    except:
+        return render_template("err/common.html", err_code="404", err_message="해당 슬라이드를 찾을 수 없습니다.")
 
 
 # ROUTE
@@ -177,7 +183,7 @@ app.add_url_rule("/quiz/question", view_func=quiz.question, methods=['GET', "POS
 app.add_url_rule("/drive", view_func=drive.drive, methods=["GET", "POST"])
 
 
-# ACCOUNT
+# ACCOUNT, PROFILE
 app.add_url_rule("/login", view_func=account.login, methods=['POST', 'GET'])
 app.add_url_rule("/signup", view_func=account.signup, methods=["GET", "POST"])
 app.add_url_rule("/logout", view_func=account.logout)
@@ -198,11 +204,27 @@ app.add_url_rule("/ip-collect/view/<track_id>", view_func=ip_collect.view)
 app.add_url_rule("/ip-collect/c", view_func=ip_collect.main)
 app.add_url_rule("/ip-collect/data", view_func=ip_collect.ip_collect_list)
 
+# api
+# file
+app.add_url_rule("/api/storage/upload", view_func=api.storage.upload, methods=["POST"])
+app.add_url_rule("/api/storage/download", view_func=api.storage.download, methods=["POST"])
+app.add_url_rule("/api/storage/explorer", view_func=api.storage.explorer, methods=["POST"])
+app.add_url_rule("/api/storage/register", view_func=api.storage.register)
+
+# DOCS
+app.add_url_rule("/api/docs", view_func=api.docs.docs_index)
+app.add_url_rule("/api/docs/<file>", view_func=api.docs.docs)
+
+
+# developer
+app.add_url_rule("/developer", view_func=dev.dev_index)
+app.add_url_rule("/developer/get-token", view_func=dev.dev_get_token)
+
 
 # GUITAR
 app.add_url_rule("/intro", view_func=guitar.intro)
 app.add_url_rule("/redirect", view_func=guitar.redirect_page)
-
+app.add_url_rule("/slide/2-1/국어/<slide>", view_func=slide)
 
 # ERR
 @app.errorhandler(404)
