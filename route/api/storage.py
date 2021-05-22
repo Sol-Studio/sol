@@ -76,3 +76,12 @@ def explorer():
         else:
             return_dict["folders"].append(entry)
     return jsonify(return_dict)
+
+def mkdir():
+    return ""
+
+def rmdir():
+    return ""
+
+def delete_file():
+    return ""

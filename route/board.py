@@ -22,46 +22,17 @@ def pages_(index_num):
     except:
         return redirect("/board/list/1")
 
-    client = MongoClient("mongodb://localhost:27017")
-    posts = client.sol.posts
-    i = 0
-    return_posts = {}
-    if request.args.get("tag"):
-        for post_ in posts.find().sort('_id', -1):
-            if "tags" in post_.keys():
-                if request.args.get("tag") in post_["tags"]:
-                    if i < (int(index_num)-1) * 20:
-                        i += 1
-                        continue
-                    return_posts[post_['url']] = post_['title'], post_['url'], post_['time'], post_['author']
-                    i += 1
-                    if len(return_posts.keys()) == 20:
-                        break
 
-        client.close()
-        if len(return_posts.keys()) == 0:
-            abort(404)
+    tag = request.args.get("tag")
+    i = 0
+    if tag:
         return render_template("board/index.html",
-                            posts=return_posts,
-                            length=list(return_posts.keys()),
                             page=int(index_num),
-                            tag="#" + request.args.get("tag")
+                            tag=request.args.get("tag")
                             )
 
-
     else:
-        for post_ in posts.find().sort('_id', -1).skip((int(index_num) - 1) * 20).limit(50):
-            return_posts[post_['url']] = post_['title'], post_['url'], post_['time'], post_['author']
-            i += 1
-
-        client.close()
-        if len(return_posts.keys()) == 0:
-            abort(404)
-        
-        print(return_posts)
         return render_template("board/index.html",
-                            posts=return_posts,
-                            length=list(return_posts.keys()),
                             page=int(index_num)
                             )
 
@@ -99,7 +70,7 @@ def new():
     })
 
     client.close()
-    return redirect("/board/list")
+    return redirect("/board/list/1")
 
 
 def board_upload_image():
@@ -163,3 +134,28 @@ def post_edit(id_):
             "url": data["url"],
             "ip": data["ip"] + ", " + request.environ.get('HTTP_X_REAL_IP', request.remote_addr) + "에서 수정"}, False, True)
         return redirect("/board/post/" + str(data["url"]))
+    
+
+def post_list(page):
+    client = MongoClient("mongodb://localhost:27017")
+    posts = client.sol.posts
+    return_posts = ""
+    tag = request.args.get("tag")
+    i = 0
+    if tag:
+        for post_ in posts.find({"tags": {"$all": [tag]}}).sort('_id', -1).skip((int(page) - 1) * 50).limit(50):
+            return_posts += '<a href="/board/post/' + str(post_["url"]) + '"></a><tr id="' + str(post_["url"]) + '" onclick="window.location = \'/board/post/' + str(post_["url"]) + '\'"><td>' + post_["title"] + '</td><td>' + post_["author"] + '</td><td>' + str(post_["time"]) + '</td></tr>'
+        client.close()
+        if return_posts:
+            return return_posts + "<button id='more' onclick='load()' class='btn btn-outline-primary btn-lg btn-block' style='width: 288%'>더보기</button>"
+        else:
+            return ""
+    else:
+        i = 0
+        for post_ in posts.find().sort('_id', -1).skip((int(page) - 1) * 50).limit(50):
+            return_posts += '<a href="/board/post/' + str(post_["url"]) + '"></a><tr id="' + str(post_["url"]) + '" onclick="window.location = \'/board/post/' + str(post_["url"]) + '\'"><td>' + post_["title"] + '</td><td>' + post_["author"] + '</td><td>' + str(post_["time"]) + '</td></tr>'
+            i += 1
+        client.close()
+        if not return_posts:
+            return ""
+        return return_posts + "<button id='more' onclick='load()' class='btn btn-outline-primary btn-lg btn-block' style='width: 288%'>더보기</button>"

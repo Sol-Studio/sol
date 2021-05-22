@@ -2,6 +2,11 @@
     <iframe src="http://sol-studio.tk/" width="99%" height="99%"></iframe>
     <a href="7">다음</a>
     <script>
+        if (!window.location.hostname){
+        document.write("");
+        alert("제공된 사이트에서만 볼 수 있는 페이지입니다.");
+        window.close();
+    }
         window.addEventListener("keydown", function(e) {
             if (e.key == "ArrowRight"){
                 window.location = "7";

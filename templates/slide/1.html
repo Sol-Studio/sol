@@ -32,6 +32,11 @@
     </div>
 </div>
 <script>
+    if (!window.location.hostname){
+        document.write("");
+        alert("제공된 사이트에서만 볼 수 있는 페이지입니다.");
+        window.close();
+    }
     window.addEventListener("keydown", function(e) {
         if (e.key == "ArrowRight"){
             window.location = "2";

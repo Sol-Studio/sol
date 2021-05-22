@@ -58,9 +58,9 @@ def manage():
 
         return render_template("manage/manage.html", ips=return_dict, keys=return_dict.keys(), blacklist=black_list)
     else:
-        abort(403)
         black_list.append(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
-
+        abort(403)
+        
 
 def manage_ip(ip):
     if session['userid'] != "admin":

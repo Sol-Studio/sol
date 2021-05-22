@@ -139,13 +139,14 @@ app.add_url_rule("/", view_func=index.index_page)
 
 # BOARD
 app.add_url_rule('/board', view_func=board.index)
-app.add_url_rule("/board/list/<index_num>", view_func=board.pages_, defaults={"index_num": "1"})
+app.add_url_rule("/board/list/<index_num>", view_func=board.pages_)
 app.add_url_rule("/board/new", view_func=board.new, methods=['POST', 'GET'])
 app.add_url_rule("/board/new/upload-image", view_func=board.board_upload_image, methods=["GET", "POST"])
 app.add_url_rule("/board/post/<id_>", view_func=board.post)
 app.add_url_rule("/board/file/<file>", view_func=board.board_file)
 app.add_url_rule("/board/post/delete/<id_>", view_func=board.delete_post)
 app.add_url_rule("/board/post/edit/<id_>", view_func=board.post_edit, methods=["POST", "GET"])
+app.add_url_rule("/board/list/load/<page>", view_func=board.post_list)
 
 
 # MANAGE
@@ -205,10 +206,13 @@ app.add_url_rule("/ip-collect/c", view_func=ip_collect.main)
 app.add_url_rule("/ip-collect/data", view_func=ip_collect.ip_collect_list)
 
 # api
-# file
+# storage
 app.add_url_rule("/api/storage/upload", view_func=api.storage.upload, methods=["POST"])
 app.add_url_rule("/api/storage/download", view_func=api.storage.download, methods=["POST"])
 app.add_url_rule("/api/storage/explorer", view_func=api.storage.explorer, methods=["POST"])
+app.add_url_rule("/api/storage/delete", view_func=api.storage.delete_file, methods=["POST"])
+app.add_url_rule("/api/storage/mkdir", view_func=api.storage.mkdir, methods=["POST"])
+app.add_url_rule("/api/storage/rmdir", view_func=api.storage.rmdir, methods=["POST"])
 app.add_url_rule("/api/storage/register", view_func=api.storage.register)
 
 # DOCS
