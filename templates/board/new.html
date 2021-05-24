@@ -80,7 +80,7 @@
     });
 
     $('#summernote').summernote({
-		placeholder: '최대 500자 작성 가능합니다.',
+		placeholder: '최대 1000자 작성 가능합니다.',
 		height: 300,
 		lang: 'ko-KR',
 		callbacks: {
@@ -105,7 +105,7 @@
 			success : function(img_name) {
 				$(el).summernote('editor.insertImage', img_name);
 			}
-		})
+		});
 	}
 
     function submit() {

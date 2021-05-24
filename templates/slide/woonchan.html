@@ -1,0 +1,51 @@
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<style>
+    body {
+        margin: 0px;
+        width: 100%;
+        height: 100%;
+    }
+</style>
+<body>
+<img src="/static/w/11.png" width="100%">
+</body>
+<script>
+    slide = 1
+    if (!window.location.hostname){
+        document.write("");
+        alert("제공된 사이트에서만 볼 수 있는 페이지입니다.");
+        window.close();
+    }
+    window.addEventListener("keydown", function(e) {
+        if (slide < 7){
+            if (e.key == "ArrowRight"){
+                slide = slide + 1;
+                $("img").attr("src", "/static/w/1" + slide + ".png");
+                console.log($("img").attr("src"));
+                
+            }
+            else if (e.key == "ArrowLeft"){
+                slide = slide - 1;
+                $("img").attr("src", "/static/w/1" + slide + ".png");
+                console.log($("img").attr("src"));
+            }
+        }
+        else{
+            alert("슬라이드가 끝났습니다. By 최유찬");
+            window.close();
+        }
+
+    });
+    window.addEventListener("click", function() {
+        if (slide < 7){
+            slide = slide + 1;
+            $("img").attr("src", "/static/w/1" + slide + ".png");
+            console.log($("img").attr("src"));
+        }
+        else{
+            alert("슬라이드가 끝났습니다. By 최유찬");
+            window.close();
+        }
+            
+    });
+</script>

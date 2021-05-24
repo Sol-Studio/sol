@@ -17,50 +17,51 @@
             <img src="https://kr.seaicons.com/wp-content/uploads/2015/06/Very-Basic-Search-icon.png"width="25rem"></button></form>
          </div>
       </nav>
-      <div id="top"></div>
+      <div id="undefined"></div>
       <div style="margin-top: 5rem;"></div>
       <div class='container'>
          <h1>{{tag}}</h1>
-         <table class="table table-hover table-striped">
+         <table class="table table-hover table-striped" style="table-layout: fixed;">
             <thead>
                <tr>
-                  <th>제목</th>
-                  <th>글쓴이</th>
-                  <th>날짜</th>
+                  <th width="65%">제목</th>
+                  <th width="15%">글쓴이</th>
+                  <th width="20%">날짜</th>
                </tr>
             </thead>
             <tbody id="tbody"></tbody>
+            
          </table>
+         <button id='more' onclick='load(true)' class='btn btn-outline-primary btn-lg btn-block' style='width: 100%'>더보기</button>
          <hr/>
       </div>
       <div id="bottom"></div>
       <script>
-        page = {{page}};
-        end = false;
-
-        function load() {
-            $.get("/board/list/load/" + page + "?tag={{ tag }}", function(data) {
-                $("#more").remove();
-                $("#tbody").html($("#tbody").html() + data);
-                if (data) page++;
-                else end = true
-            })
-        }
-
-        setInterval(function() {
-            if (!end)
-                if ($(window).scrollTop() + 200 >= $(document).height() - $(window).height()) load()
-        }, 100);
-
-        function getParameter(name) {
+         page = {{page}};
+         end = false;
+         date = new Date();
+         function load(im) {
+            now = new Date();
+            if (now.getTime() - date.getTime() > 1000 || im){
+               $.get("/board/list/load/" + page + "?tag={{ tag }}", function(data) {
+                  last = $("#tbody > tr:last-child").attr("id");
+                  $("#tbody").html($("#tbody").html() + data);
+                  if (data) page++;
+                  else $("#more").remove();
+                  date = new Date();
+                  window.location = "#" + last;
+               });
+            }
+         }
+         function getParameter(name) {
             name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
             var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-                results = regex.exec(location.search);
+            results = regex.exec(location.search);
             return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-        }
-        
-        $("input[name='tag']").val(getParameter("tag"))
-    
+         }
+         $("input[name='tag']").val(getParameter("tag"));
+         load(true);
+
     </script>
    </body>
 </html>

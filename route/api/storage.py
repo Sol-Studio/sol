@@ -23,7 +23,7 @@ def upload():
     file = request.files.get("file")
     full_path = request.form.get("path")
     token = request.form.get("token")
-    if not full_path.startswith("/") or "../" in file or token not in full_path:
+    if not full_path.startswith("/") or "../" in file:
         return "Path Err"
     
     if not token or not os.path.isdir(os.path.join("D:\\storage\\"+token)):
@@ -38,22 +38,21 @@ def upload():
         os.remove(os.path.join(save_path))
         return "Limit Err"
 
-    return "Success"
+    return "/" + os.path.join(full_path, custom_secure_filename(file.filename))
 
 
 
 def download():
-    file = request.form.get("file")
-    token = request.form.get("token")
-    if not file.startswith("/") or "../" in file or token not in file:
+    file = request.args.get("file")
+    token = request.args.get("token")
+    if not file.startswith("/") or "../" in file:
         return "Path Err"
-    token = request.form.get("token")
+
     if not token or not os.path.isdir(os.path.join("D:\\storage\\"+token)):
         return "Token Err"
     if not file:
         return "File Err"
 
-    token = request.form.get("token")
     try:
         return send_file("D:/storage/" + token + file)
     except:

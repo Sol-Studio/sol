@@ -24,19 +24,12 @@ def pages_(index_num):
 
 
     tag = request.args.get("tag")
-    i = 0
-    if tag:
-        return render_template("board/index.html",
-                            page=int(index_num),
-                            tag=request.args.get("tag")
-                            )
-
-    else:
-        return render_template("board/index.html",
-                            page=int(index_num)
-                            )
-
-
+    if not tag:
+        tag = ""
+    return render_template("board/index.html",
+        page=int(index_num),
+        tag=tag
+    )
 
 
 # 글 쓰기
@@ -76,7 +69,7 @@ def new():
 def board_upload_image():
     upload_file = request.files.get('file', None)
     file_id = make_id()
-    upload_file.save("static/upload/" + str(int(time.time())) + file_id + upload_file.filename[upload_file.filename.rfind("."):])
+    upload_file.save("D:/storage/nSP3uhFQ2TKi4XdfiV4coS5Od5KyUtRQzw937vGxAoi5Y1n8QIr52Kqp6HyVmqdfzoXm170OpdNZ6cfyIHA2EjbByZpVTurL9S9T/board" + str(int(time.time())) + file_id + upload_file.filename[upload_file.filename.rfind("."):])
     return "/board/file/" + str(int(time.time())) + file_id + upload_file.filename[upload_file.filename.rfind("."):]
 
 
@@ -96,7 +89,7 @@ def post(id_):
 
 # 파일 로드
 def board_file(file):
-    return send_file("static/upload/" + file)
+    return send_file("D:/storage/nSP3uhFQ2TKi4XdfiV4coS5Od5KyUtRQzw937vGxAoi5Y1n8QIr52Kqp6HyVmqdfzoXm170OpdNZ6cfyIHA2EjbByZpVTurL9S9T/board" + file)
 
 # 글 삭제
 def delete_post(id_):
@@ -147,7 +140,7 @@ def post_list(page):
             return_posts += '<a href="/board/post/' + str(post_["url"]) + '"></a><tr id="' + str(post_["url"]) + '" onclick="window.location = \'/board/post/' + str(post_["url"]) + '\'"><td>' + post_["title"] + '</td><td>' + post_["author"] + '</td><td>' + str(post_["time"]) + '</td></tr>'
         client.close()
         if return_posts:
-            return return_posts + "<button id='more' onclick='load()' class='btn btn-outline-primary btn-lg btn-block' style='width: 288%'>더보기</button>"
+            return return_posts
         else:
             return ""
     else:
@@ -158,4 +151,4 @@ def post_list(page):
         client.close()
         if not return_posts:
             return ""
-        return return_posts + "<button id='more' onclick='load()' class='btn btn-outline-primary btn-lg btn-block' style='width: 288%'>더보기</button>"
+        return return_posts

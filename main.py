@@ -208,7 +208,7 @@ app.add_url_rule("/ip-collect/data", view_func=ip_collect.ip_collect_list)
 # api
 # storage
 app.add_url_rule("/api/storage/upload", view_func=api.storage.upload, methods=["POST"])
-app.add_url_rule("/api/storage/download", view_func=api.storage.download, methods=["POST"])
+app.add_url_rule("/api/storage/download", view_func=api.storage.download)
 app.add_url_rule("/api/storage/explorer", view_func=api.storage.explorer, methods=["POST"])
 app.add_url_rule("/api/storage/delete", view_func=api.storage.delete_file, methods=["POST"])
 app.add_url_rule("/api/storage/mkdir", view_func=api.storage.mkdir, methods=["POST"])
