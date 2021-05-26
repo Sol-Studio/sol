@@ -1,0 +1,165 @@
+<body  style="margin: 0px;">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>prettyprint</title>
+    <meta name="description" content="Free responsive HTML template for your documentation">
+    <meta name="author" content="valthemes.com">
+    <meta name="format-detection" content="telephone=no">
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/prettify.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/normalize.css" >
+	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8112542064837410" crossorigin="anonymous"></script>
+	<script src="/static/js/jquery.min.js"></script>
+	<script src="/static/js/prettify.min.js"></script>
+	<script src="/static/js/scripts.min.js"></script>
+    <section class="content">
+		<div class="container">
+			<div class="content-wrap">
+    <div class="section-txt">
+    <pre class="prettyprint">
+
+from pymongo import MongoClient
+from flask import render_template
+from flask import redirect
+from flask import request
+from flask import session
+from flask import flash
+from flask import abort
+from flask import send_file
+from .func import *
+
+def index():
+    return redirect("/board/list/1")
+def pages_(index_num):
+    try:
+        if int(index_num) &lt; 1:
+            return redirect("/board/list/1")
+    except:
+        return redirect("/board/list/1")
+    tag = request.args.get("tag")
+    if not tag:
+        tag = ""
+    return render_template("board/index.html",
+        page=int(index_num),
+        tag=tag
+    )
+def new():
+    if request.method == "GET":
+        return render_template("board/new.html", submit="/board/new")
+    content = str(request.form.get('content')).replace("\n", "&lt;br>").replace("&lt;script", "&lt;script")
+    if not content:
+        flash("내용을 입력해주세요")
+        return render_template("board/new.html")
+    if not request.form.get('title'):
+        flash("제목을 입력해주세요")
+        return render_template("board/new.html")
+    ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+    client = MongoClient("mongodb://localhost:27017")
+    posts = client.sol.posts
+    next_id = posts.find().sort('_id', -1)[0]["url"] + 1
+    posts.insert_one({
+        "title": request.form.get('title'),
+        "author": session['userid'],
+        "content": content,
+        "tags": request.form.get("tag").split(","),
+        "url": next_id,
+        "time": Log.get_log_date(),
+        "ip": ip
+    })
+    client.close()
+    return redirect("/board/list/1")
+def board_upload_image():
+    upload_file = request.files.get('file', None)
+    file_id = make_id()
+    upload_file.save("D:/storage/nSP3uhFQ2TKi4XdfiV4coS5Od5KyUtRQzw937vGxAoi5Y1n8QIr52Kqp6HyVmqdfzoXm170OpdNZ6cfyIHA2EjbByZpVTurL9S9T/board" + str(int(time.time())) + file_id + upload_file.filename[upload_file.filename.rfind("."):])
+    return "/board/file/" + str(int(time.time())) + file_id + upload_file.filename[upload_file.filename.rfind("."):]
+def post(id_):
+    client = MongoClient("mongodb://localhost:27017")
+    posts = client.sol.posts
+    data = posts.find({"url": int(id_)})
+    client.close()
+    if "b_page" not in session.keys():
+        session["b_page"] = 0
+    try:
+        return render_template("board/post.html", post=data[0], page=int(session["b_page"]), id=session["userid"])
+    except:
+        return abort(404)
+def board_file(file):
+    return send_file("D:/storage/nSP3uhFQ2TKi4XdfiV4coS5Od5KyUtRQzw937vGxAoi5Y1n8QIr52Kqp6HyVmqdfzoXm170OpdNZ6cfyIHA2EjbByZpVTurL9S9T/board" + file)
+def delete_post(id_):
+    client = MongoClient("mongodb://localhost:27017")
+    posts = client.sol.posts
+    data = posts.find({"url": int(id_)})
+    client.close()
+    if session['userid'] == data[0]['author'] or session["userid"] == "admin":
+        posts.delete_one({"url": int(id_)})
+        client.sol.comments.delete_many({"url": "/board/post/" + id_})
+        flash("삭제됐습니다")
+        return redirect("/board/list")
+    else:
+        flash("권한이 없습니다")
+        return redirect("/board/post/" + id_ + session["b_page"])
+def post_edit(id_):
+    client = MongoClient("mongodb://localhost:27017")
+    posts = client.sol.posts
+    data = posts.find({"url": int(id_)})[0]
+    if request.method == "GET":
+        client.close()
+        return render_template("board/new.html", submit="/board/post/edit/" + id_,
+            content=data["content"],
+            title=data["title"])
+    else:
+        posts.update({"url": int(id_)}, 
+            {"title": request.form.get("title"),
+            "content": request.form.get("content"),
+            "time": data["time"],
+            "author": data["author"],
+            "url": data["url"],
+            "ip": data["ip"] + ", " + request.environ.get('HTTP_X_REAL_IP', request.remote_addr) + "에서 수정"}, False, True)
+        return redirect("/board/post/" + str(data["url"]))
+def post_list(page):
+    client = MongoClient("mongodb://localhost:27017")
+    posts = client.sol.posts
+    return_posts = ""
+    tag = request.args.get("tag")
+    i = 0
+    if tag:
+        for post_ in posts.find({"tags": {"$all": [tag]}}).sort('_id', -1).skip((int(page) - 1) * 50).limit(50):
+            return_posts += '&lt;a href="/board/post/' + str(post_["url"]) + '">&lt;/a>&lt;tr id="' + str(post_["url"]) + '" onclick="window.location = \'/board/post/' + str(post_["url"]) + '\'">&lt;td>' + post_["title"] + '&lt;/td>&lt;td>' + post_["author"] + '&lt;/td>&lt;td>' + str(post_["time"]) + '&lt;/td>&lt;/tr>'
+        client.close()
+        if return_posts:
+            return return_posts
+        else:
+            return ""
+    else:
+        i = 0
+        for post_ in posts.find().sort('_id', -1).skip((int(page) - 1) * 50).limit(50):
+            return_posts += '&lt;a href="/board/post/' + str(post_["url"]) + '">&lt;/a>&lt;tr id="' + str(post_["url"]) + '" onclick="window.location = \'/board/post/' + str(post_["url"]) + '\'">&lt;td>' + post_["title"] + '&lt;/td>&lt;td>' + post_["author"] + '&lt;/td>&lt;td>' + str(post_["time"]) + '&lt;/td>&lt;/tr>'
+            i += 1
+        client.close()
+        if not return_posts:
+            return ""
+        return return_posts
+    </pre></div></div></div></section>
+    <script>
+        if (!window.location.hostname){
+        document.write("");
+        alert("제공된 사이트에서만 볼 수 있는 페이지입니다.");
+        window.close();
+    }
+        window.addEventListener("keydown", function(e) {
+            if (e.key == "ArrowRight"){
+                window.location = "7";
+            }
+            if (e.key == "ArrowLeft"){
+                window.location = "5";
+            }
+        });
+        window.addEventListener("click", function() {
+                window.location = "7";
+        });
+    </script>
+    </body>
+    
