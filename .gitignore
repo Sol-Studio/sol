@@ -6,3 +6,4 @@
 *.log
 /route/__pycache__
 /route/api/__pycache__
+/static/discord
